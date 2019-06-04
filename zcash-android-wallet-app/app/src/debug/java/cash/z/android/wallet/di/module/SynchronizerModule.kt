@@ -70,8 +70,8 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideDownloader(@Named(PREFS_SERVER_NAME) server: String, twigger: Twig): CompactBlockStream {
-        return CompactBlockStream(server, COMPACT_BLOCK_PORT, twigger)
+    fun provideDownloader(@Named(PREFS_SERVER_NAME) server: String): CompactBlockStream {
+        return CompactBlockStream(server, COMPACT_BLOCK_PORT)
     }
 
     @JvmStatic

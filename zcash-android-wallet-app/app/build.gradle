@@ -11,7 +11,7 @@ apply plugin: 'com.google.gms.google-services'
 android {
     compileSdkVersion buildConfig.compileSdkVersion
     defaultConfig {
-        applicationId "cash.z.android.wallet"
+        applicationId "cash.z.android.zcon1"
         minSdkVersion buildConfig.minSdkVersion
         targetSdkVersion buildConfig.targetSdkVersion
         versionCode 20 // todo: change this to 1_00_04 format, once we graduate beyond zero for the major version number because leading zeros indicate on octal number.
@@ -31,13 +31,13 @@ android {
         // product flavor names cannot start with the word "test" because they would clash with other targets
         zcashtestnet {
             dimension 'network'
-            applicationId 'cash.z.android.wallet.testnet'
+            applicationId 'cash.z.android.zcon1.testnet'
             matchingFallbacks = ['debug', 'zcashtestnet']
         }
 
         zcashmainnet {
             dimension 'network'
-            applicationId 'cash.z.android.wallet.mainnet'
+            applicationId 'cash.z.android.zcon1.mainnet'
             matchingFallbacks = ['release', 'zcashmainnet']
         }
     }
