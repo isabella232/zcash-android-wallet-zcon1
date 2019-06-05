@@ -103,8 +103,7 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         mainActivity?.setToolbarShown(false)
-        mainActivity?.setDrawerLocked(false)
-        initFab()
+        mainActivity?.setNavigationShown(true)
 
         binding.includeContent.recyclerTransactions.apply {
             layoutManager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
@@ -384,19 +383,19 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
     /**
      * Initialize the Fab button and all its action items. Should be called during onActivityCreated.
      */
-    private fun initFab() {
-        val speedDial = binding.sdFab
-        val nav = mainActivity?.navController
-
-        HomeFab.values().forEach {
-            speedDial.addActionItem(it.createItem())
-        }
-
-        speedDial.setOnActionSelectedListener { item ->
-            HomeFab.fromId(item.id)?.destination?.apply { nav?.navigate(this) }
-            false
-        }
-    }
+//    private fun initFab() {
+//        val speedDial = binding.sdFab
+//        val nav = mainActivity?.navController
+//
+//        HomeFab.values().forEach {
+//            speedDial.addActionItem(it.createItem())
+//        }
+//
+//        speedDial.setOnActionSelectedListener { item ->
+//            HomeFab.fromId(item.id)?.destination?.apply { nav?.navigate(this) }
+//            false
+//        }
+//    }
 
     /**
      * Helper for creating fablets--those little buttons that pop up when the fab is tapped.

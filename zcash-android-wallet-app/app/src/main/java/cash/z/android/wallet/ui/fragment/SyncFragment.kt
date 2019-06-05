@@ -70,7 +70,6 @@ class SyncFragment : ProgressFragment(R.id.progress_sync) {
 
     override fun onResume() {
         super.onResume()
-        mainActivity?.setDrawerLocked(true)
         mainActivity?.setToolbarShown(true)
     }
 

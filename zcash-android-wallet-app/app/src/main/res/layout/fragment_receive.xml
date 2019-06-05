@@ -13,6 +13,14 @@
         android:background="@color/fragment_receive_background"
         tools:context=".ui.fragment.ReceiveFragment">
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/ic_bg_path"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+
         <include
             android:id="@+id/main_app_bar"
             layout="@layout/include_main_app_bar"

@@ -24,7 +24,7 @@
             android:id="@+id/action_welcome_fragment_to_home_fragment"
             app:popUpTo="@navigation/mobile_navigation"
             app:popUpToInclusive="true"
-            app:destination="@id/nav_home_fragment" />
+            app:destination="@id/nav_zcon1_home_fragment" />
     </fragment>
     <fragment
         android:id="@+id/nav_firstrun_fragment"
@@ -46,24 +46,24 @@
             android:id="@+id/action_sync_fragment_to_home_fragment"
             app:popUpTo="@navigation/mobile_navigation"
             app:popUpToInclusive="true"
-            app:destination="@id/nav_home_fragment" />
+            app:destination="@id/nav_zcon1_home_fragment" />
     </fragment>
     <fragment
-        android:id="@+id/nav_home_fragment"
-        android:name="cash.z.android.wallet.ui.fragment.HomeFragment"
+        android:id="@+id/nav_zcon1_home_fragment"
+        android:name="cash.z.android.wallet.ui.fragment.Zcon1HomeFragment"
 
-        tools:layout="@layout/fragment_home">
+        tools:layout="@layout/fragment_zcon1_home">
         <action
-            android:id="@+id/action_home_fragment_to_send_fragment"
+            android:id="@+id/action_zcon1_home_fragment_to_send_fragment"
             app:destination="@id/nav_send_fragment" />
         <action
-            android:id="@+id/action_home_fragment_to_receive_fragment"
+            android:id="@+id/action_zcon1_home_fragment_to_receive_fragment"
             app:destination="@id/nav_receive_fragment" />
         <action
-            android:id="@+id/action_home_fragment_to_request_fragment"
+            android:id="@+id/action_zcon1_home_fragment_to_request_fragment"
             app:destination="@id/nav_request_fragment" />
         <action
-            android:id="@+id/action_home_fragment_to_history_fragment"
+            android:id="@+id/action_zcon1_home_fragment_to_history_fragment"
             app:destination="@id/nav_history_fragment" />
     </fragment>
     <fragment

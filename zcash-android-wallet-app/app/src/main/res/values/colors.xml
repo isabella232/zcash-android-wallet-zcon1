@@ -42,6 +42,12 @@
     <color name="zcashRed">#B00016</color>
     <color name="zcashYellow">#f4b728</color>
 
+    <!-- purples -->
+    <color name="zcashPurple_dark">#BD211435</color>
+    <color name="zcashPurple_accent">#FFA980C3</color>
+    <color name="zcashPurple">#291441</color>
+
+
     <!--                  -->
     <!-- named colors     -->
     <!--                  -->
@@ -71,16 +77,15 @@
     <!-- backgrounds -->
     <color name="fragment_receive_background">@color/zcashBlack_light</color>
     <color name="fragment_request_background">@color/colorPrimary</color>
-    <color name="fragment_send_background">@color/zcashWhite_light</color>
-    <color name="fragment_history_background">@color/zcashWhite_light</color>
+    <color name="fragment_send_background">@color/zcashPurple</color>
+    <color name="fragment_history_background">@color/colorPrimaryDark</color>
     <color name="fragment_about_background">@color/zcashWhite_light</color>
     <color name="fragment_settings_background">@color/zcashGray_light</color>
-    <color name="fragment_home_background">@color/zcashWhite_light</color>
+    <color name="fragment_home_background">@color/colorPrimaryDark</color>
     <color name="launcher_icon_background">@color/zcashPrimaryMedium</color>
-    <color name="receive_title_background">@color/zcashBlack_12</color>
     <color name="home_transaction_item_background">@color/zcashBlueGray</color>
-    <color name="history_transaction_item_background">@color/zcashWhite</color>
-    <color name="divider_background">@color/zcashBlack_12</color>
+    <color name="history_transaction_item_background">@color/colorPrimaryDark</color>
+    <color name="divider_background">@color/zcashPurple_accent</color>
 
     <!-- content -->
     <color name="walkthrough_text_header">@color/zcashBlueGray_dark</color>
@@ -90,5 +95,10 @@
 
     <!-- controls -->
     <color name="progress_bar_active">@color/zcashBlack_12</color>
+
+    <!-- fragment: receive -->
+    <color name="receive_title_background">@color/zcashBlack_12</color>
+    <color name="receive_shield">@color/zcashPurple_dark</color>
+    <color name="receive_segments">@color/colorAccent</color>
 
 </resources>

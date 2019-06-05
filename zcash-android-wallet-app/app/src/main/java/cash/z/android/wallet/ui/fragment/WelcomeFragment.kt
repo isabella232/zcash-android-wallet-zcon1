@@ -92,7 +92,6 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
 
     override fun onResume() {
         super.onResume()
-        mainActivity?.setDrawerLocked(true)
         mainActivity?.setToolbarShown(false)
     }
 

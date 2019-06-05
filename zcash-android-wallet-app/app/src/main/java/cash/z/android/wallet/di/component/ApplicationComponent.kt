@@ -34,7 +34,10 @@ import javax.inject.Singleton
         SettingsFragmentModule::class,
         WelcomeFragmentModule::class,
         FirstrunFragmentModule::class,
-        SyncFragmentModule::class
+        SyncFragmentModule::class,
+
+        // Zcon1 Fragments
+        Zcon1HomeFragmentModule::class
     ]
 )
 interface ApplicationComponent : AndroidInjector<ZcashWalletApplication> {

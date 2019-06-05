@@ -50,7 +50,7 @@ buildscript {
             'stdlib': "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${versions.kotlin}"
         ],
         'lottie': "com.airbnb.android:lottie:3.0.0",
-        'material': 'com.google.android.material:material:1.1.0-alpha05',
+        'material': 'com.google.android.material:material:1.1.0-alpha06',
         'mockito': [
             'jupiter':'org.mockito:mockito-junit-jupiter:2.26.0',
             'kotlin':'com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0'

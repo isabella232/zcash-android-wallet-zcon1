@@ -56,7 +56,6 @@ class FirstrunFragment : ProgressFragment(R.id.progress_firstrun), Transition.Tr
 
     override fun onResume() {
         super.onResume()
-        mainActivity?.setDrawerLocked(true)
         mainActivity?.setToolbarShown(false)
     }
 

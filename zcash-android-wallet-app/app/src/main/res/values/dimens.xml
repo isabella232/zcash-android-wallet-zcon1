@@ -6,6 +6,7 @@
     <dimen name="nav_header_height">206dp</dimen>
     <dimen name="home_app_bar_expanded_height">180dp</dimen>
 
+    <dimen name="nav_button_width">64dp</dimen>
 
     <!-- Text Sizes -->
     <dimen name="text_size_h1">96sp</dimen>

@@ -73,7 +73,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        mainActivity?.setToolbarShown(true)
+        mainActivity?.setToolbarShown(false)
     }
 
     override fun onResume() {
@@ -94,7 +94,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
     //
 
     override fun exit() {
-        mainActivity?.navController?.navigate(R.id.nav_home_fragment)
+        mainActivity?.navController?.navigate(R.id.nav_zcon1_home_fragment)
     }
 
     override fun setHeaders(isUsdSelected: Boolean, headerString: String, subheaderString: String) {
@@ -320,7 +320,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
             binding.textAddressError.text = null
             binding.textAddressError.visibility = View.GONE
         } else {
-            setAddressLineColor(R.color.zcashRed)
+            setAddressLineColor(R.color.colorAccent)
             binding.textAddressError.text = message
             binding.textAddressError.visibility = View.VISIBLE
             setSendEnabled(false)
@@ -329,7 +329,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
 
     override fun setMemoError(message: String?) {
         val validColor = R.color.zcashBlack_12.toAppColor()
-        val errorColor = R.color.zcashRed.toAppColor()
+        val errorColor = R.color.colorAccent.toAppColor()
         if (message == null) {
             binding.dividerMemo.setBackgroundColor(validColor)
             binding.textMemoCharCount.setTextColor(validColor)

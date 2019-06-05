@@ -1,10 +1,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="ZcashBaseTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="ZcashBaseTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
     </style>
 
     <style name="ZcashTheme" parent="ZcashBaseTheme">
@@ -22,6 +23,14 @@
     <style name="Zcash.Progressbar.Indeterminate" parent="ZcashBaseTheme">
         <item name="colorControlActivated">@color/progress_bar_active</item>
     </style>
+
+    <style name="Zcash.TabLayout" parent="Widget.MaterialComponents.TabLayout.Colored">
+        <item name="android:background">@color/zcashPurple_dark</item>
+        <item name="tabIndicatorColor">@color/text_light</item>
+        <item name="tabTextColor">@color/text_light</item>
+        <item name="tabRippleColor">@color/zcashPurple</item>
+    </style>
+
 
     <!--                  -->
     <!-- Text Appearances -->

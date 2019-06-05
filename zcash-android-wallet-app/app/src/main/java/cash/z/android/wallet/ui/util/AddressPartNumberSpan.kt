@@ -14,7 +14,7 @@ import cash.z.android.wallet.ZcashWalletApplication
  */
 class AddressPartNumberSpan(
     val proportion: Float = 0.5f,
-    val color: Int = ContextCompat.getColor(ZcashWalletApplication.instance, R.color.colorPrimary)
+    val color: Int = ContextCompat.getColor(ZcashWalletApplication.instance, R.color.receive_segments)
 ) : MetricAffectingSpan(), ParcelableSpan {
     constructor(parcel: Parcel) : this(parcel.readFloat(), parcel.readInt())
 
