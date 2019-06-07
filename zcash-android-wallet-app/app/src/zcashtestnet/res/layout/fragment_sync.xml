@@ -88,7 +88,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:background="@drawable/background_selector_primary_button"
             android:enabled="false"
             android:text="Loading..."
             android:textColor="@color/walkthrough_button_text"

@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import cash.z.android.wallet.R
+import cash.z.android.wallet.ZcashWalletApplication.Companion.PREFS_PSEUDONYM
 import cash.z.android.wallet.databinding.FragmentZcon1WelcomeBinding
 import cash.z.android.wallet.ui.util.doOnComplete
 import cash.z.android.wallet.ui.util.playToFrame
@@ -57,9 +58,9 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
 
     private suspend fun onNext() = coroutineScope {
         if (mainActivity != null) {
-            val isFirstRun = prefs.getString(PREFS_WELCOME_FIRST_RUN, null) != null
+            val hasName = prefs.getString(PREFS_PSEUDONYM, null) == null
             val destination =
-                if (isFirstRun) R.id.action_welcome_fragment_to_firstrun_fragment
+                if (hasName) R.id.action_welcome_fragment_to_firstrun_fragment
                 else R.id.action_welcome_fragment_to_home_fragment
 
             val extras = FragmentNavigatorExtras(
@@ -73,10 +74,6 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
                 extras
             )
         }
-    }
-
-    companion object {
-        const val PREFS_WELCOME_FIRST_RUN = "prefs_welcome_first_run"
     }
 }
 

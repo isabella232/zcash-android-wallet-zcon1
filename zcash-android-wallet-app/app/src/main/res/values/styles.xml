@@ -31,6 +31,10 @@
         <item name="tabRippleColor">@color/zcashPurple</item>
     </style>
 
+    <style name="Zcash.Button.Outline" parent="Widget.MaterialComponents.Button">
+        <item name="android:background">@color/zcashPurple_dark</item>
+    </style>
+
 
     <!--                  -->
     <!-- Text Appearances -->

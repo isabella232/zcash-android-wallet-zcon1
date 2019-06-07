@@ -7,7 +7,7 @@
 
     <!-- every color here should map to a material design value -->
 
-    <color name="colorPrimary">#8200FF</color>
+    <color name="colorPrimary">#72639E</color>
     <color name="colorPrimaryDark">#332E48</color>
     <color name="colorAccent">#00FFDA</color>
 
@@ -43,9 +43,10 @@
     <color name="zcashYellow">#f4b728</color>
 
     <!-- purples -->
+    <color name="zcashPurple">#291441</color>
     <color name="zcashPurple_dark">#BD211435</color>
     <color name="zcashPurple_accent">#FFA980C3</color>
-    <color name="zcashPurple">#291441</color>
+    <color name="zcashPurple_launcherIcon">#8E68B8</color>
 
 
     <!--                  -->
@@ -82,7 +83,7 @@
     <color name="fragment_about_background">@color/zcashWhite_light</color>
     <color name="fragment_settings_background">@color/zcashGray_light</color>
     <color name="fragment_home_background">@color/colorPrimaryDark</color>
-    <color name="launcher_icon_background">@color/zcashPrimaryMedium</color>
+    <color name="launcher_icon_background">@color/zcashPurple_launcherIcon</color>
     <color name="home_transaction_item_background">@color/zcashBlueGray</color>
     <color name="history_transaction_item_background">@color/colorPrimaryDark</color>
     <color name="divider_background">@color/zcashPurple_accent</color>

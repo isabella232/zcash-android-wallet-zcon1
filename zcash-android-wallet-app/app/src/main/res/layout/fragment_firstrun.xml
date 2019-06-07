@@ -88,7 +88,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:background="@drawable/background_selector_primary_button"
             android:text="Got It"
             android:textColor="@color/walkthrough_button_text"
             app:layout_constraintBottom_toBottomOf="parent"

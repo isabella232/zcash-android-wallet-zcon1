@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Zcash Wallet</string>
+    <string name="app_name">Zcon1 Swag Wallet</string>
     <string name="product_name">Zcon1 Swag Wallet</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -27,6 +27,7 @@
     <string name="destination_title_firstrun">Getting Started</string>
     <string name="destination_title_sync">Release Notes</string>
     <string name="destination_title_history">Past Transactions</string>
+    <string name="destination_title_zcon1_cart">Cart</string>
     <string name="destination_title_about">About</string>
     <string name="destination_title_settings">Settings</string>
     <string name="destination_title_placeholder">Coming Soon</string>
@@ -50,6 +51,14 @@
     <!--             -->
     <!-- Screen copy -->
     <!--             -->
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_page_0">HEEEYO!</string>
+    <string name="onboarding_title_page_1">Swag Token?</string>
+    <string name="onboarding_title_page_2">Syncing</string>
+    <string name="onboarding_subtitle_page_0">What should we call you?</string>
+    <string name="onboarding_subtitle_page_1">Scan your token for some TAZ!</string>
+    <string name="onboarding_subtitle_page_2">Patience please! Your wallet will be ready as soon as we have downloaded the latest blocks.</string>
 
     <!-- Home -->
     <string name="home_empty_wallet">Your wallet is empty.</string>
@@ -94,6 +103,7 @@
 
     <!-- Settings -->
     <string name="settings_alert_reset_app">Delete all data and reset like a new installation?</string>
+
 
     <string-array name="demo_user_names">
         <item>Alice</item>

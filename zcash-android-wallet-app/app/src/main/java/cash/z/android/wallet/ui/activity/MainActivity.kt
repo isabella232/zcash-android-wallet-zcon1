@@ -119,7 +119,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
             0 -> R.id.nav_zcon1_home_fragment
             1 -> R.id.nav_send_fragment
             2 -> R.id.nav_receive_fragment
-            3 -> R.id.nav_history_fragment
+            3 -> R.id.nav_zcon1_cart_fragment
             else -> R.id.nav_zcon1_home_fragment
         }, null, navOptions)
     }

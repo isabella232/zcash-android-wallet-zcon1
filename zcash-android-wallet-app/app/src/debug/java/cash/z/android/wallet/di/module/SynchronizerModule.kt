@@ -6,7 +6,7 @@ import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.sample.*
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
-import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_SERVER
+import cash.z.android.wallet.sample.SampleProperties.DEFAULT_SERVER
 import cash.z.android.wallet.sample.SampleProperties.PREFS_SERVER_NAME
 import cash.z.android.wallet.sample.SampleProperties.PREFS_WALLET_DISPLAY_NAME
 import cash.z.wallet.sdk.data.*
@@ -60,9 +60,8 @@ internal object SynchronizerModule {
     @Singleton
     @Named(PREFS_SERVER_NAME)
     fun provideServer(prefs: SharedPreferences): String {
-        val serverName = prefs.getString(PREFS_SERVER_NAME, null)
-        // in theory, the actual stored value itself could be null so provide the default this way to be safe
-        val server = Servers.values().firstOrNull { it.displayName == serverName }?.host ?: COMPACT_BLOCK_SERVER //TODO: validate that this is a hostname or IP. For now use default, instead
+        val serverName = prefs.getString(PREFS_SERVER_NAME, DEFAULT_SERVER.displayName)
+        val server = Servers.values().firstOrNull { it.displayName == serverName }?.host ?: DEFAULT_SERVER.host
         twig("FOUND SERVER DISPLAY NAME : $serverName ($server)")
         return server
     }

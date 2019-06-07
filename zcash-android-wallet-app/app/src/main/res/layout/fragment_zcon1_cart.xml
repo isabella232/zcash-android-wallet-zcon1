@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_cart_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/fragment_receive_background">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_content_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="32dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_content_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_end="32dp" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.5"
+                android:scaleType="fitXY"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_bg_path" />
+
+            <View
+                android:id="@+id/background_header"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@color/zcashBlack_54"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/text_integer_digits"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:layout_marginStart="24dp"
+                android:text="25"
+                android:textColor="@color/text_light"
+                android:textSize="@dimen/text_size_h3"
+                app:layout_constraintBottom_toBottomOf="@id/background_header"
+                app:layout_constraintStart_toStartOf="@id/guideline_content_start" />
+
+            <TextView
+                android:id="@+id/text_fractional_digits"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=".0462346"
+                android:textColor="@color/text_light_dimmed"
+                android:textSize="@dimen/text_size_body_1"
+                app:layout_constraintBaseline_toBaselineOf="@id/text_integer_digits"
+                app:layout_constraintStart_toEndOf="@id/text_integer_digits" />
+
+            <TextView
+                android:id="@+id/text_taz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TA"
+                android:textColor="@color/text_light_dimmed"
+                android:textSize="24dp"
+                android:textStyle="bold"
+                app:layout_constraintBaseline_toBaselineOf="@id/text_integer_digits"
+                app:layout_constraintEnd_toStartOf="@id/image_zec_symbol" />
+
+            <!-- Zec symbol -->
+            <ImageView
+                android:id="@+id/image_zec_symbol"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="4dp"
+                app:layout_constraintBottom_toBottomOf="@id/text_taz"
+                app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                app:srcCompat="@drawable/ic_zec_symbol" />
+
+            <TextView
+                android:id="@+id/text_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="left"
+                android:justificationMode="inter_word"
+                android:text="As a reward for helping us test the Zcash Reference Wallet, we are 'selling' Electric Coin Company swag for the TAZ you received while registering!\n\nThe main goal is further testing of sending and receiving funds with the lgithwallet architecture. So please buy some swag, share your extra TAZ, and create as many transactions as possible. Thank you for your support!"
+                android:textColor="@color/text_light"
+                android:textSize="@dimen/text_size_body_1"
+                app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                app:layout_constraintTop_toBottomOf="@+id/background_header" />
+
+            <Button
+                android:id="@+id/button_swag_shirt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
+                android:text="Shirt"
+                app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                app:layout_constraintTop_toBottomOf="@id/text_info" />
+
+            <Button
+                android:id="@+id/button_swag_pad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Pad"
+                app:layout_constraintStart_toEndOf="@id/button_swag_shirt"
+                app:layout_constraintBottom_toBottomOf="@id/button_swag_shirt" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</layout>

@@ -36,6 +36,11 @@
             app:popUpTo="@navigation/mobile_navigation"
             app:popUpToInclusive="true"
             app:destination="@id/nav_sync_fragment" />
+        <action
+            android:id="@+id/action_firstrun_fragment_to_zcon1_home_fragment"
+            app:popUpTo="@navigation/mobile_navigation"
+            app:popUpToInclusive="true"
+            app:destination="@id/nav_zcon1_home_fragment" />
     </fragment>
     <fragment
         android:id="@+id/nav_sync_fragment"
@@ -87,7 +92,11 @@
         android:name="cash.z.android.wallet.ui.fragment.HistoryFragment"
         android:label="@string/destination_title_history"
         tools:layout="@layout/fragment_placeholder" />
-
+    <fragment
+        android:id="@+id/nav_zcon1_cart_fragment"
+        android:name="cash.z.android.wallet.ui.fragment.Zcon1CartFragment"
+        android:label="@string/destination_title_zcon1_cart"
+        tools:layout="@layout/fragment_zcon1_cart" />
     <!-- unimplemented -->
     <fragment
         android:id="@+id/nav_about_fragment"

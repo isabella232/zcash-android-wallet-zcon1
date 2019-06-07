@@ -33,5 +33,8 @@ class ZcashWalletApplication : DaggerApplication() {
 
     companion object {
         lateinit var instance: ZcashWalletApplication
+
+        // Pref keys
+        const val PREFS_PSEUDONYM = "Swag.PREFS_PSEUDONYM"
     }
 }

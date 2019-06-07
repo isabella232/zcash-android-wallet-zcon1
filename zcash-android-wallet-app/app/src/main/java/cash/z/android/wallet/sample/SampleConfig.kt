@@ -96,7 +96,7 @@ enum class Servers(val host: String, val displayName: String) {
     LOCALHOST("10.0.0.191", "Localhost"),
     //    WLAN("10.0.0.26"),
     WLAN1("10.0.2.24", "WLAN Conference"),
-    WLAN2("192.168.1.235", "WLAN Office"),
+    WLAN2("192.168.1.134", "WLAN Office"),
     BOLT_TESTNET("ec2-34-228-10-162.compute-1.amazonaws.com", "Bolt Labs Testnet"),
     ZCASH_TESTNET("lightwalletd.z.cash", "Zcash Testnet")
 }
@@ -108,9 +108,11 @@ object SampleProperties {
     const val PREFS_WALLET_DISPLAY_NAME = "prefs_wallet_name"
     const val PREFS_SERVER_NAME = "prefs_server_name"
 
-    val COMPACT_BLOCK_SERVER = Servers.ZCASH_TESTNET.host
     const val COMPACT_BLOCK_PORT = 9067
     val wallet = DaveWallet
     // TODO: placeholder until we have a network service for this
     val USD_PER_ZEC = BigDecimal("52.86", MathContext.DECIMAL128)
+
+    // Defaults
+    val DEFAULT_SERVER = Servers.WLAN2
 }

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container_first_run_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="RtlSymmetry">
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_content_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="32dp" />
+
+    <ImageView
+        android:id="@+id/image_header_icon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="64dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="16dp"
+        android:background="@drawable/background_circle"
+        app:srcCompat="@drawable/ic_onboarding_start"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="@id/input_pseudonym"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:id="@+id/text_title_page_0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:fontFamily="sans-serif-thin"
+        android:text="@string/onboarding_title_page_0"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/text_size_h4"
+        app:layout_constraintStart_toStartOf="@id/input_pseudonym"
+        app:layout_constraintTop_toBottomOf="@id/image_header_icon"
+        />
+
+    <TextView
+        android:id="@+id/text_subtitle_page_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/onboarding_subtitle_page_0"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/text_size_body_1"
+        app:layout_constraintStart_toStartOf="@id/input_pseudonym"
+        app:layout_constraintTop_toBottomOf="@id/text_title_page_0"/>
+
+    <!-- Input: Address -->
+    <EditText
+        android:id="@+id/input_pseudonym"
+        android:hint="Enter pseudonym, handle, nick, tag, etc."
+        android:imeOptions="actionDone"
+        android:inputType="textNoSuggestions"
+        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="48dp"
+        android:paddingRight="8dp"
+        android:paddingTop="0dp"
+        android:singleLine="true"
+        android:textColor="@color/text_light"
+        android:textColorHint="@color/text_light_dimmed"
+        app:backgroundTint="@color/colorPrimary"
+        app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_subtitle_page_2"/>
+
+    <Button
+        android:id="@+id/button_next"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="That's Me!"
+        android:textColor="@color/text_light"
+        app:layout_constraintEnd_toEndOf="@id/input_pseudonym"
+        app:layout_constraintTop_toBottomOf="@id/input_pseudonym"/>
+
+    <TextView
+        android:id="@+id/text_disclaimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="The name entered above is only used\nto assist with swag order fullfillment."
+        android:maxLines="2"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/text_size_body_1"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_next" />
+</androidx.constraintlayout.widget.ConstraintLayout>

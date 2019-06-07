@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:id="@+id/container_first_run_2"
+                                                   android:layout_height="match_parent"
+                                                   android:layout_width="match_parent"
+                                                   tools:ignore="RtlSymmetry">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_content_start"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="32dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_content_end"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="32dp" />
+
+    <ImageView
+        android:id="@+id/image_header_icon"
+        android:background="@drawable/background_circle"
+        android:layout_height="64dp"
+        android:layout_marginTop="64dp"
+        android:layout_width="64dp"
+        android:paddingTop="18dp"
+        android:paddingBottom="18dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:scaleType="fitXY"
+        app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_onboarding_sync"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:id="@+id/text_title_page_2"
+        android:fontFamily="sans-serif-thin"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_width="wrap_content"
+        android:text="@string/onboarding_title_page_2"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/text_size_h4"
+        app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+        app:layout_constraintTop_toBottomOf="@id/image_header_icon" />
+
+    <TextView
+        android:id="@+id/text_subtitle_page_2"
+        android:justificationMode="inter_word"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_width="0dp"
+        android:lineSpacingMultiplier="1.5"
+        android:text="@string/onboarding_subtitle_page_2"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/text_size_body_1"
+        app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+        app:layout_constraintTop_toBottomOf="@id/text_title_page_2" />
+
+    <TextView
+        android:id="@+id/text_reality_check"
+        android:fontFamily="sans-serif-thin"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_width="wrap_content"
+        android:text="Reality Check"
+        android:textAllCaps="true"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/text_size_h4"
+        app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+        app:layout_constraintTop_toBottomOf="@+id/text_subtitle_page_2" />
+
+    <TextView
+        android:id="@+id/text_disclaimer_1"
+        android:gravity="left"
+        android:justificationMode="inter_word"
+        android:lineSpacingMultiplier="1.5"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_width="0dp"
+        android:text="Since this is a testnet application, we are skipping all important seed phrase / private key backup flow!\n\nWe do NOT recommend this for mainnet wallets. Those seed phrases ARE your money!"
+        android:textColor="@color/text_light"
+        android:textSize="@dimen/text_size_body_1"
+        app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+        app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+        app:layout_constraintTop_toBottomOf="@+id/text_reality_check" />
+
+    <Button
+        android:id="@+id/button_next"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_width="wrap_content"
+        android:text="Done!"
+        android:textColor="@color/text_light"
+        app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+        app:layout_constraintTop_toBottomOf="@id/text_disclaimer_1" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
