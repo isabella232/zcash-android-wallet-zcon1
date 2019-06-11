@@ -69,6 +69,7 @@
         android:layout_marginTop="16dp"
         android:text="Scan"
         android:textColor="@color/text_light"
+        android:onClick="onScanQr"
         app:layout_constraintEnd_toEndOf="@id/image_scan_icon"
         app:layout_constraintTop_toBottomOf="@id/image_scan_icon"/>
 

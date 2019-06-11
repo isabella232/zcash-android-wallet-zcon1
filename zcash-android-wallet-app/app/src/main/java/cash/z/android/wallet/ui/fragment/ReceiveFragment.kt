@@ -10,11 +10,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import cash.z.android.qrecycler.QRecycler
 import cash.z.android.wallet.R
-import cash.z.android.wallet.ui.activity.MainActivity
 import cash.z.android.wallet.ui.util.AddressPartNumberSpan
 import cash.z.wallet.sdk.data.Synchronizer
-import cash.z.wallet.sdk.jni.JniConverter
-import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.android.synthetic.main.fragment_receive.*

@@ -200,16 +200,15 @@ class CartPresenter @Inject constructor(
 //    }
 
     // TODO: get these values elsewhere and simplify construction
-    sealed class CartItem(val itemName: String = "", val zatoshiValue: Long = -1L, val toAddress: String = "", val memo: String = "") {
-        data class SwagShirt(val to: String, val from: String) : CartItem("Swag Shirt", 2000010000, to, from)
-        data class SwagPad(val to: String, val from: String) :  CartItem("Swag Pad", 3000010000, to, from)
+    sealed class CartItem(val itemName: String = "", val zatoshiValue: Long = -1L, val toAddress: String = "ztestsapling1yu2zy9aanf8pjf2qvm4qmn4k6q57y2d9fcs3vz0guthxx3m2aq57qm6hkx0580m9u9635xh6ttr", val memo: String = "") {
+        data class SwagShirt(val fromName: String) : CartItem("Swag Shirt", 199990000, memo=fromName) // 20 TAZ - miner's fee
+        data class SwagPad(val fromName: String) :  CartItem("Swag Pad", 299990000, memo=fromName) // 30 TAZ - miner's fee
     }
 
     sealed class PurchaseResult {
         data class Processing(val state: TransactionState = TransactionState.Creating) : PurchaseResult()
         data class Failure(val reason: String = "") : PurchaseResult()
     }
-
 }
 
 

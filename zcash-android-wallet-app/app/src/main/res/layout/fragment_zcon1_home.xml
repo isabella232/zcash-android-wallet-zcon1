@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content_home"
@@ -29,45 +29,105 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY"
-            app:srcCompat="@drawable/ic_bg_path"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_bg_path" />
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:scaleType="fitXY"
-            app:srcCompat="@drawable/bg_mountains"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="0.38"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.viewpager.widget.ViewPager
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/guideline_content_start">
+            app:layout_constraintTop_toTopOf="parent"
+            android:alpha="0.6"
+            app:srcCompat="@drawable/bg_mountains" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabs_transactions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Zcash.TabLayout">
+        <TextView
+            android:id="@+id/text_integer_digits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="25"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_light"
+            android:textSize="@dimen/text_size_h1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/background_buttons"/>
 
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="All Transactions" />
+        <TextView
+            android:id="@+id/text_fractional_digits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=".0462346"
+            android:textColor="@color/text_light_dimmed"
+            android:textSize="@dimen/text_size_body_1"
+            app:layout_constraintBaseline_toBaselineOf="@id/text_integer_digits"
+            app:layout_constraintStart_toEndOf="@id/text_integer_digits" />
 
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Pending Only" />
+        <TextView
+            android:id="@+id/text_taz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TA"
+            android:fontFamily="sans-serif-thin"
+            android:textColor="@color/colorAccent"
+            android:includeFontPadding="false"
+            android:textSize="24dp"
+            android:alpha="0.5"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="@id/image_zec_symbol"
+            app:layout_constraintBottom_toBottomOf="@id/image_zec_symbol"
+            app:layout_constraintEnd_toStartOf="@id/image_zec_symbol"/>
 
-            </com.google.android.material.tabs.TabLayout>
-        </androidx.viewpager.widget.ViewPager>
+        <!-- Zec symbol -->
+        <ImageView
+            android:id="@+id/image_zec_symbol"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="18dp"
+            android:tint="@color/colorAccent"
+            app:layout_constraintTop_toTopOf="@id/text_integer_digits"
+            app:layout_constraintEnd_toStartOf="@id/text_integer_digits"
+            app:srcCompat="@drawable/ic_zec_symbol" />
+        <View
+            android:id="@+id/background_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="@color/zcashPurple_dark"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/guideline_content_start" />
+
+        <Button
+            android:id="@+id/button_scan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onScanQr"
+            android:text="Scan QR"
+            android:textColor="@color/text_light"
+            app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+            app:layout_constraintEnd_toStartOf="@id/button_feedback"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
+        <Button
+            android:id="@+id/button_feedback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:onClick="onSendFeedback"
+            android:text="Give Feedback"
+            android:textColor="@color/text_light"
+            android:theme="@style/Zcash.Button.Outline"
+            app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/button_scan"
+            app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

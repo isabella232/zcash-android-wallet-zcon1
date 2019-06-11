@@ -111,8 +111,13 @@ object SampleProperties {
     const val COMPACT_BLOCK_PORT = 9067
     val wallet = DaveWallet
     // TODO: placeholder until we have a network service for this
-    val USD_PER_ZEC = BigDecimal("52.86", MathContext.DECIMAL128)
+    val USD_PER_ZEC = BigDecimal("62.86", MathContext.DECIMAL128)
 
     // Defaults
     val DEFAULT_SERVER = Servers.WLAN2
+    val DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS = 50_000L
+    val DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS = 10_000L
+    val DEFAULT_BLOCK_BATCH_SIZE = 100
+    val DEFAULT_RETRIES = 5
+    val DEFAULT_STALE_TOLERANCE = 10
 }

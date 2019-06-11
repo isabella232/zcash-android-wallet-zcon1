@@ -1,6 +1,7 @@
 package cash.z.android.wallet.ui.activity
 
 import android.animation.Animator
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.getSystemService
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
@@ -16,13 +18,18 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.ActivityMainBinding
+import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.sample.WalletConfig
+import cash.z.android.wallet.ui.fragment.ScanFragment
+import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.data.Synchronizer
+import cash.z.wallet.sdk.data.twig
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import javax.inject.Inject
+import kotlin.random.Random
 
-class MainActivity : BaseActivity(), Animator.AnimatorListener {
+class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.BarcodeCallback {
 
     @Inject
     lateinit var synchronizer: Synchronizer
@@ -30,11 +37,17 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
     @Inject
     lateinit var walletConfig: WalletConfig
 
+    @Inject
+    lateinit var broom: Broom
+
     lateinit var binding: ActivityMainBinding
     lateinit var loadMessages: List<String>
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     lateinit var navController: NavController
+    
+    private val mediaPlayer: MediaPlayer = MediaPlayer()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +56,16 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
         initAppBar()
         loadMessages = generateFunLoadMessages().shuffled()
         synchronizer.start(this)
+    }
+
+    override fun onAttachFragment(childFragment: Fragment) {
+        super.onAttachFragment(childFragment)
+        (childFragment as? ScanFragment)?.barcodeCallback = this
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        synchronizer.stop()
     }
 
     private fun initAppBar() {
@@ -54,11 +77,6 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
         // show content behind the status bar
         window.decorView.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        synchronizer.stop()
     }
 
     /**
@@ -94,9 +112,13 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
         }
     }
 
-    fun onNavButtonSelected(index: Int) {
+// TODO: move all this nav stuff to a separate component
+    var navSelection = -1
+    var start = -1
+    var end = -1
+    val frameSize = 24
+    fun onNavButtonSelected2(index: Int) {
         if (navSelection == index) return
-        val frameSize = 24
         val previousEnd =  (navSelection * frameSize + 6) + frameSize / 2
         navSelection = index.rem(4)
         start = navSelection * frameSize + 6
@@ -123,10 +145,62 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
             else -> R.id.nav_zcon1_home_fragment
         }, null, navOptions)
     }
+
+    val enterRanges = arrayOf<IntRange>(
+        0..13,
+        24..37,
+        48..61,
+        72..85
+    )
+    val exitRanges = arrayOf<IntRange>(
+        14..23,
+        38..47,
+        62..71,
+        86..95
+    )
+    fun onNavButtonSelected(index: Int) {
+        if (navSelection == index || index < 0 || index > 3) return
+        val previousSelection = navSelection
+        navSelection = index
+
+        if (previousSelection == -1) {
+            onAnimationEnd(null)
+        } else {
+            // play nav section exit animation
+            binding.lottieNavigationZcon1.apply {
+                addAnimatorListener(this@MainActivity)
+                setMinAndMaxFrame(exitRanges[previousSelection].first, exitRanges[previousSelection].last)
+                playAnimation()
+            }
+        }
+
+        val navOptions = NavOptions.Builder()
+            .setEnterAnim(R.anim.nav_default_enter_anim)
+            .setExitAnim(R.anim.nav_default_exit_anim)
+            .build()
+        navController.navigate(when(navSelection) {
+            0 -> R.id.nav_zcon1_home_fragment
+            1 -> R.id.nav_send_fragment
+            2 -> R.id.nav_receive_fragment
+            3 -> R.id.nav_zcon1_cart_fragment
+            else -> R.id.nav_zcon1_home_fragment
+        }, null, navOptions)
+    }
+
+
     override fun onAnimationRepeat(animation: Animator?) {
     }
 
     override fun onAnimationEnd(animation: Animator?) {
+            // play nav section enter animation
+        binding.lottieNavigationZcon1.apply {
+            removeAnimatorListener(this@MainActivity)
+            setMinAndMaxFrame(enterRanges[navSelection].first, enterRanges[navSelection].last)
+            playAnimation()
+        }
+    }
+
+    fun onAnimationEnd2(animation: Animator?) {
         binding.lottieNavigationZcon1.apply {
             removeAnimatorListener(this@MainActivity)
             setMinAndMaxFrame(start, end)
@@ -139,11 +213,6 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
 
     override fun onAnimationStart(animation: Animator?) {
     }
-
-    var navSelection = -1
-    var start = -1
-    var end = -1
-
 
 
 
@@ -181,6 +250,55 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener {
             )
         }
     }
+
+    fun onScanQr(view: View) {
+        supportFragmentManager.beginTransaction()
+            .add(R.id.camera_placeholder, ScanFragment(), "camera_fragment")
+            .addToBackStack("camera_fragment_scanning")
+            .commit()
+    }
+
+    fun onSendFeedback(view: View) {
+        Toaster.short("Feedback sent! (j/k)")
+    }
+
+    override fun onBarcodeScanned(value: String) {
+        Toaster.short(value)
+        playSound(Random.nextBoolean())
+        exitScanMode()
+
+//        Toaster.short("qr scanned")
+//        launch {
+//            val result = broom.sweep(SampleSeedProvider("testreferencebob"))
+//            Toaster.short("Sweep result? $result")
+//        }
+    }
+
+    private fun playSound(isLarge: Boolean) {
+        mediaPlayer.apply {
+            if (isPlaying) stop()
+            try {
+                reset()
+                val fileName = if (isLarge) "sound_receive_large.mp3" else "sound_receive_small.mp3"
+                assets.openFd(fileName).let { afd ->
+                    setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                }
+                prepare()
+                start()
+            } catch (t: Throwable) {
+                twig("ERROR: unable to play sound due to $t")
+            }
+        }
+    }
+
+    private fun exitScanMode() {
+        with(supportFragmentManager) {
+            findFragmentByTag("camera_fragment")?.let { cameraFragment ->
+                beginTransaction().remove(cameraFragment).commit()
+            }
+        }
+    }
+
 }
 
 @Module

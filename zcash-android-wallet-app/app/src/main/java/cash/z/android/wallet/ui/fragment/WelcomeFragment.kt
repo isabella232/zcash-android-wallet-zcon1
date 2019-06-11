@@ -54,6 +54,7 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
         super.onResume()
         mainActivity?.setToolbarShown(false)
         binding.lottieEccLogo.playToFrame(240)
+        binding.lottieEccLogo.speed = 1.4f
     }
 
     private suspend fun onNext() = coroutineScope {

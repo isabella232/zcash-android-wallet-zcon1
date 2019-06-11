@@ -54,10 +54,10 @@ class Zcon1CartFragment : BaseFragment(), CartPresenter.Zcon1CartView {//, Swipe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonSwagShirt.setOnClickListener {
-            showSendDialog(CartPresenter.CartItem.SwagShirt(getString(R.string.store_id), prefs.getString(ZcashWalletApplication.PREFS_PSEUDONYM, null)!!))
+            showSendDialog(CartPresenter.CartItem.SwagShirt(prefs.getString(ZcashWalletApplication.PREFS_PSEUDONYM, null)!!))
         }
         binding.buttonSwagPad.setOnClickListener {
-            showSendDialog(CartPresenter.CartItem.SwagPad(getString(R.string.store_id), prefs.getString(ZcashWalletApplication.PREFS_PSEUDONYM, null)!!))
+            showSendDialog(CartPresenter.CartItem.SwagPad(prefs.getString(ZcashWalletApplication.PREFS_PSEUDONYM, null)!!))
         }
     }
 

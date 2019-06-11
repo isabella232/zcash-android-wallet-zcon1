@@ -108,5 +108,9 @@
         android:name="cash.z.android.wallet.ui.fragment.SettingsFragment"
         android:label="@string/destination_title_settings"
         tools:layout="@layout/fragment_placeholder" />
+    <fragment
+        android:id="@+id/nav_scan_fragment"
+        android:name="cash.z.android.wallet.ui.fragment.Zcon1ScanFragment"
+        tools:layout="@layout/fragment_zcon1_scan" />
 
 </navigation>

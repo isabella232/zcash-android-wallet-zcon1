@@ -4,14 +4,25 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.ZcashWalletApplication
+import cash.z.android.wallet.extention.toDbPath
 import cash.z.android.wallet.sample.*
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
+import cash.z.android.wallet.sample.SampleProperties.DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_SERVER
+import cash.z.android.wallet.sample.SampleProperties.DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
 import cash.z.android.wallet.sample.SampleProperties.PREFS_SERVER_NAME
 import cash.z.android.wallet.sample.SampleProperties.PREFS_WALLET_DISPLAY_NAME
+import cash.z.android.wallet.ui.util.Broom
+import cash.z.wallet.sdk.block.*
 import cash.z.wallet.sdk.data.*
-import cash.z.wallet.sdk.jni.JniConverter
+import cash.z.wallet.sdk.ext.DEFAULT_BATCH_SIZE
+import cash.z.wallet.sdk.ext.DEFAULT_RETRIES
+import cash.z.wallet.sdk.ext.DEFAULT_STALE_TOLERANCE
+import cash.z.wallet.sdk.jni.RustBackend
+import cash.z.wallet.sdk.jni.RustBackendWelding
 import cash.z.wallet.sdk.secure.Wallet
+import cash.z.wallet.sdk.service.LightWalletGrpcService
+import cash.z.wallet.sdk.service.LightWalletService
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -34,8 +45,8 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideJniConverter(): JniConverter {
-        return JniConverter().also {
+    fun provideRustBackend(): RustBackendWelding {
+        return RustBackend().also {
             if (BuildConfig.DEBUG) it.initLogs()
         }
     }
@@ -44,11 +55,11 @@ internal object SynchronizerModule {
     @Provides
     @Singleton
     fun provideWalletConfig(prefs: SharedPreferences): WalletConfig {
-        val walletName = prefs.getString(PREFS_WALLET_DISPLAY_NAME, null)
+        val walletName = prefs.getString(PREFS_WALLET_DISPLAY_NAME, BobWallet.displayName)
         twig("FOUND WALLET DISPLAY NAME : $walletName")
         return when(walletName) {
             AliceWallet.displayName -> AliceWallet
-            BobWallet.displayName, null -> BobWallet // Default wallet
+            BobWallet.displayName -> BobWallet // Default wallet
             CarolWallet.displayName -> CarolWallet
             DaveWallet.displayName -> DaveWallet
             else -> WalletConfig.create(walletName)
@@ -69,56 +80,115 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideDownloader(@Named(PREFS_SERVER_NAME) server: String): CompactBlockStream {
-        return CompactBlockStream(server, COMPACT_BLOCK_PORT)
+    fun provideLightwalletService(@Named(PREFS_SERVER_NAME) server: String): LightWalletService {
+        return LightWalletGrpcService(server, COMPACT_BLOCK_PORT)
     }
 
     @JvmStatic
     @Provides
     @Singleton
-    fun provideProcessor(application: ZcashWalletApplication, converter: JniConverter, walletConfig: WalletConfig): CompactBlockProcessor {
-        return CompactBlockProcessor(application, converter, walletConfig.cacheDbName, walletConfig.dataDbName)
+    fun provideCompactBlockStore(walletConfig: WalletConfig): CompactBlockStore {
+        return CompactBlockDbStore(ZcashWalletApplication.instance, walletConfig.cacheDbName)
     }
 
     @JvmStatic
     @Provides
     @Singleton
-    fun provideRepository(application: ZcashWalletApplication, walletConfig: WalletConfig, converter: JniConverter): TransactionRepository {
-        return PollingTransactionRepository(application, walletConfig.dataDbName, 10_000L)
+    fun provideDownloader(service: LightWalletService, compatBlockStore: CompactBlockStore): CompactBlockDownloader {
+        return CompactBlockDownloader(service, compatBlockStore)
     }
 
     @JvmStatic
     @Provides
     @Singleton
-    fun provideWallet(application: ZcashWalletApplication, walletConfig: WalletConfig, converter: JniConverter): Wallet {
-        return Wallet(
-            context = application,
-            converter = converter,
-            dataDbPath = application.getDatabasePath(walletConfig.dataDbName).absolutePath,
-            paramDestinationDir =  "${application.cacheDir.absolutePath}/params",
-            seedProvider = walletConfig.seedProvider,
-            spendingKeyProvider = walletConfig.spendingKeyProvider
+    fun provideProcessorConfig(walletConfig: WalletConfig): ProcessorConfig {
+        return ProcessorConfig(
+            ZcashWalletApplication.instance.getDatabasePath(walletConfig.cacheDbName).absolutePath,
+            ZcashWalletApplication.instance.getDatabasePath(walletConfig.dataDbName).absolutePath,
+            DEFAULT_BATCH_SIZE,
+            DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS,
+            DEFAULT_RETRIES
         )
     }
 
     @JvmStatic
     @Provides
     @Singleton
-    fun provideManager(wallet: Wallet, repository: TransactionRepository, downloader: CompactBlockStream): ActiveTransactionManager {
-        return ActiveTransactionManager(repository, downloader.connection, wallet)
+    fun provideProcessor(
+        config: ProcessorConfig,
+        downloader: CompactBlockDownloader,
+        repository: TransactionRepository,
+        rustBackend: RustBackendWelding
+    ): CompactBlockProcessor {
+        return CompactBlockProcessor(config, downloader, repository, rustBackend)
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideRepository(
+        application: ZcashWalletApplication,
+        walletConfig: WalletConfig
+    ): TransactionRepository {
+        return PollingTransactionRepository(
+            application,
+            walletConfig.dataDbName,
+            DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
+        )
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideWallet(
+        application: ZcashWalletApplication,
+        rustBackend: RustBackendWelding,
+        walletConfig: WalletConfig
+    ): Wallet {
+        return Wallet(
+            application,
+            rustBackend,
+            walletConfig.dataDbName.toDbPath(),
+            "${application.cacheDir.absolutePath}/params",
+            arrayOf(0),
+            walletConfig.seedProvider,
+            walletConfig.spendingKeyProvider
+        )
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideManager(wallet: Wallet, repository: TransactionRepository, service: LightWalletService): ActiveTransactionManager {
+        return ActiveTransactionManager(repository, service, wallet)
     }
 
     @JvmStatic
     @Provides
     @Singleton
     fun provideSynchronizer(
-        downloader: CompactBlockStream,
         processor: CompactBlockProcessor,
         repository: TransactionRepository,
         manager: ActiveTransactionManager,
         wallet: Wallet
     ): Synchronizer {
-        return SdkSynchronizer(downloader, processor, repository, manager, wallet, batchSize = 100, blockPollFrequency = 50_000L)
+        return SdkSynchronizer(processor, repository, manager, wallet, DEFAULT_STALE_TOLERANCE)
     }
 
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideBroom(
+        service: LightWalletService,
+        wallet: Wallet,
+        rustBackend: RustBackendWelding,
+        walletConfig: WalletConfig
+    ): Broom {
+        return Broom(
+            service,
+            rustBackend,
+            walletConfig.cacheDbName,
+            wallet
+        )
+    }
 }
