@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentSettingsBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.sample.SampleProperties
@@ -113,6 +114,7 @@ class SettingsFragment : BaseFragment() {
 
 @Module
 abstract class SettingsFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeSettingsFragment(): SettingsFragment
 }

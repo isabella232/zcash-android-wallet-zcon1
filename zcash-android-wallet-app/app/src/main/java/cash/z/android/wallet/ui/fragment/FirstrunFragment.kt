@@ -18,6 +18,7 @@ import androidx.viewpager2.widget.ViewPager2
 import cash.z.android.wallet.R
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.databinding.FragmentZcon1FirstrunBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import javax.inject.Inject
@@ -196,6 +197,7 @@ class FirstrunFragment : ProgressFragment(R.id.progress_firstrun), Transition.Tr
 
 @Module
 abstract class FirstrunFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeFirstrunFragment(): FirstrunFragment
 }

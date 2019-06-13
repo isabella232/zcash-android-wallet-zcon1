@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import cash.z.android.qrecycler.QRecycler
 import cash.z.android.wallet.R
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.util.AddressPartNumberSpan
 import cash.z.wallet.sdk.data.Synchronizer
 import dagger.Module
@@ -94,6 +95,7 @@ class ReceiveFragment : BaseFragment() {
 
 @Module
 abstract class ReceiveFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeReceiveFragment(): ReceiveFragment
 }

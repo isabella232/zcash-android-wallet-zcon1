@@ -11,6 +11,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import cash.z.android.wallet.R
 import cash.z.android.wallet.ZcashWalletApplication.Companion.PREFS_PSEUDONYM
 import cash.z.android.wallet.databinding.FragmentZcon1WelcomeBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.util.doOnComplete
 import cash.z.android.wallet.ui.util.playToFrame
 import dagger.Module
@@ -53,7 +54,7 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
     override fun onResume() {
         super.onResume()
         mainActivity?.setToolbarShown(false)
-        binding.lottieEccLogo.playToFrame(240)
+        binding.lottieEccLogo.playToFrame(240/100)
         binding.lottieEccLogo.speed = 1.4f
     }
 
@@ -80,7 +81,7 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
 
 @Module
 abstract class WelcomeFragmentModule {
-
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeWelcomeFragment(): WelcomeFragment
 

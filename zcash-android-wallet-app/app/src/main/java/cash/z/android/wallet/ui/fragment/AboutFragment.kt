@@ -10,6 +10,7 @@ import androidx.databinding.DataBindingUtil
 import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentAboutBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
@@ -51,6 +52,7 @@ class AboutFragment : BaseFragment() {
 }
 @Module
 abstract class AboutFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeAboutFragment(): AboutFragment
 }

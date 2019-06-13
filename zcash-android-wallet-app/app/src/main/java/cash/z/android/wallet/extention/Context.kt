@@ -2,7 +2,7 @@ package cash.z.android.wallet.extention
 
 import android.content.Context
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 internal val NO_ACTION = {}
 
@@ -11,6 +11,7 @@ internal val NO_ACTION = {}
  */
 internal fun Context.alert(
     @StringRes messageResId: Int,
+    @StringRes titleResId: Int = 0,
     @StringRes positiveButtonResId: Int = android.R.string.ok,
     @StringRes negativeButtonResId: Int = android.R.string.cancel,
     negativeAction: () -> Unit = NO_ACTION,
@@ -18,6 +19,7 @@ internal fun Context.alert(
 ) {
     alert(
         message = getString(messageResId),
+        title = if (titleResId == 0) null else getString(titleResId),
         positiveButtonResId = positiveButtonResId,
         negativeButtonResId = negativeButtonResId,
         negativeAction = negativeAction,
@@ -31,13 +33,16 @@ internal fun Context.alert(
  */
 internal fun Context.alert(
     message: String,
+    title: String? = null,
     @StringRes positiveButtonResId: Int = android.R.string.ok,
     @StringRes negativeButtonResId: Int = android.R.string.cancel,
     negativeAction: (() -> Unit) = NO_ACTION,
     positiveAction: (() -> Unit) = NO_ACTION
 ) {
-    val builder = AlertDialog.Builder(this)
-        .setMessage(message)
+    val builder = MaterialAlertDialogBuilder(this)
+        .setMessage(message).apply {
+            if(title != null) setTitle(title)
+        }
         .setPositiveButton(positiveButtonResId) { dialog, _ ->
             dialog.dismiss()
             positiveAction()

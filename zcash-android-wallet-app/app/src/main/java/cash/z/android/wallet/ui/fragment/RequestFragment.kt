@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import cash.z.android.wallet.R
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.activity.MainActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
@@ -112,6 +113,7 @@ class RequestFragment : BaseFragment() {
 
 @Module
 abstract class RequestFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeRequestFragment(): RequestFragment
 }

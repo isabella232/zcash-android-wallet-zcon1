@@ -26,4 +26,8 @@
     <!-- Ratios -->
     <item name="ratio_golden_small" format="float" type="dimen">0.381966</item>
     <item name="ratio_golden_large" format="float" type="dimen">0.618034</item>
+
+    <!-- Zcon1 temp -->
+    <!-- this is a quick workaround because this app doesn't use an actionbar and I don't want to re-write all the fragments that need one because this app is a throw-away for zcon1 -->
+    <dimen name="actionBarSize_placeholder">56dp</dimen>
 </resources>

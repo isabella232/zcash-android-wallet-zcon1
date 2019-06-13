@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
 class HomePresenter @Inject constructor(
     private val view: HomeFragment,
@@ -110,6 +111,6 @@ class HomePresenter @Inject constructor(
 @Module
 abstract class HomePresenterModule {
     @Binds
-    @FragmentScope
+    @Singleton
     abstract fun providePresenter(homePresenter: HomePresenter): Presenter
 }

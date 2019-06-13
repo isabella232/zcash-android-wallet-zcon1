@@ -104,6 +104,10 @@
     <!-- Settings -->
     <string name="settings_alert_reset_app">Delete all data and reset like a new installation?</string>
 
+    <!-- Swag -->
+    <string name="swag_tee_description">The Zcash Company has rebranded as The Electric Coin Company to help clear up confusion between the coin and the company. Now Zcash Co. is just ECC and you can be the first to sport the new logo :)\n\nLimited quantity of sizes.</string>
+    <string name="swag_pad_description">Take notes like a pro with this ECC-branded moleskin notebook. There are only a few of these, so beg your friends for their extra TAZ and buy one quickly!\n\nVery limited supplies.</string>
+
 
     <string-array name="demo_user_names">
         <item>Alice</item>

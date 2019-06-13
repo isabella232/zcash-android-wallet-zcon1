@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentHistoryBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
 import cash.z.android.wallet.ui.presenter.HistoryPresenter
 import cash.z.android.wallet.ui.presenter.HistoryPresenterModule
@@ -71,6 +72,7 @@ class HistoryFragment : BaseFragment(), HistoryPresenter.HistoryView {
 
 @Module
 abstract class HistoryFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector(modules = [HistoryPresenterModule::class])
     abstract fun contributeHistoryFragment(): HistoryFragment
 }

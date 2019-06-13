@@ -11,11 +11,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import cash.z.android.cameraview.CameraView
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentScanBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.Toaster
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
@@ -78,6 +80,15 @@ class ScanFragment : BaseFragment() {
             }
         }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // This callback will only be called when MyFragment is at least Started.
+        val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
+            mainActivity?.onBarcodeScanned("BACK PRESSED")
+        }
+        callback.isEnabled = true
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -112,6 +123,7 @@ class ScanFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
+        mainActivity?.setNavigationShown(false)
         binding.overlayBarcodeScan.post(revealCamera)
         System.err.println("camoorah : onResume ScanFragment")
         if(allPermissionsGranted()) onStartCamera()
@@ -122,6 +134,7 @@ class ScanFragment : BaseFragment() {
     }
 
     override fun onPause() {
+        mainActivity?.setNavigationShown(true)
         binding.cameraView.stop()
         super.onPause()
 //        sendPresenter.stop()
@@ -275,6 +288,7 @@ class ScanFragment : BaseFragment() {
 
 @Module
 abstract class ScanFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeScanFragment(): ScanFragment
 }

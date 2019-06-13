@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 class HistoryPresenter @Inject constructor(
@@ -66,6 +67,6 @@ class HistoryPresenter @Inject constructor(
 @Module
 abstract class HistoryPresenterModule {
     @Binds
-    @FragmentScope
+    @Singleton
     abstract fun providePresenter(historyPresenter: HistoryPresenter): Presenter
 }

@@ -70,6 +70,8 @@ dependencies {
     implementation deps.androidx.constraintLayout
     implementation deps.androidx.core
     implementation deps.androidx.coreKtx
+    implementation deps.androidx.fragment
+    implementation deps.androidx.fragmentKtx
     implementation deps.androidx.navigation.fragment
     implementation deps.androidx.navigation.fragmentKtx
     implementation deps.androidx.navigation.ui

@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment
 import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentSendBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.*
 import cash.z.android.wallet.sample.SampleProperties
 import cash.z.android.wallet.ui.presenter.SendPresenter
@@ -384,6 +385,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
 
 @Module
 abstract class SendFragmentModule {
+    @FragmentScope
     @ContributesAndroidInjector(modules = [SendPresenterModule::class])
     abstract fun contributeSendFragment(): SendFragment
 }

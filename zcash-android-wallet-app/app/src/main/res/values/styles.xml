@@ -1,11 +1,36 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="ZcashBaseTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="ZcashBaseTheme" parent="Theme.MaterialComponents">
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="materialAlertDialogTheme">@style/Zcash.AlertDialog</item>
+        <item name="materialButtonStyle">@style/Zcash.Button</item>
+<!--        <item name="colorPrimaryVariant">@color/zcashYellow</item>-->
+<!--        <item name="colorOnPrimary">#FF00FF</item>-->
+<!--        <item name="colorSecondary">@color/zcashRed</item>-->
+<!--        <item name="colorSecondaryVariant">@color/zcashBlue</item>-->
+<!--        <item name="colorOnSecondary">#ff9900</item>-->
+
+<!--        <item name="android:colorBackground">#3e2723</item>-->
+<!--        <item name="colorOnBackground">#b4a647</item>-->
+<!--        <item name="colorSurface">@color/zcashRed</item>-->
+<!--        <item name="colorOnSurface">@color/text_light</item>-->
+<!--        <item name="colorError">#827717</item>-->
+<!--        <item name="colorOnError">#ff7043</item>-->
+
+<!--        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+<!--        <item name="colorAccent">@color/colorAccent</item>-->
+<!--        -->
+
+<!--        -->
+<!--        <item name="android:windowBackground">@color/colorPrimaryDark</item>-->
+<!--        <item name="alertDialogTheme">@style/Zcash.AlertDialog</item>-->
+<!--        <item name="materialAlertDialogTheme">@style/Zcash.AlertDialog</item>-->
+<!--        <item name="dialogTheme">@style/Zcash.AlertDialog</item>-->
+<!--        <item name="android:dialogTheme">@style/Zcash.AlertDialog</item>-->
+<!--        <item name="android:buttonStyle">@style/Zcash.Button</item>-->
+<!--        <item name="materialButtonStyle">@style/Zcash.Button</item>-->
+        <item name="actionBarSize">@dimen/actionBarSize_placeholder</item>
     </style>
 
     <style name="ZcashTheme" parent="ZcashBaseTheme">
@@ -35,6 +60,24 @@
         <item name="android:background">@color/zcashPurple_dark</item>
     </style>
 
+    <style name="Zcash.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/text_light</item>
+    </style>
+
+    <style name="Zcash.AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:background">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/text_light</item>
+        <item name="android:colorControlActivated">@color/zcashYellow</item>
+        <item name="android:colorControlNormal">@color/zcashRed</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Zcash.Button.Alert</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Zcash.Button.Alert</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Zcash.Button.Alert</item>
+    </style>
+
+    <style name="Zcash.Button.Alert" parent="Widget.MaterialComponents.Button.TextButton">
+<!--        <item name="rippleColor">@color/colorAccent</item>-->
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
 
     <!--                  -->
     <!-- Text Appearances -->

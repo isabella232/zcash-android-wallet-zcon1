@@ -17,22 +17,33 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import cash.z.android.wallet.R
+import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.databinding.ActivityMainBinding
+import cash.z.android.wallet.di.annotation.ActivityScope
 import cash.z.android.wallet.extention.Toaster
+import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.fragment.ScanFragment
+import cash.z.android.wallet.ui.presenter.BalancePresenter
+import cash.z.android.wallet.ui.presenter.MainPresenter
+import cash.z.android.wallet.ui.presenter.MainPresenterModule
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
 
-class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.BarcodeCallback {
+class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.BarcodeCallback, MainPresenter.MainView {
 
     @Inject
     lateinit var synchronizer: Synchronizer
+
+    @Inject
+    lateinit var mainPresenter: MainPresenter
 
     @Inject
     lateinit var walletConfig: WalletConfig
@@ -48,6 +59,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     
     private val mediaPlayer: MediaPlayer = MediaPlayer()
 
+    lateinit var balancePresenter: BalancePresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +68,27 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         initAppBar()
         loadMessages = generateFunLoadMessages().shuffled()
         synchronizer.start(this)
+
+        balancePresenter = BalancePresenter()
     }
 
     override fun onAttachFragment(childFragment: Fragment) {
         super.onAttachFragment(childFragment)
         (childFragment as? ScanFragment)?.barcodeCallback = this
+    }
+
+    override fun onResume() {
+        super.onResume()
+        launch {
+            balancePresenter.start(this, synchronizer)
+            mainPresenter.start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        balancePresenter.stop()
+        mainPresenter.stop()
     }
 
     override fun onDestroy() {
@@ -108,7 +136,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
         binding.lottieNavigationZcon1.apply {
             speed = 2.0f
-            alpha = 0.85f
+//            alpha = 0.85f
         }
     }
 
@@ -299,10 +327,36 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         }
     }
 
+    fun buyProduct(product: Zcon1Store.CartItem) {
+        alert(
+            message = "Are you sure you'd like to buy a ${product.name} for ${product.zatoshiValue.convertZatoshiToZecString(1)} TAZ?",
+            positiveButtonResId = R.string.ok_allcaps,
+            negativeButtonResId = R.string.cancel,
+            positiveAction = { sendPurchaseOrder(product) }
+        )
+    }
+
+    private fun sendPurchaseOrder(item: Zcon1Store.CartItem) {
+        launch {
+            synchronizer.sendToAddress(item.zatoshiValue, item.toAddress, item.memo)
+        }
+    }
+    override fun orderFailed(error: MainPresenter.PurchaseResult.Failure) {
+        alert(
+            title = "Purchase Failed",
+            message = "${error.reason}"
+        )
+    }
+
+    override fun orderUpdated(processing: MainPresenter.PurchaseResult.Processing) {
+        Toaster.short(processing.state.toString())
+    }
+
 }
 
 @Module
 abstract class MainActivityModule {
-    @ContributesAndroidInjector
+    @ActivityScope
+    @ContributesAndroidInjector(modules = [MainPresenterModule::class])
     abstract fun contributeMainActivity(): MainActivity
 }

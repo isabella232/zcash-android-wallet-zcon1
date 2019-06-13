@@ -10,6 +10,7 @@ import androidx.navigation.NavOptions
 import androidx.transition.TransitionInflater
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentSyncBinding
+import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.extention.showOk
 import cash.z.android.wallet.ui.presenter.Presenter
@@ -114,7 +115,7 @@ class SyncFragment : ProgressFragment(R.id.progress_sync) {
 
 @Module
 abstract class SyncFragmentModule {
-
+    @FragmentScope
     @ContributesAndroidInjector
     abstract fun contributeSyncFragment(): SyncFragment
 
