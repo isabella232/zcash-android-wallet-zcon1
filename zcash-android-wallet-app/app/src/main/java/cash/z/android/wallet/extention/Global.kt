@@ -1,5 +1,8 @@
 package cash.z.android.wallet.extention
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import cash.z.android.wallet.ZcashWalletApplication
 
 internal inline fun tryIgnore(block: () -> Unit) {
@@ -17,4 +20,9 @@ internal inline fun String.truncate(): String {
 
 internal inline fun String.toDbPath(): String {
     return ZcashWalletApplication.instance.getDatabasePath(this).absolutePath
+}
+
+fun Context.copyToClipboard(text: CharSequence) {
+    val clipboard: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    clipboard.primaryClip = ClipData.newPlainText("Zcon1", text)
 }

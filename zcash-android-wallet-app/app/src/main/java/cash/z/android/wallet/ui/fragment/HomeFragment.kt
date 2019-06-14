@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.transition.Transition
 import androidx.transition.TransitionInflater
+import cash.z.android.wallet.ChipBucket
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentHomeBinding
 import cash.z.android.wallet.di.annotation.FragmentScope

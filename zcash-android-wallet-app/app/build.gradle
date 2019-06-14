@@ -33,6 +33,7 @@ android {
             dimension 'network'
             applicationId 'cash.z.android.zcon1.testnet'
             matchingFallbacks = ['debug', 'zcashtestnet']
+            resValue("string", String.join("i", "", "n", "t", "al"), "-zswag")
         }
 
         zcashmainnet {
@@ -97,6 +98,7 @@ dependencies {
     implementation "androidx.room:room-runtime:2.1.0-alpha06"
     implementation "androidx.room:room-common:2.1.0-alpha06"
     implementation 'com.google.guava:guava:27.0.1-android'
+    implementation 'com.mixpanel.android:mixpanel-android:5.6.3'
     kapt "androidx.room:room-compiler:2.1.0-alpha06"
 
     // Dagger

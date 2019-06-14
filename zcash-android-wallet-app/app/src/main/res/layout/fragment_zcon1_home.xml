@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content_home"
@@ -36,28 +38,56 @@
             app:srcCompat="@drawable/ic_bg_path" />
 
         <ImageView
+            android:id="@+id/background_balance_image"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:alpha="0.6"
             android:scaleType="fitXY"
             app:layout_constraintHeight_default="percent"
             app:layout_constraintHeight_percent="0.38"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:alpha="0.6"
             app:srcCompat="@drawable/bg_mountains" />
 
         <TextView
             android:id="@+id/text_integer_digits"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="25"
             android:includeFontPadding="false"
+            android:text="25"
             android:textColor="@color/text_light"
             android:textSize="@dimen/text_size_h1"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/background_buttons"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/background_buttons"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/text_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="status: syncing"
+            android:paddingBottom="3dp"
+            android:includeFontPadding="false"
+            android:fontFamily="sans-serif-thin"
+            android:textSize="@dimen/text_size_subtitle_1"
+            android:textColor="@color/text_light"
+            app:layout_constraintBottom_toTopOf="@id/background_buttons"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_fractional_digits" />
+
+        <View
+            android:id="@+id/indicator_status"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/background_circle"
+            android:backgroundTint="@color/zcashRed"
+            app:layout_constraintTop_toTopOf="@id/text_status"
+            app:layout_constraintBottom_toBottomOf="@id/text_status"
+            app:layout_constraintEnd_toStartOf="@id/text_status"/>
 
         <TextView
             android:id="@+id/text_fractional_digits"
@@ -73,16 +103,16 @@
             android:id="@+id/text_taz"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TA"
-            android:fontFamily="sans-serif-thin"
-            android:textColor="@color/colorAccent"
-            android:includeFontPadding="false"
-            android:textSize="24dp"
             android:alpha="0.5"
+            android:fontFamily="sans-serif-thin"
+            android:includeFontPadding="false"
+            android:text="TA"
+            android:textColor="@color/colorAccent"
+            android:textSize="24dp"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="@id/image_zec_symbol"
             app:layout_constraintBottom_toBottomOf="@id/image_zec_symbol"
-            app:layout_constraintEnd_toStartOf="@id/image_zec_symbol"/>
+            app:layout_constraintEnd_toStartOf="@id/image_zec_symbol"
+            app:layout_constraintTop_toTopOf="@id/image_zec_symbol" />
 
         <!-- Zec symbol -->
         <ImageView
@@ -91,9 +121,10 @@
             android:layout_height="24dp"
             android:layout_marginTop="18dp"
             android:tint="@color/colorAccent"
-            app:layout_constraintTop_toTopOf="@id/text_integer_digits"
             app:layout_constraintEnd_toStartOf="@id/text_integer_digits"
+            app:layout_constraintTop_toTopOf="@id/text_integer_digits"
             app:srcCompat="@drawable/ic_zec_symbol" />
+
         <View
             android:id="@+id/background_buttons"
             android:layout_width="match_parent"
@@ -129,5 +160,21 @@
             app:layout_constraintStart_toEndOf="@id/button_scan"
             app:layout_constraintTop_toTopOf="@id/background_buttons" />
 
+        <!-- Transactions -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_transaction_history"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            android:clipToPadding="false"
+            android:paddingBottom="120dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/background_buttons"
+            tools:itemCount="15"
+            tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_zcon1_transaction_history"
+            tools:orientation="vertical" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -1,6 +1,8 @@
 package cash.z.android.wallet.ui.util
 
+import cash.z.android.wallet.PokerChip
 import cash.z.android.wallet.ZcashWalletApplication
+import cash.z.android.wallet.data.StaticTransactionRepository
 import cash.z.android.wallet.extention.toDbPath
 import cash.z.android.wallet.extention.tryIgnore
 import cash.z.android.wallet.sample.SampleProperties
@@ -8,6 +10,7 @@ import cash.z.wallet.sdk.data.PollingTransactionRepository
 import cash.z.wallet.sdk.data.TransactionRepository
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.jni.RustBackendWelding
 import cash.z.wallet.sdk.rpc.Service
 import cash.z.wallet.sdk.secure.Wallet
@@ -25,16 +28,12 @@ class Broom(
     private val appWallet: Wallet
 ) {
 
-    val repository =  PollingTransactionRepository(
-        ZcashWalletApplication.instance,
-        DATA_DB_NAME,
-        SampleProperties.DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
-    )
+    private val repository =  StaticTransactionRepository(DATA_DB_NAME, rustBackend)
 
     /**
      * Gets the seed from the provider and sweeps the associated wallet
      */
-    suspend fun sweep(walletSeedProvider: ReadOnlyProperty<Any?, ByteArray>): Boolean = withContext(Dispatchers.IO){
+    suspend fun sweep(walletSeedProvider: ReadOnlyProperty<Any?, ByteArray>, amount: Long = 100_000_000L - MINERS_FEE_ZATOSHI): String? = withContext(Dispatchers.IO){
         Twig.sprout("sweep")
         // copy cache db
 //        cloneCachedBlocks() // optional?
@@ -49,7 +48,6 @@ class Broom(
             Twig.clip("broom-scan")
             if (scanResult) {
                 twig("successfully scanned blocks! Ready to sweep!!!")
-                val amount = 100_000_000L - 10_000L
                 val memo = "swag shirt test"
                 val address = "ztestsapling1yu2zy9aanf8pjf2qvm4qmn4k6q57y2d9fcs3vz0guthxx3m2aq57qm6hkx0580m9u9635xh6ttr"
 //                val address = appWallet.getAddress()
@@ -59,10 +57,11 @@ class Broom(
             } else {
                 twig("failed to scan!")
             }
-            true
+            null
         } catch (t: Throwable) {
-            twig("Failed to sweep due to: ${t.message}")
-            false
+            val message = "Failed to sweep due to: ${t.message}"
+            twig(message)
+            message
         } finally {
             Twig.clip("sweep")
         }

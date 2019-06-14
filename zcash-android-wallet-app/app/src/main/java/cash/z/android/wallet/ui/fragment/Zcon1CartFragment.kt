@@ -60,6 +60,12 @@ class Zcon1CartFragment : BaseFragment(), BalancePresenter.BalanceView {
         }
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        mainActivity?.setToolbarShown(false)
+        mainActivity?.setNavigationShown(true)
+    }
+
     override fun onResume() {
         super.onResume()
         mainActivity?.balancePresenter?.addBalanceView(this)
@@ -74,12 +80,6 @@ class Zcon1CartFragment : BaseFragment(), BalancePresenter.BalanceView {
     //
     // Private API
     //
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        mainActivity?.setToolbarShown(false)
-        mainActivity?.setNavigationShown(true)
-    }
 
     private fun showSwagDialog(item: Zcon1Store.CartItem) {
         Zcon1SwagDialog(item.id, buyerName).show(activity!!.supportFragmentManager, item.name)

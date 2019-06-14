@@ -3,7 +3,10 @@ package cash.z.android.wallet.di.module
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import cash.z.android.wallet.BuildConfig
+import cash.z.android.wallet.ChipBucket
+import cash.z.android.wallet.InMemoryChipBucket
 import cash.z.android.wallet.ZcashWalletApplication
+import cash.z.android.wallet.data.StaticTransactionRepository
 import cash.z.android.wallet.extention.toDbPath
 import cash.z.android.wallet.sample.*
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
@@ -55,15 +58,16 @@ internal object SynchronizerModule {
     @Provides
     @Singleton
     fun provideWalletConfig(prefs: SharedPreferences): WalletConfig {
-        val walletName = prefs.getString(PREFS_WALLET_DISPLAY_NAME, BobWallet.displayName)
-        twig("FOUND WALLET DISPLAY NAME : $walletName")
-        return when(walletName) {
-            AliceWallet.displayName -> AliceWallet
-            BobWallet.displayName -> BobWallet // Default wallet
-            CarolWallet.displayName -> CarolWallet
-            DaveWallet.displayName -> DaveWallet
-            else -> WalletConfig.create(walletName)
-        }
+        return CarolWallet
+//        val walletName = prefs.getString(PREFS_WALLET_DISPLAY_NAME, BobWallet.displayName)
+//        twig("FOUND WALLET DISPLAY NAME : $walletName")
+//        return when(walletName) {
+//            AliceWallet.displayName -> AliceWallet
+//            BobWallet.displayName -> BobWallet // Default wallet
+//            CarolWallet.displayName -> CarolWallet
+//            DaveWallet.displayName -> DaveWallet
+//            else -> WalletConfig.create(walletName)
+//        }
     }
 
     @JvmStatic
@@ -128,11 +132,13 @@ internal object SynchronizerModule {
     @Singleton
     fun provideRepository(
         application: ZcashWalletApplication,
+        rustBackend: RustBackendWelding,
         walletConfig: WalletConfig
     ): TransactionRepository {
         return PollingTransactionRepository(
             application,
             walletConfig.dataDbName,
+            rustBackend,
             DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
         )
     }
@@ -190,5 +196,12 @@ internal object SynchronizerModule {
             walletConfig.cacheDbName,
             wallet
         )
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideChipBucket(): ChipBucket {
+        return InMemoryChipBucket()
     }
 }

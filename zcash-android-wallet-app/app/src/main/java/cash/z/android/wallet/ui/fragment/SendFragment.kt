@@ -146,6 +146,11 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
         sendPresenter.inputAddressUpdated(value)
     }
 
+    override fun isTargetBarcode(value: String?): Boolean {
+        if(value == null) return false
+        return value.toLowerCase().startsWith("ztest")
+    }
+
 
     //
     // Internal View Logic
@@ -179,11 +184,6 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
 
         /* Init - Taps */
 
-        binding.imageSwapCurrency.setOnClickListener {
-            // validate the amount before we toggle (or else we lose their uncommitted change)
-            sendPresenter.inputHeaderUpdated(binding.textValueHeader.text.toString())
-            sendPresenter.inputToggleCurrency()
-        }
         binding.buttonSendZec.setOnClickListener{
             exitScanMode()
             sendPresenter.inputSendPressed()
@@ -201,15 +201,6 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
             TooltipCompat.setTooltipText(this, context.getString(R.string.send_tooltip_scan_qr))
         }
 
-        binding.imageAddressShortcut?.apply {
-            if (BuildConfig.DEBUG) {
-                visibility = View.VISIBLE
-                TooltipCompat.setTooltipText(this, context.getString(R.string.send_tooltip_address_shortcut))
-                setOnClickListener(::onPasteShortcutAddress)
-            } else {
-                visibility = View.GONE
-            }
-        }
         binding.dialogSendBackground.setOnClickListener { hideSendDialog() }
         binding.dialogSubmitButton.setOnClickListener { onSendZec() }
         binding.imageScanQr.setOnClickListener(::onScanQrCode)
@@ -329,12 +320,13 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
     }
 
     override fun setMemoError(message: String?) {
-        val validColor = R.color.zcashBlack_12.toAppColor()
+        val validColor = R.color.text_light.toAppColor()
+        val accentColor = R.color.zcashPurple_accent.toAppColor()
         val errorColor = R.color.colorAccent.toAppColor()
         if (message == null) {
-            binding.dividerMemo.setBackgroundColor(validColor)
-            binding.textMemoCharCount.setTextColor(validColor)
-            binding.textAreaMemo.setTextColor(R.color.text_dark.toAppColor())
+            binding.dividerMemo.setBackgroundColor(accentColor)
+            binding.textMemoCharCount.setTextColor(accentColor)
+            binding.textAreaMemo.setTextColor(validColor)
         } else {
             binding.dividerMemo.setBackgroundColor(errorColor)
             binding.textMemoCharCount.setTextColor(errorColor)

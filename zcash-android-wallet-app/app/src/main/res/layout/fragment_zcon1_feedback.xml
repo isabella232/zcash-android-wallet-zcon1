@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/image_bg_parallax"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.5"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/bg_parrallax" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_cart_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_content_start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_begin="32dp" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_content_end"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_end="32dp" />
+
+
+                <ImageView
+                    android:id="@+id/image_header_icon"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="64dp"
+                    android:background="@drawable/background_circle"
+                    android:padding="20dp"
+                    android:scaleType="fitXY"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_thumbup"
+                    tools:ignore="RtlHardcoded" />
+
+                <TextView
+                    android:id="@+id/text_feedback_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:includeFontPadding="false"
+                    android:text="Feedback!"
+                    android:textAllCaps="true"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_h4"
+                    app:layout_constraintStart_toEndOf="@id/image_header_icon"
+                    app:layout_constraintTop_toTopOf="@id/image_header_icon" />
+
+                <TextView
+                    android:id="@+id/text_feedback_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Rank your experience"
+                    android:textAllCaps="true"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_1"
+                    app:layout_constraintBottom_toBottomOf="@id/image_header_icon"
+                    app:layout_constraintStart_toEndOf="@id/image_header_icon" />
+
+                <View
+                    android:id="@+id/background_buttons"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/zcashBlack_54"
+                    app:layout_constraintTop_toBottomOf="@id/text_feedback_subtitle" />
+
+                <TextView
+                    android:id="@+id/feedback_exp_1"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/background_circle"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="30dp"
+                    app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+                    app:layout_constraintEnd_toStartOf="@id/feedback_exp_2"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
+                <TextView
+                    android:id="@+id/feedback_exp_2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/background_circle"
+                    android:gravity="center"
+                    android:text="2"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="30dp"
+                    app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+                    app:layout_constraintEnd_toStartOf="@id/feedback_exp_3"
+                    app:layout_constraintStart_toEndOf="@id/feedback_exp_1"
+                    app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
+                <TextView
+                    android:id="@+id/feedback_exp_3"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/background_circle"
+                    android:gravity="center"
+                    android:text="3"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="30dp"
+                    app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+                    app:layout_constraintEnd_toStartOf="@id/feedback_exp_4"
+                    app:layout_constraintStart_toEndOf="@id/feedback_exp_2"
+                    app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
+                <TextView
+                    android:id="@+id/feedback_exp_4"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/background_circle"
+                    android:gravity="center"
+                    android:text="4"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="30dp"
+                    app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+                    app:layout_constraintEnd_toStartOf="@id/feedback_exp_5"
+                    app:layout_constraintStart_toEndOf="@id/feedback_exp_3"
+                    app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
+                <TextView
+                    android:id="@+id/feedback_exp_5"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:background="@drawable/background_circle"
+                    android:gravity="center"
+                    android:text="5"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="30dp"
+                    app:layout_constraintBottom_toBottomOf="@id/background_buttons"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                    app:layout_constraintStart_toEndOf="@id/feedback_exp_4"
+                    app:layout_constraintTop_toTopOf="@id/background_buttons" />
+
+                <TextView
+                    android:id="@+id/text_question_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/feedback_question_1"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_1"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toBottomOf="@id/background_buttons" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/input_question_1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:hint="@string/feedback_hint_1"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toBottomOf="@id/text_question_1">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:lines="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/text_question_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/feedback_question_2"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_1"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toBottomOf="@id/input_question_1" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/input_question_2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:hint="@string/feedback_hint_2"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toBottomOf="@id/text_question_2">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:lines="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/text_question_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/feedback_question_3"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_1"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toBottomOf="@id/input_question_2" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/input_question_3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:hint="@string/feedback_hint_3"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                    app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                    app:layout_constraintTop_toBottomOf="@id/text_question_3">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:singleLine="true" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/button_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="32dp"
+                    android:onClick="onFeedbackCancel"
+                    android:text="@string/cancel"
+                    android:textColor="@color/text_light"
+                    app:layout_constraintEnd_toStartOf="@id/button_submit"
+                    app:layout_constraintTop_toBottomOf="@id/input_question_3" />
+
+                <Button
+                    android:id="@+id/button_submit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onFeedbackSubmit"
+                    android:text="Submit"
+                    android:textColor="@color/text_light"
+                    app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
+                    app:layout_constraintTop_toTopOf="@id/button_cancel" />
+
+                <Space
+                    android:id="@+id/extra_padding_for_scrolling"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/button_submit"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </ScrollView>
+    </FrameLayout>
+</layout>

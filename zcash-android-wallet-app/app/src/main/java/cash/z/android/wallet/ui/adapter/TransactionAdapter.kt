@@ -1,6 +1,5 @@
 package cash.z.android.wallet.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,10 +13,10 @@ import cash.z.android.wallet.R
 import cash.z.android.wallet.extention.toAppColor
 import cash.z.android.wallet.extention.toRelativeTimeString
 import cash.z.android.wallet.extention.truncate
-import cash.z.wallet.sdk.ext.convertZatoshiToZec
-import cash.z.wallet.sdk.ext.toZec
-import java.text.SimpleDateFormat
 import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
+import cash.z.wallet.sdk.ext.convertZatoshiToZecString
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -41,25 +40,33 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
     private val timestamp = itemView.findViewById<TextView>(R.id.text_transaction_timestamp)
     private val amount = itemView.findViewById<TextView>(R.id.text_transaction_amount)
     private val address = itemView.findViewById<TextView>(R.id.text_transaction_address)
+    private val memo = itemView.findViewById<TextView>(R.id.text_transaction_memo)
     private val formatter = SimpleDateFormat("M/d h:mma", Locale.getDefault())
 
     fun bind(tx: WalletTransaction) {
+        val isChip = tx.isPokerChip()
+        val useSend = tx.isSend && !isChip
         val isHistory = icon != null
-        val sign = if (tx.isSend) "-" else "+"
-        val amountColor = if (tx.isSend) R.color.text_dark_dimmed else R.color.colorPrimary
-        val transactionColor = if (tx.isSend) R.color.send_associated else R.color.receive_associated
-        val transactionIcon = if (tx.isSend) R.drawable.ic_sent_transaction else R.drawable.ic_received_transaction
-        val zecAbsoluteValue = tx.value.absoluteValue.convertZatoshiToZec(6)
-        val toOrFrom = if (tx.isSend) "to" else "from"
+        val sign = if (useSend) "- " else "+ "
+        val amountColor = if (useSend) R.color.colorAccent else R.color.zcashPurple_accent
+        val transactionColor = if (useSend) R.color.send_associated else R.color.receive_associated
+        val transactionIcon = if (useSend || (isChip && tx.address != "Redeemed")) R.drawable.ic_sent_transaction else R.drawable.ic_received_transaction
+        val zecAbsoluteValue = tx.value.absoluteValue + if(tx.isSend) MINERS_FEE_ZATOSHI else 0
+        val toOrFrom = if (useSend) "to" else "from"
         val srcOrDestination = tx.address?.truncate() ?: "shielded mystery person"
-        timestamp.text = if (!tx.isMined || tx.timeInSeconds == 0L) "Pending"
-        else (if (isHistory) formatter.format(tx.timeInSeconds * 1000) else (tx.timeInSeconds * 1000L).toRelativeTimeString())
-        amount.text = "$sign$zecAbsoluteValue"
+        timestamp.text = if ((!tx.isMined || tx.timeInSeconds == 0L) && !isChip) "Pending"
+                         else (if (isHistory) formatter.format(tx.timeInSeconds * 1000) else (tx.timeInSeconds * 1000L).toRelativeTimeString())
+        amount.text = "$sign${zecAbsoluteValue.convertZatoshiToZecString(4)}"
         amount.setTextColor(amountColor.toAppColor())
 
         // maybes - and if this gets to be too much, then pass in a custom holder when constructing the adapter, instead
         status?.setBackgroundColor(transactionColor.toAppColor())
-        address?.text = "$toOrFrom $srcOrDestination"
+        address?.text = if (isChip) tx.address else "$toOrFrom $srcOrDestination"
+        memo?.text = tx.memo
         icon?.setImageResource(transactionIcon)
     }
+}
+
+private fun WalletTransaction.isPokerChip(): Boolean {
+    return memo?.contains("Poker") == true
 }

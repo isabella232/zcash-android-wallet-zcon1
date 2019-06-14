@@ -137,16 +137,6 @@
                 app:layout_constraintTop_toTopOf="@id/transition_active_transaction_bg" />
 
             <!-- Currency swap symbol -->
-            <ImageView
-                android:id="@+id/image_swap_currency"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="18dp"
-                android:tint="@color/text_light"
-                app:layout_constraintBottom_toBottomOf="@id/transition_active_transaction_bg"
-                app:layout_constraintEnd_toEndOf="@id/transition_active_transaction_bg"
-                app:layout_constraintTop_toTopOf="@id/transition_active_transaction_bg"
-                app:srcCompat="@drawable/ic_import_export_black" />
 
             <!-- Input: Header -->
             <EditText
@@ -172,6 +162,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_light"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toEndOf="@id/text_value_header"
                 app:layout_constraintStart_toStartOf="@id/text_value_header"
                 app:layout_constraintTop_toBottomOf="@id/text_value_header"
@@ -223,6 +214,7 @@
                 android:text="$"
                 android:textColor="@color/text_light"
                 android:textSize="8dp"
+                android:visibility="invisible"
                 app:layout_constraintEnd_toStartOf="@id/text_value_subheader"
                 app:layout_constraintTop_toTopOf="@id/image_zec_symbol_subheader" />
 
@@ -274,20 +266,6 @@
                 app:layout_constraintTop_toTopOf="@id/input_zcash_address"
                 app:srcCompat="@drawable/ic_qrcode_24dp" />
 
-            <ImageView
-                android:id="@+id/image_address_shortcut"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingTop="10dp"
-                android:paddingEnd="6dp"
-                android:paddingBottom="24dp"
-                android:tint="@color/zcashPurple_accent"
-                app:layout_constraintBottom_toBottomOf="@id/image_scan_qr"
-                app:layout_constraintEnd_toStartOf="@id/image_scan_qr"
-                app:layout_constraintTop_toTopOf="@id/image_scan_qr"
-                app:srcCompat="@drawable/ic_content_paste_black_24dp" />
-
             <TextView
                 android:id="@+id/text_to_label"
                 android:layout_width="wrap_content"
@@ -309,6 +287,7 @@
                 android:maxLength="@integer/memo_max_length"
                 android:padding="16dp"
                 android:textColor="@color/text_light"
+                tools:text="heere is a heck of a lot of  text"
                 app:backgroundTint="#1E1331"
                 app:layout_constraintBottom_toTopOf="@id/button_send_zec"
                 app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
@@ -355,7 +334,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0 / 512"
-                android:textColor="@color/zcashGray"
+                android:textColor="@android:color/transparent"
                 app:layout_constraintBottom_toBottomOf="@id/text_area_memo"
                 app:layout_constraintEnd_toEndOf="@id/divider_memo"
                 app:layout_constraintTop_toBottomOf="@id/divider_memo" />
@@ -507,9 +486,6 @@
                 android:layout_height="wrap_content"
                 app:constraint_referenced_ids="
                 transition_active_transaction_bg,
-                text_value_subheader,
-                text_dollar_symbol_subheader,
-                image_zec_symbol_subheader,
                 image_zec_symbol_header,
                 text_dollar_symbol_header,
                 text_amount_background,

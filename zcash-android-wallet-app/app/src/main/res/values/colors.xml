@@ -57,7 +57,7 @@
 
     <!-- association -->
     <color name="send_associated">@color/colorAccent</color>
-    <color name="receive_associated">@color/colorPrimary</color> <!-- design decision: when you get money it should be associated with green -->
+    <color name="receive_associated">@color/zcashPurple_accent</color> <!-- design decision: when you get money it should be associated with green -->
     <color name="request_associated">@color/zcashBlue</color>
 
     <!-- icons -->
@@ -67,6 +67,7 @@
     <color name="fab_icon_color">@color/zcashWhite</color>
     <color name="fab_closed_color">@color/colorPrimary</color>
     <color name="fab_open_color">@color/colorPrimaryDark</color>
+
 
     <!-- text -->
     <color name="text_light">@color/zcashWhite</color>
@@ -102,4 +103,9 @@
     <color name="receive_shield">@color/zcashPurple_dark</color>
     <color name="receive_segments">@color/colorAccent</color>
 
+
+    <!-- Zcon1 -->
+    <color name="transaction_icon_fg_color">@color/zcashBlack_54</color>
+    <color name="transaction_send_color">#FFE082</color>
+    <color name="transaction_received_color">#80CBC4</color>
 </resources>

@@ -28,6 +28,9 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
 
     private lateinit var binding: FragmentZcon1WelcomeBinding
 
+    // Flag for development
+    private val developmentShortcut: Boolean = false
+
     //
     // Lifecycle
     //
@@ -54,13 +57,13 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
     override fun onResume() {
         super.onResume()
         mainActivity?.setToolbarShown(false)
-        binding.lottieEccLogo.playToFrame(240/100)
+        binding.lottieEccLogo.playToFrame(if(developmentShortcut) 240 else 240)
         binding.lottieEccLogo.speed = 1.4f
     }
 
     private suspend fun onNext() = coroutineScope {
         if (mainActivity != null) {
-            val hasName = prefs.getString(PREFS_PSEUDONYM, null) == null
+            val hasName = if(developmentShortcut) true else prefs.getString(PREFS_PSEUDONYM, null) == null
             val destination =
                 if (hasName) R.id.action_welcome_fragment_to_firstrun_fragment
                 else R.id.action_welcome_fragment_to_home_fragment

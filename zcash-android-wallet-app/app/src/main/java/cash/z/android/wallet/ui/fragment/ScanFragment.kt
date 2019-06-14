@@ -37,6 +37,11 @@ class ScanFragment : BaseFragment() {
 
     interface BarcodeCallback {
         fun onBarcodeScanned(value: String)
+
+        /**
+         * Any barcode that returns false from this method will be ignored and not returned through [onBarcodeScanned]
+         */
+        fun isTargetBarcode(value: String?): Boolean
     }
 
     private val revealCamera = Runnable {
@@ -84,7 +89,7 @@ class ScanFragment : BaseFragment() {
         super.onCreate(savedInstanceState)
         // This callback will only be called when MyFragment is at least Started.
         val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-            mainActivity?.onBarcodeScanned("BACK PRESSED")
+            mainActivity?.onBarcodeScanned("")
         }
         callback.isEnabled = true
     }
@@ -252,11 +257,13 @@ class ScanFragment : BaseFragment() {
                         if (results.isNotEmpty()) {
                             val barcode = results[0]
                             val value = barcode.rawValue
-                            onScanSuccess(value!!)
-                            // TODO: highlight the barcode
-                            var bounds = barcode.boundingBox
-                            var corners = barcode.cornerPoints
-                            binding.cameraView.setBarcode(barcode)
+                            if (barcodeCallback == null || barcodeCallback?.isTargetBarcode(value) == true) {
+                                onScanSuccess(value!!)
+                            }
+//                            // TODO: highlight the barcode
+//                            var bounds = barcode.boundingBox
+//                            var corners = barcode.cornerPoints
+//                            binding.cameraView.setBarcode(barcode)
                         }
                     }
             } catch (t: Throwable) {

@@ -16,17 +16,23 @@ import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import cash.z.android.wallet.R
-import cash.z.android.wallet.Zcon1Store
+import cash.z.android.wallet.*
 import cash.z.android.wallet.databinding.ActivityMainBinding
 import cash.z.android.wallet.di.annotation.ActivityScope
 import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.extention.alert
+import cash.z.android.wallet.extention.copyToClipboard
 import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.fragment.ScanFragment
 import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.MainPresenter
 import cash.z.android.wallet.ui.presenter.MainPresenterModule
+import cash.z.android.wallet.ui.util.Analytics
+import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.StartSweep
+import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.Swept
+import cash.z.android.wallet.ui.util.Analytics.Tap.*
+import cash.z.android.wallet.ui.util.Analytics.trackAction
+import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.twig
@@ -51,6 +57,9 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     @Inject
     lateinit var broom: Broom
 
+    @Inject
+    lateinit var chipBucket: ChipBucket
+
     lateinit var binding: ActivityMainBinding
     lateinit var loadMessages: List<String>
 
@@ -63,6 +72,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        chipBucket.restore()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.activity = this
         initAppBar()
@@ -79,6 +89,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     override fun onResume() {
         super.onResume()
+        chipBucket.restore()
         launch {
             balancePresenter.start(this, synchronizer)
             mainPresenter.start()
@@ -89,11 +100,13 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         super.onPause()
         balancePresenter.stop()
         mainPresenter.stop()
+        chipBucket.save()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         synchronizer.stop()
+        Analytics.clear()
     }
 
     private fun initAppBar() {
@@ -280,6 +293,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     fun onScanQr(view: View) {
+        trackAction(TAPPED_SCAN_QR_HOME)
         supportFragmentManager.beginTransaction()
             .add(R.id.camera_placeholder, ScanFragment(), "camera_fragment")
             .addToBackStack("camera_fragment_scanning")
@@ -287,19 +301,76 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     fun onSendFeedback(view: View) {
-        Toaster.short("Feedback sent! (j/k)")
+        trackAction(TAPPED_GIVE_FEEDBACK)
+        navController.navigate(R.id.nav_feedback_fragment)
     }
 
     override fun onBarcodeScanned(value: String) {
-        Toaster.short(value)
-        playSound(Random.nextBoolean())
         exitScanMode()
 
-//        Toaster.short("qr scanned")
-//        launch {
-//            val result = broom.sweep(SampleSeedProvider("testreferencebob"))
-//            Toaster.short("Sweep result? $result")
-//        }
+        // For now, empty happens when back is pressed
+        if (value.isEmpty()) return
+        chipBucket.findChip(value)?.let {existingChip ->
+            if (existingChip.isRedeemed()) {
+                alert("Previously Redeemed!", "We scanned this one already and the funds went to this wallet.")
+            } else {
+                alert(
+                    title = "Still Processing",
+                    message = "We scanned this one already and it is still processing. Would you rather wait until it finishes or abort and try again later?",
+                    positiveButtonResId = R.string.wait,
+                    negativeButtonResId = R.string.abort,
+                    negativeAction = {
+                        onAbortChip(existingChip)
+                    }
+                )
+            }
+            return
+        }
+
+        alert(
+            title = "You found a token!",
+            message = "Would you like to magically convert this poker chip into digital money?"
+        ) {
+            playSound(Random.nextBoolean())
+            funQuote()
+            launch {
+                val chip = PokerChip(value)
+                chipBucket.add(chip)
+                val result = sweepChip(chip)
+                twig("Sweep result? $result")
+                trackFunnelStep(Swept(chip, result))
+            }
+        }
+
+    }
+
+    private fun onAbortChip(chip: PokerChip) {
+        // TODO: don't remove until we're sure we can because this triggers a funnel event
+        chipBucket.remove(chip)
+    }
+
+    private suspend fun sweepChip(chip: PokerChip): String? {
+        trackFunnelStep(StartSweep(chip))
+        val provider = PokerChipSeedProvider(chip)
+        return broom.sweep(provider, chip.zatoshiValue)
+    }
+
+    val scanQuote = arrayOf(
+        "You're the Scrooge McDuck of Zcon1!",
+        "We're rich!",
+        "Show me the money! Oh wait, you just did. Literally.",
+        "Doing magic. Actual magic.",
+        "This is TAZmania!"
+    )
+    private fun funQuote() {
+        var message = scanQuote.random()
+//        if(message == scanQuote[0]) message = scanQuote.random() // simple way to make 0 more rare
+        Toaster.short(message)
+    }
+
+    override fun isTargetBarcode(value: String?): Boolean {
+        if(value == null) return false
+        return value.startsWith("r-") || value.startsWith("b-")
     }
 
     private fun playSound(isLarge: Boolean) {
@@ -350,6 +421,23 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     override fun orderUpdated(processing: MainPresenter.PurchaseResult.Processing) {
         Toaster.short(processing.state.toString())
+    }
+
+    fun onFeedbackSubmit(view: View) {
+        trackAction(TAPPED_SUBMIT_FEEDBACK)
+        Toaster.short("Feedback Submitted! (j/k)")
+        navController.navigateUp()
+    }
+    fun onFeedbackCancel(view: View) {
+        Toaster.short("Feedback cancelled")
+        trackAction(TAPPED_CANCEL_FEEDBACK)
+        navController.navigateUp()
+    }
+
+    fun copyAddress(view: View) {
+        trackAction(TAPPED_COPY_ADDRESS)
+        Toaster.short("Address copied!")
+        copyToClipboard(synchronizer.getAddress())
     }
 
 }
