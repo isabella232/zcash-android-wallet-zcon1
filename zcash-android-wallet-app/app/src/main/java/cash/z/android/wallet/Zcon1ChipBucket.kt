@@ -11,6 +11,7 @@ import kotlin.reflect.KProperty
 
 
 interface ChipBucket {
+    fun count(): Int
     fun add(chip: PokerChip)
     fun remove(chip: PokerChip)
     fun redeem(chip: PokerChip)
@@ -33,6 +34,8 @@ class InMemoryChipBucket : ChipBucket {
 
     private var listener: ChipBucket.OnBucketChangedListener? = null
     private val chips = CopyOnWriteArraySet<PokerChip>()
+
+    override fun count(): Int = chips.size
 
     override fun add(chip: PokerChip) {
         chips.add(chip)

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import cash.z.android.wallet.ChipBucket
 import cash.z.android.wallet.PokerChip
 import cash.z.android.wallet.R
+import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.databinding.FragmentZcon1HomeBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
@@ -71,7 +72,31 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     }
 
     private fun showStatus() {
-        StatusDialog(balanceInfo.available).show(activity!!.supportFragmentManager, "dialog_status")
+        StatusDialog(
+            availableBalance = balanceInfo.available,
+            syncingBalance = balanceInfo.total - balanceInfo.available,
+            pendingChipBalance = chipBucket.valuePending(),
+            summary = determineStatusSummary()
+        ).show(activity!!.supportFragmentManager, "dialog_status")
+    }
+
+    private fun determineStatusSummary(): String {
+        val available = balanceInfo.available
+        val total = balanceInfo.total
+        val hasIncomingFunds = available < total
+        val isUnfunded = total == 0L && chipBucket.count() == 0
+        val hasPendingChips = chipBucket.valuePending() > 0
+        val hasEnoughForSwag = available > Zcon1Store.CartItem.SwagTee("").zatoshiValue
+
+
+        val statusResId = when {
+            isUnfunded -> R.string.status_wallet_unfunded
+            hasEnoughForSwag -> R.string.status_wallet_funds_available_for_swag
+            hasIncomingFunds -> R.string.status_wallet_incoming_funds
+            hasPendingChips -> R.string.status_wallet_chips_pending
+            else -> R.string.status_wallet_generic
+        }
+        return getString(statusResId) + "\n\nErrors: there was an error. J/k but if there was it would show up here."
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -146,7 +171,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
             (adapter as TransactionAdapter).submitList(addPokerChips(transactions))
             postDelayed({
                 smoothScrollToPosition(0)
-            }, 100L)
+            }, 150L)
         }
     }
 

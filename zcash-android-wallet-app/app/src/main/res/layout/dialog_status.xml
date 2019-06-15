@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -47,36 +48,76 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/text_available"
+                    android:id="@+id/text_available_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:text="Amount available:"
+                    android:fontFamily="sans-serif-thin"
                     android:textColor="@color/text_light"
                     android:textSize="@dimen/text_size_body_2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/status_header" />
 
                 <TextView
-                    android:id="@+id/text_syncing"
+                    android:id="@+id/text_available_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_2"
+                    app:layout_constraintStart_toEndOf="@id/text_pending_label"
+                    app:layout_constraintTop_toBottomOf="@+id/status_header"
+                    tools:text="20 TAZ" />
+
+                <TextView
+                    android:id="@+id/text_syncing_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Amount syncing:"
+                    android:fontFamily="sans-serif-thin"
                     android:textColor="@color/text_light"
                     android:textSize="@dimen/text_size_body_2"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_available" />
+                    app:layout_constraintTop_toBottomOf="@+id/text_available_label" />
 
                 <TextView
-                    android:id="@+id/text_pending"
+                    android:id="@+id/text_syncing_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_2"
+                    app:layout_constraintStart_toEndOf="@id/text_pending_label"
+                    app:layout_constraintTop_toBottomOf="@+id/text_available_label"
+                    tools:text="20 TAZ" />
+
+                <TextView
+                    android:id="@+id/text_pending_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Pending chip amount:"
+                    android:fontFamily="sans-serif-thin"
                     android:textColor="@color/text_light"
                     android:textSize="@dimen/text_size_body_2"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_syncing" />
+                    app:layout_constraintTop_toBottomOf="@+id/text_syncing_label" />
+
+                <TextView
+                    android:id="@+id/text_pending_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_2"
+                    app:layout_constraintStart_toEndOf="@id/text_pending_label"
+                    app:layout_constraintTop_toBottomOf="@+id/text_syncing_label"
+                    tools:text="20 TAZ" />
 
                 <View
                     android:id="@+id/divider"
@@ -86,34 +127,47 @@
                     android:background="@color/text_light_dimmed"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_pending" />
+                    app:layout_constraintTop_toBottomOf="@+id/text_pending_label" />
 
                 <TextView
-                    android:id="@+id/text_status_detail"
+                    android:id="@+id/text_total_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Total Wallet Value:"
+                    android:fontFamily="sans-serif-thin"
                     android:textColor="@color/text_light"
                     android:textSize="@dimen/text_size_body_2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/divider" />
 
                 <TextView
+                    android:id="@+id/text_total_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_light"
+                    android:textSize="@dimen/text_size_body_2"
+                    app:layout_constraintStart_toEndOf="@id/text_pending_label"
+                    app:layout_constraintTop_toBottomOf="@+id/divider"
+                    tools:text="20 TAZ" />
+
+                <TextView
                     android:id="@+id/summary_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
+                    android:fontFamily="sans-serif-thin"
                     android:text="Summary"
                     android:textAllCaps="true"
-                    android:fontFamily="sans-serif-thin"
                     android:textColor="@color/text_light"
                     android:textSize="@dimen/text_size_body_2"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/text_status_detail" />
+                    app:layout_constraintTop_toBottomOf="@+id/text_total_label" />
 
                 <TextView
-                    android:id="@+id/text_summary"
+                    android:id="@+id/text_summary_value"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -122,6 +176,7 @@
                     android:textSize="@dimen/text_size_body_2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/summary_header" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
         </ScrollView>
 

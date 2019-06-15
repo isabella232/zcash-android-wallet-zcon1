@@ -43,6 +43,7 @@ internal fun Context.alert(
         .setMessage(message).apply {
             if(title != null) setTitle(title)
         }
+        .setCancelable(false)
         .setPositiveButton(positiveButtonResId) { dialog, _ ->
             dialog.dismiss()
             positiveAction()

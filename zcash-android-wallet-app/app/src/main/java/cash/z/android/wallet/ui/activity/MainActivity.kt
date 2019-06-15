@@ -78,6 +78,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         initAppBar()
         loadMessages = generateFunLoadMessages().shuffled()
         synchronizer.start(this)
+        synchronizer.onSynchronizerErrorListener = ::onSynchronizerError
 
         balancePresenter = BalancePresenter()
     }
@@ -423,6 +424,22 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         Toaster.short(processing.state.toString())
     }
 
+    fun onSynchronizerError(error: Throwable?): Boolean {
+        alert(
+            message = "WARNING: A critical error has occurred and " +
+                    "this app will not function properly until that is corrected!",
+            positiveButtonResId = R.string.ignore,
+            negativeButtonResId = R.string.details,
+            negativeAction = { alert("Synchronization error:\n\n$error") }
+        )
+        return false
+    }
+
+
+    //
+    // Events from Layout Files
+    //
+
     fun onFeedbackSubmit(view: View) {
         trackAction(TAPPED_SUBMIT_FEEDBACK)
         Toaster.short("Feedback Submitted! (j/k)")
@@ -439,6 +456,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         Toaster.short("Address copied!")
         copyToClipboard(synchronizer.getAddress())
     }
+
 
 }
 

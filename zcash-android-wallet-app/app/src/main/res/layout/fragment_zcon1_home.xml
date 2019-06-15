@@ -84,7 +84,7 @@
             android:layout_height="16dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/background_circle"
-            android:backgroundTint="@color/zcashRed"
+            android:backgroundTint="#FFF59D"
             app:layout_constraintTop_toTopOf="@id/text_status"
             app:layout_constraintBottom_toBottomOf="@id/text_status"
             app:layout_constraintEnd_toStartOf="@id/text_status"/>

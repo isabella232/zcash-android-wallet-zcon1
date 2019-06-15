@@ -79,6 +79,8 @@ dependencies {
     implementation deps.androidx.navigation.uiKtx
     implementation deps.material
     implementation deps.androidx.multidex
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha01" // provides lifecycleScope!
 
     // Kotlin
     implementation deps.kotlin.stdlib
@@ -95,11 +97,11 @@ dependencies {
     implementation "io.grpc:grpc-protobuf-lite:1.19.0"
     implementation "io.grpc:grpc-stub:1.19.0"
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
-    implementation "androidx.room:room-runtime:2.1.0-alpha06"
-    implementation "androidx.room:room-common:2.1.0-alpha06"
+    implementation "androidx.room:room-runtime:2.1.0"
+    implementation "androidx.room:room-common:2.1.0"
     implementation 'com.google.guava:guava:27.0.1-android'
     implementation 'com.mixpanel.android:mixpanel-android:5.6.3'
-    kapt "androidx.room:room-compiler:2.1.0-alpha06"
+    kapt "androidx.room:room-compiler:2.1.0"
 
     // Dagger
     implementation deps.dagger.android.support

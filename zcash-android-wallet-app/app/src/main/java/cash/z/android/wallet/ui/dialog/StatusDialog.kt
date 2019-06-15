@@ -3,11 +3,13 @@ package cash.z.android.wallet.ui.dialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
 import android.view.Window
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.DialogStatusBinding
+import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 
@@ -60,11 +62,18 @@ class StatusDialog(
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        fun String.long() = requireArguments().getLong(this)
+        fun Long.zec() = convertZatoshiToZecString(6)
 
-//        binding.statusDescription.setText(product.descriptionResId)
-//        binding.statusProduct.text = product.name
-//        binding.statusPrice.text = product.zatoshiValue.convertZatoshiToZecString(1) + " TAZ"
-//        binding.statusImage.setImageResource(product.imageResId)
+        val available = ARG_BALANCE_AVAILABLE.long()
+        val pending = ARG_BALANCE_PENDING.long()
+        val syncing = ARG_BALANCE_SYNCING.long()
+
+        binding.textAvailableValue.text = available.zec()
+        binding.textPendingValue.text = pending.zec()
+        binding.textSyncingValue.text = syncing.zec()
+        binding.textTotalValue.text = (available + pending + syncing).zec()
+        binding.textSummaryValue.text = requireArguments().getString(ARG_SUMMARY)
 
         binding.buttonOk.setOnClickListener {
             dismiss()
