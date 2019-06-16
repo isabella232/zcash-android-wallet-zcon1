@@ -6,15 +6,16 @@ import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.ChipBucket
 import cash.z.android.wallet.InMemoryChipBucket
 import cash.z.android.wallet.ZcashWalletApplication
-import cash.z.android.wallet.data.StaticTransactionRepository
+import cash.z.android.wallet.data.*
 import cash.z.android.wallet.extention.toDbPath
-import cash.z.android.wallet.sample.*
+import cash.z.android.wallet.sample.CarolWallet
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_SERVER
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
 import cash.z.android.wallet.sample.SampleProperties.PREFS_SERVER_NAME
-import cash.z.android.wallet.sample.SampleProperties.PREFS_WALLET_DISPLAY_NAME
+import cash.z.android.wallet.sample.Servers
+import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.block.*
 import cash.z.wallet.sdk.data.*
@@ -28,6 +29,7 @@ import cash.z.wallet.sdk.service.LightWalletGrpcService
 import cash.z.wallet.sdk.service.LightWalletService
 import dagger.Module
 import dagger.Provides
+import dagger.android.DispatchingAndroidInjector
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -168,30 +170,30 @@ internal object SynchronizerModule {
     fun provideManager(wallet: Wallet, repository: TransactionRepository, service: LightWalletService): ActiveTransactionManager {
         return ActiveTransactionManager(repository, service, wallet)
     }
-
-    @JvmStatic
-    @Provides
-    @Singleton
-    fun provideSynchronizer(
-        processor: CompactBlockProcessor,
-        repository: TransactionRepository,
-        manager: ActiveTransactionManager,
-        wallet: Wallet
-    ): Synchronizer {
-        return SdkSynchronizer(processor, repository, manager, wallet, DEFAULT_STALE_TOLERANCE)
-    }
+//
+//    @JvmStatic
+//    @Provides
+//    @Singleton
+//    fun provideSynchronizer(
+//        processor: CompactBlockProcessor,
+//        repository: TransactionRepository,
+//        manager: ActiveTransactionManager,
+//        wallet: Wallet
+//    ): Synchronizer {
+//        return SdkSynchronizer(processor, repository, manager, wallet, DEFAULT_STALE_TOLERANCE)
+//    }
 
     @JvmStatic
     @Provides
     @Singleton
     fun provideBroom(
-        service: LightWalletService,
+        sender: TransactionSender,
         wallet: Wallet,
         rustBackend: RustBackendWelding,
         walletConfig: WalletConfig
     ): Broom {
         return Broom(
-            service,
+            sender,
             rustBackend,
             walletConfig.cacheDbName,
             wallet
@@ -203,5 +205,34 @@ internal object SynchronizerModule {
     @Singleton
     fun provideChipBucket(): ChipBucket {
         return InMemoryChipBucket()
+    }
+
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideTransactionManager(): TransactionManager {
+        return PersistentTransactionManager()
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideTransactionSender(manager: TransactionManager, service: LightWalletService): TransactionSender {
+        return PersistentTransactionMonitor(manager, service)
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideTransactionEncoder(wallet: Wallet, repository: TransactionRepository): RawTransactionEncoder {
+        return WalletTransactionEncoder(wallet, repository)
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideDataSynchronizer(wallet: Wallet, encoder: RawTransactionEncoder, sender: TransactionSender) : DataSyncronizer {
+        return StableSynchronizer(wallet, encoder, sender)
     }
 }

@@ -19,6 +19,7 @@ import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenterModule
 import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
@@ -114,10 +115,6 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     override fun onResume() {
         super.onResume()
         chipBucket.setOnBucketChangedListener(this)
-    }
-
-    override fun onStart() {
-        super.onStart()
         mainActivity?.balancePresenter?.addBalanceView(this)
         chipBucket.setOnBucketChangedListener(this)
         launch {
@@ -125,8 +122,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
         }
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         mainActivity?.balancePresenter?.removeBalanceView(this)
         chipBucket.removeOnBucketChangedListener(this)
         transactionPresenter.stop()

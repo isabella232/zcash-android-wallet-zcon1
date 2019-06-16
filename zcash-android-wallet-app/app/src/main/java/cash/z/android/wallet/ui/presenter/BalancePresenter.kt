@@ -29,12 +29,12 @@ class BalancePresenter {
     // LifeCycle
     //
 
-    fun start(scope: CoroutineScope, synchronizer: Synchronizer) {
+    fun start(scope: CoroutineScope, balanceChannel: ReceiveChannel<Wallet.WalletBalance>) {
         Twig.sprout("BalancePresenter")
         twig("balancePresenter starting!")
         balanceJob?.cancel()
         balanceJob = Job()
-        balanceJob = scope.launchBalanceBinder(synchronizer.balances())
+        balanceJob = scope.launchBalanceBinder(balanceChannel)
     }
 
     fun stop() {

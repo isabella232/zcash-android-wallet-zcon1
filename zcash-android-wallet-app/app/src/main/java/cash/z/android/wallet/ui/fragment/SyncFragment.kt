@@ -66,7 +66,7 @@ class SyncFragment : ProgressFragment(R.id.progress_sync) {
         (view?.parent as? ViewGroup)?.doOnPreDraw {
             startPostponedEnterTransition()
         }
-        synchronizer.onSynchronizerErrorListener = ::onSynchronizerError
+//        synchronizer.onSynchronizerErrorListener = ::onSynchronizerError
     }
 
     override fun onResume() {

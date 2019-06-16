@@ -1,5 +1,6 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.Twig
@@ -11,7 +12,7 @@ import kotlin.coroutines.CoroutineContext
 
 class ProgressPresenter @Inject constructor(
     private val view: ProgressView,
-    private var synchronizer: Synchronizer
+    private var synchronizer: DataSyncronizer
 ) : Presenter {
 
     private var job: Job? = null
@@ -29,7 +30,6 @@ class ProgressPresenter @Inject constructor(
         job?.cancel()
         job = Job()
         Twig.sprout("ProgressPresenter")
-        twig("starting")
         view.launchProgressMonitor(synchronizer.progress())
     }
 
@@ -40,7 +40,7 @@ class ProgressPresenter @Inject constructor(
     }
 
     private fun CoroutineScope.launchProgressMonitor(channel: ReceiveChannel<Int>) = launch {
-        twig("progress monitor starting on thread ${Thread.currentThread().name}!")
+        twig("Progress monitor starting")
         for (i in channel) {
             bind(i)
         }

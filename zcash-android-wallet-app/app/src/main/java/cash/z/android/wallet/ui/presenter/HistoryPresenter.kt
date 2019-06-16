@@ -1,5 +1,6 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.fragment.HistoryFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
@@ -19,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
 
 class HistoryPresenter @Inject constructor(
     private val view: HistoryFragment,
-    private var synchronizer: Synchronizer
+    private var synchronizer: DataSyncronizer
 ) : Presenter {
 
     private var job: Job? = null
@@ -32,7 +33,7 @@ class HistoryPresenter @Inject constructor(
         job?.cancel()
         job = Job()
         twig("historyPresenter starting!")
-        view.launchTransactionBinder(synchronizer.allTransactions())
+//        view.launchTransactionBinder(synchronizer.allTransactions())
     }
 
     override fun stop() {

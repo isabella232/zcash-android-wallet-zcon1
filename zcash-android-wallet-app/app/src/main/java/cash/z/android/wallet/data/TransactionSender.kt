@@ -1,5 +1,9 @@
 package cash.z.android.wallet.data
 
+import kotlinx.coroutines.CoroutineScope
+
 interface TransactionSender {
-    fun sendToAddress(zatoshi: Long, toAddress: String, memo: String, fromAccountId: Int)
+    fun start(scope: CoroutineScope)
+    fun stop()
+    suspend fun sendToAddress(encoder: RawTransactionEncoder, zatoshi: Long, toAddress: String, memo: String = "", fromAccountId: Int = 0)
 }

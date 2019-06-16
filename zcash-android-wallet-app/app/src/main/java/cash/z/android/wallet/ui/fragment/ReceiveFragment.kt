@@ -10,12 +10,14 @@ import android.view.ViewGroup
 import android.widget.TextView
 import cash.z.android.qrecycler.QRecycler
 import cash.z.android.wallet.R
+import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.util.AddressPartNumberSpan
 import cash.z.wallet.sdk.data.Synchronizer
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.android.synthetic.main.fragment_receive.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -27,7 +29,7 @@ class ReceiveFragment : BaseFragment() {
     lateinit var qrecycler: QRecycler
 
     @Inject
-    lateinit var synchronizer: Synchronizer
+    lateinit var synchronizer: DataSyncronizer
 
     lateinit var addressParts: Array<TextView>
 
@@ -61,7 +63,9 @@ class ReceiveFragment : BaseFragment() {
         super.onResume()
 
         // TODO: replace these with channels. For now just wire the logic together
-        onAddressLoaded(loadAddress())
+        launch {
+            onAddressLoaded(synchronizer.getAddress())
+        }
 //        converter.scanBlocks()
     }
 
@@ -85,12 +89,6 @@ class ReceiveFragment : BaseFragment() {
 
         addressParts[index].text = textSpan
     }
-
-    // TODO: replace with tiered load. First check memory reference (textview contents?) then check DB, then load from JNI and write to DB
-    private fun loadAddress(): String {
-        return synchronizer.getAddress()
-    }
-
 }
 
 @Module

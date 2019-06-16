@@ -1,5 +1,6 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.ui.fragment.HomeFragment
@@ -18,7 +19,7 @@ import javax.inject.Singleton
 
 class HomePresenter @Inject constructor(
     private val view: HomeFragment,
-    private val synchronizer: Synchronizer
+    private val synchronizer: DataSyncronizer
 ) : Presenter {
 
     private var job: Job? = null
@@ -32,15 +33,15 @@ class HomePresenter @Inject constructor(
     }
 
     override suspend fun start() {
-        job?.cancel()
-        job = Job()
-        twig("homePresenter starting! from ${this.hashCode()}")
-        with(view) {
-            launchBalanceBinder(synchronizer.balances())
-            launchTransactionBinder(synchronizer.allTransactions())
-            launchActiveTransactionMonitor(synchronizer.activeTransactions())
-        }
-        synchronizer.onSynchronizerErrorListener = view::onSynchronizerError
+//        job?.cancel()
+//        job = Job()
+//        twig("homePresenter starting! from ${this.hashCode()}")
+//        with(view) {
+//            launchBalanceBinder(synchronizer.balances())
+//            launchTransactionBinder(synchronizer.allTransactions())
+//            launchActiveTransactionMonitor(synchronizer.activeTransactions())
+//        }
+//        synchronizer.onSynchronizerErrorListener = view::onSynchronizerError
     }
 
     override fun stop() {
@@ -99,11 +100,11 @@ class HomePresenter @Inject constructor(
     }
 
     fun onCancelActiveTransaction(transaction: ActiveSendTransaction) {
-        twig("requesting to cancel send for transaction ${transaction.internalId}")
-        val isTooLate = !synchronizer.cancelSend(transaction)
-        if (isTooLate) {
-            view.onCancelledTooLate()
-        }
+//        twig("requesting to cancel send for transaction ${transaction.internalId}")
+//        val isTooLate = !synchronizer.cancelSend(transaction)
+//        if (isTooLate) {
+//            view.onCancelledTooLate()
+//        }
     }
 
 }

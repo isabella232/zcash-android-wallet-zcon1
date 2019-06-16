@@ -1,5 +1,8 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.data.DataSyncronizer
+import cash.z.android.wallet.data.PendingTransaction
+import cash.z.android.wallet.data.isFailure
 import cash.z.android.wallet.ui.activity.MainActivity
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.data.*
@@ -13,7 +16,7 @@ import javax.inject.Inject
 
 class MainPresenter @Inject constructor(
     private val view: MainActivity,
-    private val synchronizer: Synchronizer
+    private val synchronizer: DataSyncronizer
 ) : Presenter {
 
     interface MainView : PresenterView {
@@ -34,7 +37,7 @@ class MainPresenter @Inject constructor(
 
         purchaseJob?.cancel()
         purchaseJob = Job()
-        purchaseJob = view.launchPurchaseBinder(synchronizer.activeTransactions())
+        purchaseJob = view.launchPurchaseBinder(synchronizer.pendingTransactions())
     }
 
     override fun stop() {
@@ -43,7 +46,7 @@ class MainPresenter @Inject constructor(
         purchaseJob?.cancel()?.also { purchaseJob = null }
     }
 
-    fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<Map<ActiveTransaction, TransactionState>>) = launch {
+    private fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<List<PendingTransaction>>) = launch {
         twig("main purchase binder starting!")
         for (new in channel) {
             twig("main polled a purchase info")
@@ -57,18 +60,18 @@ class MainPresenter @Inject constructor(
     // Events
     //
 
-    private fun bind(activeTransactions: Map<ActiveTransaction, TransactionState>) {
-        val newestState = activeTransactions.entries.last().value
-        if (newestState is TransactionState.Failure) {
-            view.orderFailed(PurchaseResult.Failure(newestState.reason))
+    private fun bind(activeTransactions: List<PendingTransaction>) {
+        val newest = activeTransactions.last()
+        if (newest.isFailure()) {
+            view.orderFailed(PurchaseResult.Failure(newest.errorMessage))
         } else {
-            view.orderUpdated(PurchaseResult.Processing(newestState))
+            view.orderUpdated(PurchaseResult.Processing(newest))
         }
     }
 
     sealed class PurchaseResult {
-        data class Processing(val state: TransactionState = TransactionState.Creating) : PurchaseResult()
-        data class Failure(val reason: String = "") : PurchaseResult()
+        data class Processing(val pendingTransaction: PendingTransaction) : PurchaseResult()
+        data class Failure(val reason: String? = "") : PurchaseResult()
     }
 }
 

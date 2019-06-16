@@ -17,12 +17,13 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import cash.z.android.wallet.*
+import cash.z.android.wallet.data.DataSyncronizer
+import cash.z.android.wallet.data.StableSynchronizer
 import cash.z.android.wallet.databinding.ActivityMainBinding
 import cash.z.android.wallet.di.annotation.ActivityScope
 import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.extention.copyToClipboard
-import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.fragment.ScanFragment
 import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.MainPresenter
@@ -34,10 +35,11 @@ import cash.z.android.wallet.ui.util.Analytics.Tap.*
 import cash.z.android.wallet.ui.util.Analytics.trackAction
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
-import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
+import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,13 +48,10 @@ import kotlin.random.Random
 class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.BarcodeCallback, MainPresenter.MainView {
 
     @Inject
-    lateinit var synchronizer: Synchronizer
+    lateinit var synchronizer: DataSyncronizer
 
     @Inject
     lateinit var mainPresenter: MainPresenter
-
-    @Inject
-    lateinit var walletConfig: WalletConfig
 
     @Inject
     lateinit var broom: Broom
@@ -72,14 +71,13 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        this.lifecycle
+
         chipBucket.restore()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.activity = this
         initAppBar()
         loadMessages = generateFunLoadMessages().shuffled()
-        synchronizer.start(this)
-        synchronizer.onSynchronizerErrorListener = ::onSynchronizerError
-
         balancePresenter = BalancePresenter()
     }
 
@@ -92,7 +90,8 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         super.onResume()
         chipBucket.restore()
         launch {
-            balancePresenter.start(this, synchronizer)
+            synchronizer.start(this)
+            balancePresenter.start(this, synchronizer.balances())
             mainPresenter.start()
         }
     }
@@ -106,7 +105,6 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     override fun onDestroy() {
         super.onDestroy()
-        synchronizer.stop()
         Analytics.clear()
     }
 
@@ -421,7 +419,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     override fun orderUpdated(processing: MainPresenter.PurchaseResult.Processing) {
-        Toaster.short(processing.state.toString())
+        Toaster.short(processing.pendingTransaction.toString())
     }
 
     fun onSynchronizerError(error: Throwable?): Boolean {
@@ -454,7 +452,9 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     fun copyAddress(view: View) {
         trackAction(TAPPED_COPY_ADDRESS)
         Toaster.short("Address copied!")
-        copyToClipboard(synchronizer.getAddress())
+        launch {
+            copyToClipboard(synchronizer.getAddress())
+        }
     }
 
 

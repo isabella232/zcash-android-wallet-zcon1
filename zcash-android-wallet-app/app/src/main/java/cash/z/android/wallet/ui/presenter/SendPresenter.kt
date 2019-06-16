@@ -1,6 +1,7 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.R
+import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.toAppString
 import cash.z.android.wallet.sample.SampleProperties
@@ -23,7 +24,7 @@ import javax.inject.Inject
 
 class SendPresenter @Inject constructor(
     private val view: SendFragment,
-    private val synchronizer: Synchronizer
+    private val synchronizer: DataSyncronizer
 ) : Presenter {
 
     interface SendView : PresenterView {

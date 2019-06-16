@@ -1,5 +1,6 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.ui.fragment.Zcon1HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.dao.WalletTransaction
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 class TransactionPresenter @Inject constructor(
     private val view: Zcon1HomeFragment,
-    private val synchronizer: Synchronizer
+    private val synchronizer: DataSyncronizer
 ) : Presenter {
 
     interface TransactionView : PresenterView {
@@ -35,7 +36,7 @@ class TransactionPresenter @Inject constructor(
         transactionJob?.cancel()
         transactionJob = Job()
 //        transactionJob = view.launchPurchaseBinder(synchronizer.activeTransactions())
-        transactionJob = view.launchTransactionBinder(synchronizer.allTransactions())
+//        transactionJob = view.launchTransactionBinder(synchronizer.allTransactions())
     }
 
     override fun stop() {

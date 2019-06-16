@@ -1,37 +1,64 @@
 package cash.z.android.wallet.data
 
+import cash.z.wallet.sdk.service.LightWalletService
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
+
+/**
+ * Manage transactions with the main purpose of reporting which ones are still pending, particularly after failed
+ * attempts or dropped connectivity. The intent is to help see transactions through to completion.
+ */
 interface TransactionManager {
-    /**
-     * Initialize a transaction and return its ID.
-     *
-     * @return the id of the transaction to use with subsequent calls to this manager instance.
-     */
-    fun new(): Long
+    suspend fun manageCreation(encoder: RawTransactionEncoder, value: Long, toAddress: String, memo: String)
+    suspend fun manageSubmission(service: LightWalletService, rawTransaction: ByteArray)
+    suspend fun getAllPending(): List<ByteArray>
+//
+//    /**
+//     * Initialize a transaction and return its ID.
+//     *
+//     * @return the id of the transaction to use with subsequent calls to this manager instance.
+//     */
+//    fun new(): Long
+//
+//    /**
+//     * Set the rawTransaction data for the given transaction. Typically, this would transition the state of the
+//     * transaction to something like CREATED. Some implementations might derive the state, based on whether this raw
+//     * transaction data has been provided.
+//     *
+//     * @param txId the id of the transaction to update
+//     * @param rawTransaction the raw transaction data
+//     */
+//    fun setRawTransaction(txId: Long, rawTransaction: ByteArray)
+//
+//    /**
+//     * Signal that there has been an error while attempting to create a transaction.
+//     *
+//     * @param txId the id of the transaction to update
+//     * @param error information about the error that occurred
+//     */
+//    fun setCreationError(txId: Long, error: TransactionError)
+//
+//    fun setSubmissionStarted(txId: Long)
+//    fun setSubmissionComplete(txId: Long, isSuccess: Boolean, error: TransactionError? = null)
+//    fun getAllPendingRawTransactions(): Map<Long, ByteArray>
 
-    /**
-     * Set the rawTransaction data for the given transaction. Typically, this would transition the state of the
-     * transaction to something like CREATED. Some implementations might derive the state, based on whether this raw
-     * transaction data has been provided.
-     *
-     * @param txId the id of the transaction to update
-     * @param rawTransaction the raw transaction data
-     */
-    fun setRawTransaction(txId: Long, rawTransaction: ByteArray)
-
-    /**
-     * Signal that there has been an error while attempting to create a transaction.
-     *
-     * @param txId the id of the transaction to update
-     * @param error information about the error that occurred
-     */
-    fun setCreationError(txId: Long, error: TransactionError)
-
-    fun setSubmissionStarted(txId: Long)
-    fun setSubmissionComplete(txId: Long, isSuccess: Boolean, error: TransactionError? = null)
-    fun getAllPendingRawTransactions(): Map<Long, ByteArray>
 }
 
 
 interface TransactionError {
     val message: String
+}
+
+data class PendingTransaction(
+    val id: Long = -1,
+    val isMined: Boolean = false,
+    val hasRaw: Boolean = false,
+    val submitCount: Int = 0,
+    val expiryHeight: Int = -1,
+    val expiryTime: Long = -1,
+    val errorMessage: String? = null
+)
+
+fun PendingTransaction.isFailure(): Boolean {
+    return errorMessage != null
 }
