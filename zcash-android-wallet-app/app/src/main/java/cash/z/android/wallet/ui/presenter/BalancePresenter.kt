@@ -14,7 +14,8 @@ import kotlinx.coroutines.launch
 class BalancePresenter {
 
     private val views: MutableSet<BalanceView> = mutableSetOf()
-    private var lastBalance: Wallet.WalletBalance = Wallet.WalletBalance(0, 0)
+    var lastBalance: Wallet.WalletBalance = Wallet.WalletBalance(0, 0)
+
     /**
      * Contract for views showing balance updates.
      */

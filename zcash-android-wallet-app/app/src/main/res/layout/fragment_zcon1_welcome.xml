@@ -75,6 +75,7 @@
             android:layout_height="wrap_content"
             android:min="0"
             android:max="100"
+            android:visibility="invisible"
             android:transitionName="@string/transition_walkthrough_progress_bar"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/text_welcome_product_name"

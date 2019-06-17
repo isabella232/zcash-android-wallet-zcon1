@@ -3,6 +3,8 @@ package cash.z.android.wallet.ui.activity
 import android.animation.Animator
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodManager.HIDE_NOT_ALWAYS
@@ -90,10 +92,24 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         super.onResume()
         chipBucket.restore()
         launch {
+            synchronizer.onCriticalErrorListener = ::onCriticalError
             synchronizer.start(this)
             balancePresenter.start(this, synchronizer.balances())
             mainPresenter.start()
         }
+    }
+
+    private fun onCriticalError(error: Throwable): Boolean {
+        Handler(Looper.getMainLooper()).post {
+            alert(
+                message = "WARNING: A critical error has occurred and " +
+                        "this app will not function properly until that is corrected!",
+                positiveButtonResId = R.string.ignore,
+                negativeButtonResId = R.string.details,
+                negativeAction = { alert("Synchronization error:\n\n$error") }
+            )
+        }
+        return true
     }
 
     override fun onPause() {

@@ -1,11 +1,12 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.data.PendingTransaction
-import cash.z.android.wallet.data.isFailure
+import cash.z.android.wallet.data.db.PendingTransactionEntity
+import cash.z.android.wallet.data.db.isFailure
 import cash.z.android.wallet.ui.activity.MainActivity
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.data.*
+import cash.z.wallet.sdk.data.Twig
+import cash.z.wallet.sdk.data.twig
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope
@@ -46,7 +47,7 @@ class MainPresenter @Inject constructor(
         purchaseJob?.cancel()?.also { purchaseJob = null }
     }
 
-    private fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<List<PendingTransaction>>) = launch {
+    private fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<List<PendingTransactionEntity>>) = launch {
         twig("main purchase binder starting!")
         for (new in channel) {
             twig("main polled a purchase info")
@@ -60,7 +61,7 @@ class MainPresenter @Inject constructor(
     // Events
     //
 
-    private fun bind(activeTransactions: List<PendingTransaction>) {
+    private fun bind(activeTransactions: List<PendingTransactionEntity>) {
         val newest = activeTransactions.last()
         if (newest.isFailure()) {
             view.orderFailed(PurchaseResult.Failure(newest.errorMessage))
@@ -70,7 +71,7 @@ class MainPresenter @Inject constructor(
     }
 
     sealed class PurchaseResult {
-        data class Processing(val pendingTransaction: PendingTransaction) : PurchaseResult()
+        data class Processing(val pendingTransaction: PendingTransactionEntity) : PurchaseResult()
         data class Failure(val reason: String? = "") : PurchaseResult()
     }
 }

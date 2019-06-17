@@ -1,8 +1,6 @@
 package cash.z.android.wallet.data
 
 import cash.z.wallet.sdk.service.LightWalletService
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
 /**
  * Manage transactions with the main purpose of reporting which ones are still pending, particularly after failed
@@ -10,8 +8,10 @@ import kotlin.contracts.contract
  */
 interface TransactionManager {
     suspend fun manageCreation(encoder: RawTransactionEncoder, value: Long, toAddress: String, memo: String)
-    suspend fun manageSubmission(service: LightWalletService, rawTransaction: ByteArray)
-    suspend fun getAllPending(): List<ByteArray>
+    suspend fun manageSubmission(service: LightWalletService, pendingTransaction: RawTransaction)
+    suspend fun getAllPending(currentHeight: Int): List<RawTransaction>
+    fun start()
+    fun stop()
 //
 //    /**
 //     * Initialize a transaction and return its ID.
@@ -43,22 +43,10 @@ interface TransactionManager {
 //    fun getAllPendingRawTransactions(): Map<Long, ByteArray>
 
 }
-
+interface RawTransaction {
+    val raw: ByteArray?
+}
 
 interface TransactionError {
     val message: String
-}
-
-data class PendingTransaction(
-    val id: Long = -1,
-    val isMined: Boolean = false,
-    val hasRaw: Boolean = false,
-    val submitCount: Int = 0,
-    val expiryHeight: Int = -1,
-    val expiryTime: Long = -1,
-    val errorMessage: String? = null
-)
-
-fun PendingTransaction.isFailure(): Boolean {
-    return errorMessage != null
 }

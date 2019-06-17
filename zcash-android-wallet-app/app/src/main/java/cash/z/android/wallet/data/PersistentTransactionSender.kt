@@ -1,5 +1,6 @@
 package cash.z.android.wallet.data
 
+import cash.z.android.wallet.extention.tryNull
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.service.LightWalletService
 import kotlinx.coroutines.*
@@ -56,6 +57,7 @@ class PersistentTransactionMonitor (
     override fun stop() {
         channel.close()
         monitoringJob?.cancel()?.also { monitoringJob = null }
+        manager.stop()
     }
 
     /**
@@ -79,7 +81,8 @@ class PersistentTransactionMonitor (
     private suspend fun submitPendingTransactions() = withContext(IO) {
         twig("received request to submit pending transactions")
         with(manager) {
-            getAllPending().also { twig("found ${it.size} pending txs to submit") }.forEach { rawTx ->
+            val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
+            getAllPending(currentHeight).also { twig("found ${it.size} pending txs to submit") }.forEach { rawTx ->
                 manageSubmission(service, rawTx)
             }
         }

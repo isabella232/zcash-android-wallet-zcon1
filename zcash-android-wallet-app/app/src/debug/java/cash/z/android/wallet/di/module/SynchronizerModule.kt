@@ -87,7 +87,7 @@ internal object SynchronizerModule {
     @Provides
     @Singleton
     fun provideLightwalletService(@Named(PREFS_SERVER_NAME) server: String): LightWalletService {
-        return LightWalletGrpcService(server, COMPACT_BLOCK_PORT)
+        return LightWalletGrpcService(ZcashWalletApplication.instance, server, COMPACT_BLOCK_PORT)
     }
 
     @JvmStatic
@@ -111,9 +111,10 @@ internal object SynchronizerModule {
         return ProcessorConfig(
             ZcashWalletApplication.instance.getDatabasePath(walletConfig.cacheDbName).absolutePath,
             ZcashWalletApplication.instance.getDatabasePath(walletConfig.dataDbName).absolutePath,
-            DEFAULT_BATCH_SIZE,
-            DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS,
-            DEFAULT_RETRIES
+            downloadBatchSize = DEFAULT_BATCH_SIZE,
+            blockPollFrequencyMillis = DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS,
+            retries = DEFAULT_RETRIES,
+            maxBackoffInterval = 15_000L // testing
         )
     }
 
@@ -232,7 +233,7 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideDataSynchronizer(wallet: Wallet, encoder: RawTransactionEncoder, sender: TransactionSender) : DataSyncronizer {
-        return StableSynchronizer(wallet, encoder, sender)
+    fun provideDataSynchronizer(wallet: Wallet, encoder: RawTransactionEncoder, sender: TransactionSender, processor: CompactBlockProcessor) : DataSyncronizer {
+        return StableSynchronizer(wallet, encoder, sender, processor)
     }
 }

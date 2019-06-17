@@ -4,13 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cash.z.android.wallet.ChipBucket
-import cash.z.android.wallet.PokerChip
-import cash.z.android.wallet.R
-import cash.z.android.wallet.Zcon1Store
+import cash.z.android.wallet.*
 import cash.z.android.wallet.databinding.FragmentZcon1HomeBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
@@ -25,7 +24,7 @@ import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 
@@ -36,8 +35,8 @@ import javax.inject.Inject
 class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, TransactionPresenter.TransactionView,
     ChipBucket.OnBucketChangedListener {
 
-    //, SwipeRefreshLayout.OnRefreshListener
     private lateinit var binding: FragmentZcon1HomeBinding
+    private var statusJob: Job? = null
 
     @Inject
     lateinit var transactionPresenter: TransactionPresenter
@@ -45,7 +44,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     @Inject
     lateinit var chipBucket: ChipBucket
 
-    lateinit var balanceInfo: Wallet.WalletBalance
+    private val balanceInfo: Wallet.WalletBalance get() = mainActivity?.balancePresenter?.lastBalance!!
+
     private var transactions: List<WalletTransaction> = emptyList()
 
 
@@ -81,6 +81,33 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
         ).show(activity!!.supportFragmentManager, "dialog_status")
     }
 
+    private fun updateStatusIndicator() {
+        @ColorRes var statusColor: Int
+        var statusMessage: String
+        when {
+            mainActivity?.synchronizer?.isConnected == false -> {
+                statusColor = R.color.zcashRed
+                statusMessage = "disconnected"
+            }
+            mainActivity?.synchronizer?.isScanning == true -> {
+                statusColor = R.color.zcashYellow
+                statusMessage = "scanning"
+            }
+            mainActivity?.synchronizer?.isSyncing == true -> {
+                statusColor = R.color.zcashYellow
+                statusMessage = "syncing"
+            }
+            else -> {
+                statusColor = R.color.zcashGreen
+                statusMessage = "synced"
+            }
+        }
+
+        binding.indicatorStatus.backgroundTintList = ContextCompat
+            .getColorStateList(ZcashWalletApplication.instance, statusColor)
+        binding.textStatus.text = statusMessage
+    }
+
     private fun determineStatusSummary(): String {
         val available = balanceInfo.available
         val total = balanceInfo.total
@@ -114,11 +141,12 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 
     override fun onResume() {
         super.onResume()
-        chipBucket.setOnBucketChangedListener(this)
         mainActivity?.balancePresenter?.addBalanceView(this)
+        chipBucket.setOnBucketChangedListener(this)
         chipBucket.setOnBucketChangedListener(this)
         launch {
             transactionPresenter.start()
+            statusJob = startStatusMonitor()
         }
     }
 
@@ -127,6 +155,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
         mainActivity?.balancePresenter?.removeBalanceView(this)
         chipBucket.removeOnBucketChangedListener(this)
         transactionPresenter.stop()
+        statusJob?.cancel().also { statusJob = null }
     }
 
     fun refreshBalance() {
@@ -139,12 +168,20 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
         }
     }
 
+    private fun CoroutineScope.startStatusMonitor() = launch {
+        twig("StatusMonitor starting!")
+        while (isActive && isAdded) {
+            delay(2_000L)
+            updateStatusIndicator()
+        }
+        twig("StatusMonitor stopping!")
+    }
+
     //
     // Balance listeners
     //
 
     override fun updateBalance(balanceInfo: Wallet.WalletBalance) {
-        this.balanceInfo = balanceInfo
         refreshBalance()
     }
 

@@ -1,11 +1,10 @@
 package cash.z.android.wallet
 
-import cash.z.android.wallet.ui.util.Analytics
 import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.*
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.wallet.sdk.data.twig
-import java.util.concurrent.CopyOnWriteArraySet
 import cash.z.wallet.sdk.ext.ZATOSHI
+import java.util.concurrent.CopyOnWriteArraySet
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 

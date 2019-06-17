@@ -39,7 +39,8 @@
     <color name="zcashBlack_87">#DD000000</color>
     <color name="zcashBlack">#00000000</color>
     <color name="zcashPrimaryMedium">#136E6E</color>
-    <color name="zcashRed">#B00016</color>
+    <color name="zcashRed">#E91E63</color>
+    <color name="zcashGreen">#4CAF50</color>
     <color name="zcashYellow">#f4b728</color>
 
     <!-- purples -->
