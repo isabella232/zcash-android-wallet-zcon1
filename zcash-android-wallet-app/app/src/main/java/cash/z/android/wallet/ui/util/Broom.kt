@@ -10,6 +10,7 @@ import cash.z.android.wallet.extention.tryIgnore
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
+import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.jni.RustBackendWelding
 import cash.z.wallet.sdk.secure.Wallet
 import kotlinx.coroutines.Dispatchers
@@ -47,11 +48,12 @@ class Broom(
             Twig.clip("broom-scan")
             if (scanResult) {
                 twig("successfully scanned blocks! Ready to sweep!!!")
+                twig("FYI: this wallet has a starting balance of : ${rustBackend.getBalance(DATA_DB_NAME.toDbPath(), 0).convertZatoshiToZecString(6)}")
                 tx = sender.sendPreparedTransaction(encoder, tx)
             } else {
                 twig("failed to scan!")
             }
-            null
+            tx.errorMessage
         } catch (t: Throwable) {
             val message = "Failed to sweep due to: ${t.message} caused by ${t.cause}"
             twig(message)
@@ -60,7 +62,8 @@ class Broom(
         } finally {
             Twig.clip("sweep")
             Twig.clip("broom-scan")
-            if (tx.id >= 0) sender.cleanupPreparedTransaction(tx)
+            // delete if raw=null because it's not sendable so it would just sit in the UI forever. Deleting and showing an alert is easier than retrying send later.
+            if (tx.id >= 0) sender.cleanupPreparedTransaction(tx).also { twig("cleaning up prepared transaction") }
         }
     }
 

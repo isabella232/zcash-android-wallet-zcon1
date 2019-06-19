@@ -1,9 +1,12 @@
 package cash.z.android.wallet.data
 
 import cash.z.android.wallet.data.db.PendingTransactionEntity
+import cash.z.android.wallet.data.db.isMined
 import cash.z.android.wallet.data.db.isPending
+import cash.z.android.wallet.data.db.isSameTxId
 import cash.z.android.wallet.extention.onErrorReturn
 import cash.z.android.wallet.extention.tryNull
+import cash.z.wallet.sdk.dao.WalletTransaction
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.service.LightWalletService
 import kotlinx.coroutines.*
@@ -13,7 +16,8 @@ import kotlinx.coroutines.channels.actor
 
 class PersistentTransactionSender (
     private val manager: TransactionManager,
-    private val service: LightWalletService
+    private val service: LightWalletService,
+    private val clearedTxProvider: ClearedTransactionProvider
 ) : TransactionSender {
 
     private lateinit var channel: SendChannel<TransactionUpdateRequest>
@@ -23,8 +27,13 @@ class PersistentTransactionSender (
     override var onSubmissionError: ((Throwable) -> Unit)? = null
 
     fun CoroutineScope.requestUpdate(triggerSend: Boolean) = launch {
+        twig("requesting update: $triggerSend")
         if (!channel.isClosedForSend) {
+            twig("submitting request")
             channel.send(if (triggerSend) SubmitPendingTx else RefreshSentTx)
+            twig("done submitting request")
+        } else {
+            twig("request ignored because the channel is closed for send!!!")
         }
     }
 
@@ -35,9 +44,10 @@ class PersistentTransactionSender (
     private fun CoroutineScope.startActor() = actor<TransactionUpdateRequest> {
         var pendingTransactionDao = 0 // actor state:
         for (msg in channel) { // iterate over incoming messages
+            twig("actor received message: ${msg}")
             when (msg) {
-                is SubmitPendingTx -> submitPendingTransactions()
-                is RefreshSentTx -> refreshSentTransasctions()
+                is SubmitPendingTx -> updatePendingTransactions()
+                is RefreshSentTx -> refreshSentTransactions()
             }
         }
     }
@@ -69,7 +79,7 @@ class PersistentTransactionSender (
     }
 
     override fun notifyOnChange(channel: SendChannel<List<PendingTransactionEntity>>) {
-        listenerChannel?.close()
+        if (channel != null) twig("warning: listener channel was not null but it probably should have been. Something else was listening with $channel!")
         listenerChannel = channel
     }
 
@@ -118,12 +128,17 @@ class PersistentTransactionSender (
     }
 
     //  TODO: get this from the channel instead
-    var previousPending: List<PendingTransactionEntity>? = null
+    var previousSentTxs: List<PendingTransactionEntity>? = null
 
-    private suspend fun notifyIfChanged(currentPending: List<PendingTransactionEntity>) = withContext(IO) {
-        if (hasChanged(previousPending, currentPending) && listenerChannel?.isClosedForSend != true) {
-            listenerChannel?.send(currentPending)
-            previousPending = currentPending
+    private suspend fun notifyIfChanged(currentSentTxs: List<PendingTransactionEntity>) = withContext(IO) {
+        twig("notifyIfChanged: listener null? ${listenerChannel == null} closed? ${listenerChannel?.isClosedForSend}")
+        if (hasChanged(previousSentTxs, currentSentTxs) && listenerChannel?.isClosedForSend != true) {
+            twig("START notifying listenerChannel of changed txs")
+            listenerChannel?.send(currentSentTxs)
+            twig("DONE notifying listenerChannel of changed txs")
+            previousSentTxs = currentSentTxs
+        } else {
+            twig("notifyIfChanged: did nothing because ${if(listenerChannel?.isClosedForSend == true) "the channel is closed." else "nothing changed."}")
         }
     }
 
@@ -134,24 +149,25 @@ class PersistentTransactionSender (
     }
 
     private fun hasChanged(
-        previousPending: List<PendingTransactionEntity>?,
-        currentPending: List<PendingTransactionEntity>
+        previousSents: List<PendingTransactionEntity>?,
+        currentSents: List<PendingTransactionEntity>
     ): Boolean {
         // shortcuts first
-        if (currentPending.isEmpty() && previousPending == null) return false.also { twig("checking pending txs: detected nothing happened yet") } // if nothing has happened, that doesn't count as a change
-        if (previousPending == null) return true.also { twig("checking pending txs: detected first set of txs!") } // the first set of transactions is automatically a change
-        if (previousPending.size != currentPending.size) return true.also { twig("checking pending txs: detected size change from ${previousPending.size} to ${currentPending.size}") } // can't be the same and have different sizes, duh
+        if (currentSents.isEmpty() && previousSents == null) return false.also { twig("checking pending txs: detected nothing happened yet") } // if nothing has happened, that doesn't count as a change
+        if (previousSents == null) return true.also { twig("checking pending txs: detected first set of txs!") } // the first set of transactions is automatically a change
+        if (previousSents.size != currentSents.size) return true.also { twig("checking pending txs: detected size change from ${previousSents.size} to ${currentSents.size}") } // can't be the same and have different sizes, duh
 
-        for (tx in currentPending) {
-            if (!previousPending.contains(tx)) return true.also { twig("checking pending txs: detected change for $tx") }
+        for (tx in currentSents) {
+            if (!previousSents.contains(tx)) return true.also { twig("checking pending txs: detected change for $tx") }
         }
         return false.also { twig("checking pending txs: detected no changes in pending txs") }
     }
 
     /**
-     * Submit all pending transactions that have not expired.
+     * Check on all sent transactions and if they've changed, notify listeners. This method can be called proactively
+     * when anything interesting has occurred with a transaction (via [requestUpdate]).
      */
-    private suspend fun refreshSentTransasctions(): List<PendingTransactionEntity> = withContext(IO) {
+    private suspend fun refreshSentTransactions(): List<PendingTransactionEntity> = withContext(IO) {
         twig("refreshing all sent transactions")
         val allSentTransactions = (manager as PersistentTransactionManager).getAll() // TODO: make this crash and catch error gracefully
         notifyIfChanged(allSentTransactions)
@@ -161,20 +177,47 @@ class PersistentTransactionSender (
     /**
      * Submit all pending transactions that have not expired.
      */
-    private suspend fun submitPendingTransactions() = withContext(IO) {
+    private suspend fun updatePendingTransactions() = withContext(IO) {
         twig("received request to submit pending transactions")
-        val allTransactions = refreshSentTransasctions()
+        val allTransactions = refreshSentTransactions()
 
         var pendingCount = 0
         val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
-        allTransactions.filter { it.isPending(currentHeight) }.forEach { tx ->
-            pendingCount++
-            onErrorReturn(onSubmissionError ?: {}) {
-                manager.manageSubmission(service, tx)
+        allTransactions.filter { !it.isMined() }.forEach { tx ->
+            if (tx.isPending(currentHeight)) {
+                pendingCount++
+                onErrorReturn(onSubmissionError ?: {}) {
+                    manager.manageSubmission(service, tx)
+                }
+            } else {
+                findMatchingClearedTx(tx)?.let {
+                    (manager as PersistentTransactionManager).manageMined(tx, it)
+                    refreshSentTransactions()
+                }
             }
         }
         twig("given current height $currentHeight, we found $pendingCount pending txs to submit")
     }
+
+    private fun findMatchingClearedTx(tx: PendingTransactionEntity): PendingTransactionEntity? {
+        return clearedTxProvider.getCleared().firstOrNull { clearedTx ->
+            tx.isSameTxId(clearedTx).apply {
+                twig("trying to map the memos like a rebel!!")
+                if(this) clearedTx.memo = tx.memo
+            }
+        }.toPendingTransactionEntity()
+    }
+}
+
+private fun WalletTransaction?.toPendingTransactionEntity(): PendingTransactionEntity? {
+    if(this == null) return null
+    return PendingTransactionEntity(
+        address = address ?: "",
+        value = value,
+        memo = memo ?: "",
+        minedHeight = height ?: -1,
+        txId = rawTransactionId
+    )
 }
 
 sealed class TransactionUpdateRequest

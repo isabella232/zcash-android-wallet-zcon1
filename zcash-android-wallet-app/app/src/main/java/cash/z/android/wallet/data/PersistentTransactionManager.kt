@@ -55,6 +55,8 @@ class PersistentTransactionManager : TransactionManager {
             val message = "failed initialize a placeholder transaction due to : ${t.message} caused by: ${t.cause}"
             twig(message)
             null
+        } finally {
+            twig("done constructing a placeholder transaction")
         }
     }
 
@@ -77,9 +79,9 @@ class PersistentTransactionManager : TransactionManager {
         var tx = transaction.copy(expiryHeight = if (currentHeight == -1) -1 else currentHeight + EXPIRY_OFFSET)
         try {
             twig("beginning to encode transaction with : $encoder")
-            val raw = encoder.create(tx.value, tx.address, tx.memo)
+            val encodedTx = encoder.create(tx.value, tx.address, tx.memo)
             twig("successfully encoded transaction for ${tx.memo}!!")
-            tx = tx.copy(raw = raw)
+            tx = tx.copy(raw = encodedTx.raw, txId = encodedTx.txId)
             tx
         } catch (t: Throwable) {
             val message = "failed to encode transaction due to : ${t.message} caused by: ${t.cause}"
@@ -94,20 +96,6 @@ class PersistentTransactionManager : TransactionManager {
             twig("successfully inserted TX into DB")
             tx
         }
-    }
-
-    private fun initTransaction(
-        value: Long,
-        toAddress: String,
-        memo: String,
-        currentHeight: Int = -1
-    ): PendingTransactionEntity {
-        return PendingTransactionEntity(
-            value = value,
-            address = toAddress,
-            memo = memo,
-            expiryHeight = if (currentHeight == -1) -1 else currentHeight + EXPIRY_OFFSET
-        )
     }
 
     override suspend fun manageSubmission(service: LightWalletService, pendingTransaction: RawTransaction) {
@@ -133,6 +121,30 @@ class PersistentTransactionManager : TransactionManager {
     override suspend fun getAll(): List<PendingTransactionEntity> = withContext(IO) {
         requireDb()
         dao?.getAll() ?: listOf()
+    }
+
+    private fun initTransaction(
+        value: Long,
+        toAddress: String,
+        memo: String,
+        currentHeight: Int = -1
+    ): PendingTransactionEntity {
+        return PendingTransactionEntity(
+            value = value,
+            address = toAddress,
+            memo = memo,
+            expiryHeight = if (currentHeight == -1) -1 else currentHeight + EXPIRY_OFFSET
+        )
+    }
+
+    suspend fun manageMined(pendingTx: PendingTransactionEntity, matchingMinedTx: PendingTransactionEntity) = withContext(IO) {
+        require(matchingMinedTx.minedHeight > 0) TODO: find why this breaks
+
+        requireDb()
+        twig("a pending transaction has been mined!")
+
+        val tx = pendingTx.copy(minedHeight = matchingMinedTx.minedHeight)
+        dao?.insert(tx)
     }
 
     /**

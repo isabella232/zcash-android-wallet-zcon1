@@ -86,7 +86,7 @@ class TransactionPresenter @Inject constructor(
         latestPending.forEach { mergedTransactions.add(it.toWalletTransaction()) }
         mergedTransactions.addAll(latestCleared)
         mergedTransactions.sortByDescending {
-            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
+            it.timeInSeconds
         }
         view.setTransactions(mergedTransactions)
     }
@@ -102,7 +102,7 @@ private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
     var description = when {
         isFailedEncoding() -> "Failed to create! Aborted."
         isFailedSubmit() -> "Failed to send...Retying!"
-        isCreating() -> "Creating transaction..."
+        isCreating() -> if (isPokerChip()) "Redeeming..." else "Creating transaction..."
         isSubmitted() && !isMined() -> "Submitted to network."
         isSubmitted() && isMined() -> "Successfully mined!"
         else -> "Pending..."
@@ -113,6 +113,8 @@ private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
     return WalletTransaction(
         value = value,
         isSend = true,
+        isMined = isMined(),
+        height = minedHeight,
         timeInSeconds = createTime / 1000L,
         address = address,
         status = description,

@@ -368,7 +368,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         if (value.isEmpty()) return
         synchronizer.getPending()?.firstOrNull { it.memo.contains("#${value.hashCode()}") }?.let { existingTransaction ->
             if (existingTransaction.isMined()) {
-                alert("Successfully Redeemed!", "We scanned this one already and the funds went to this wallet!")
+                alert(title = "Successfully Redeemed!", message = "We scanned this one already and the funds went to this wallet!")
             } else {
                 alert(
                     title = "Still Processing",
@@ -413,15 +413,18 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         val provider = PokerChipSeedProvider(chip)
         val memo = chip.toMemo()
         val result = broom.sweep(provider, chip.zatoshiValue, memo)
-//        if (result != null) {
-//            alert(
-//                title = "Oops. Something went wrong!",
-//                message = "We were unable to sweep that poker chip!",
-//                positiveButtonResId = R.string.ok_allcaps,
-//                negativeButtonResId = R.string.details,
-//                negativeAction = { alert("Sweep error:\n$result") }
-//            )
-//        }
+        if (result != null) {
+            // TODO: fix this lazy parsing later, with strongly typed exceptions, instead of strings
+            val message = if(result.toLowerCase().contains("insufficient")) "This poker chip was already redeemed, maybe by another wallet." else "Please try again later (tap 'details' for more info)."
+            val title = if(result.toLowerCase().contains("insufficient")) "Oops. Already Redeemed!" else "Oops. Something went wrong!"
+            alert(
+                title = title,
+                message = "We were unable to sweep that poker chip! $message",
+                positiveButtonResId = R.string.ok_allcaps,
+                negativeButtonResId = R.string.details,
+                negativeAction = { alert("Error details:\n$result") }
+            )
+        }
         return result
     }
 
@@ -524,12 +527,11 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun calculatePendingChipBalance(): Long {
         return synchronizer.getPending()?.filter {
-                it.memo.contains("Poker Chip")
+                it.memo.contains("Poker Chip") && !it.isMined()
             }?.fold(0L) { acc, item ->
                 acc + item.value
             } ?: 0L
     }
-
 
 }
 

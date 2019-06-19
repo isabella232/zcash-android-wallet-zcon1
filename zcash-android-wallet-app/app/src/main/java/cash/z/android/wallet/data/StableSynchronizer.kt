@@ -26,7 +26,8 @@ class StableSynchronizer @Inject constructor(
     private val ledger: PollingTransactionRepository,
     private val sender: TransactionSender,
     private val processor: CompactBlockProcessor,
-    private val encoder: RawTransactionEncoder
+    private val encoder: RawTransactionEncoder,
+    private val clearedTransactionProvider: ChannelListValueProvider<WalletTransaction>
 ) : DataSyncronizer {
 
     /** This listener will not be called on the main thread. So it will need to switch to do anything with UI, like dialogs */
@@ -35,11 +36,15 @@ class StableSynchronizer @Inject constructor(
     private var syncJob: Job? = null
     private var clearedJob: Job? = null
     private var pendingJob: Job? = null
+    private var progressJob: Job? = null
 
-    private val balanceChannel = ConflatedBroadcastChannel<Wallet.WalletBalance>()
-    private val progressChannel = ConflatedBroadcastChannel<Int>()
-    private val pendingChannel = ConflatedBroadcastChannel<List<PendingTransactionEntity>>()
-    private val clearedChannel = ConflatedBroadcastChannel<List<WalletTransaction>>()
+    private val balanceChannel = ConflatedBroadcastChannel(Wallet.WalletBalance())
+    private val progressChannel = ConflatedBroadcastChannel(0)
+    private val pendingChannel = ConflatedBroadcastChannel<List<PendingTransactionEntity>>(listOf())
+    private val clearedChannel = clearedTransactionProvider.channel
+
+    // TODO: clean these up and turn them into delegates
+    internal val pendingProvider = ChannelListValueProvider(pendingChannel)
 
     override val isConnected: Boolean get() = processor.isConnected
     override val isSyncing: Boolean get() = processor.isSyncing
@@ -55,6 +60,7 @@ class StableSynchronizer @Inject constructor(
         }
         sender.onSubmissionError = ::onFailedSend
         sender.start(scope)
+        progressJob = scope.launchProgressMonitor()
         pendingJob = scope.launchPendingMonitor()
         clearedJob = scope.launchClearedMonitor()
         syncJob = scope.onReady()
@@ -69,6 +75,7 @@ class StableSynchronizer @Inject constructor(
         syncJob?.cancel().also { syncJob = null }
         pendingJob?.cancel().also { pendingJob = null }
         clearedJob?.cancel().also { clearedJob = null }
+        progressJob?.cancel().also { progressJob = null }
     }
 
 
@@ -76,8 +83,22 @@ class StableSynchronizer @Inject constructor(
     // Monitors
     //
 
+    // begin the monitor that will update the balance proactively whenever we're done a large scan
+    private fun CoroutineScope.launchProgressMonitor(): Job? = launch {
+        twig("launching progress monitor")
+        val progressUpdates = progress()
+        for (progress in progressUpdates) {
+            if (progress == 100) {
+                twig("triggering a balance update because progress is complete")
+                refreshBalance()
+            }
+        }
+        twig("done monitoring for progress changes")
+    }
+
     // begin the monitor that will output pending transactions into the pending channel
     private fun CoroutineScope.launchPendingMonitor(): Job? = launch {
+        twig("launching pending monitor")
         // ask to be notified when the sender notices anything new, while attempting to send
         sender.notifyOnChange(pendingChannel)
 
@@ -86,24 +107,32 @@ class StableSynchronizer @Inject constructor(
         for (pending in channel) {
             if(balanceChannel.isClosedForSend) break
             twig("triggering a balance update because pending transactions have changed")
-            balanceChannel.send(wallet.getBalanceInfo())
+            refreshBalance()
         }
         twig("done monitoring for pending changes and balance changes")
     }
 
     // begin the monitor that will output cleared transactions into the cleared channel
     private fun CoroutineScope.launchClearedMonitor(): Job? = launch {
+        twig("launching cleared monitor")
         // poll for modifications and send them into the cleared channel
         ledger.poll(clearedChannel, 10_000L)
 
         // when those notifications come in, also update the balance
         val channel = clearedChannel.openSubscription()
         for (cleared in channel) {
-            if(balanceChannel.isClosedForSend) break
-            twig("triggering a balance update because cleared transactions have changed")
-            balanceChannel.send(wallet.getBalanceInfo())
+            if(!balanceChannel.isClosedForSend) {
+                twig("triggering a balance update because cleared transactions have changed")
+                refreshBalance()
+            } else {
+                twig("WARNING: noticed new cleared transactions but the balance channel was closed for send so ignoring!")
+            }
         }
         twig("done monitoring for cleared changes and balance changes")
+    }
+
+    private suspend fun refreshBalance() {
+        balanceChannel.send(wallet.getBalanceInfo())
     }
 
 
@@ -172,12 +201,16 @@ class StableSynchronizer @Inject constructor(
         return clearedChannel.openSubscription()
     }
 
-    override fun getPending(): List<PendingTransactionEntity>? {
-        return pendingChannel.valueOrNull
+    override fun getPending(): List<PendingTransactionEntity> {
+        return pendingProvider.getLatestValue()
     }
 
-    override fun getBalance(): Wallet.WalletBalance? {
-        return balanceChannel.valueOrNull
+    override fun getCleared(): List<WalletTransaction> {
+        return clearedTransactionProvider.getLatestValue()
+    }
+
+    override fun getBalance(): Wallet.WalletBalance {
+        return balanceChannel.value
     }
 
 
@@ -199,7 +232,7 @@ class StableSynchronizer @Inject constructor(
 }
 
 
-interface DataSyncronizer {
+interface DataSyncronizer : ClearedTransactionProvider, PendingTransactionProvider {
     fun start(scope: CoroutineScope)
     fun stop()
 
@@ -215,6 +248,15 @@ interface DataSyncronizer {
     val isSyncing: Boolean
     val isScanning: Boolean
     var onCriticalErrorListener: ((Throwable) -> Boolean)?
-    fun getPending(): List<PendingTransactionEntity>?
-    fun getBalance(): Wallet.WalletBalance?
+    override fun getPending(): List<PendingTransactionEntity>
+    override fun getCleared(): List<WalletTransaction>
+    fun getBalance(): Wallet.WalletBalance
+}
+
+interface ClearedTransactionProvider {
+    fun getCleared(): List<WalletTransaction>
+}
+
+interface PendingTransactionProvider {
+    fun getPending(): List<PendingTransactionEntity>
 }

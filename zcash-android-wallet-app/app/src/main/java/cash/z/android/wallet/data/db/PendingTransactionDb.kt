@@ -3,6 +3,7 @@ package cash.z.android.wallet.data.db
 import androidx.room.*
 import cash.z.android.wallet.data.RawTransaction
 import cash.z.android.wallet.extention.masked
+import cash.z.wallet.sdk.dao.WalletTransaction
 
 @Database(
     entities = [
@@ -66,8 +67,23 @@ data class PendingTransactionEntity(
     val errorCode: Int? = null,
     val createTime: Long = System.currentTimeMillis(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    override val raw: ByteArray? = null
+    override val raw: ByteArray? = null,
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    val txId: ByteArray? = null
 ) : RawTransaction {
+
+
+    override fun toString(): String {
+        return if ((raw != null && raw.size > 1) || !address.contains("**mask")) {
+            copy(
+                raw = byteArrayOf(1),
+                address = address.masked()
+            ).toString()
+        } else {
+            super.toString()
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is PendingTransactionEntity) return false
@@ -87,6 +103,10 @@ data class PendingTransactionEntity(
             if (other.raw == null) return false
             if (!raw.contentEquals(other.raw)) return false
         } else if (other.raw != null) return false
+        if (txId != null) {
+            if (other.txId == null) return false
+            if (!txId.contentEquals(other.txId)) return false
+        } else if (other.txId != null) return false
 
         return true
     }
@@ -104,20 +124,22 @@ data class PendingTransactionEntity(
         result = 31 * result + (errorCode ?: 0)
         result = 31 * result + createTime.hashCode()
         result = 31 * result + (raw?.contentHashCode() ?: 0)
+        result = 31 * result + (txId?.contentHashCode() ?: 0)
         return result
     }
 
-    override fun toString(): String {
-        return if ((raw != null && raw.size > 1) || !address.contains("**mask")) {
-            copy(
-                raw = byteArrayOf(1),
-                address = address.masked()
-            ).toString()
-        } else {
-            super.toString()
-        }
-    }
+}
 
+fun PendingTransactionEntity.isPokerChip(): Boolean {
+    return memo.toLowerCase().contains("poker chip")
+}
+
+fun PendingTransactionEntity.isSameTxId(other: WalletTransaction): Boolean {
+    return txId != null && other.rawTransactionId != null && txId.contentEquals(other.rawTransactionId!!)
+}
+
+fun PendingTransactionEntity.isSameTxId(other: PendingTransactionEntity): Boolean {
+    return txId != null && other.txId != null && txId.contentEquals(other.txId)
 }
 
 fun PendingTransactionEntity.isCreating(): Boolean {
@@ -129,7 +151,7 @@ fun PendingTransactionEntity.isFailedEncoding(): Boolean {
 }
 
 fun PendingTransactionEntity.isFailedSubmit(): Boolean {
-    return errorMessage != null || errorCode != null
+    return errorMessage != null || (errorCode != null && errorCode < 0)
 }
 
 fun PendingTransactionEntity.isFailure(): Boolean {
