@@ -53,15 +53,15 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
         val transactionIcon = if (useSend || (isChip && tx.address != "Redeemed")) R.drawable.ic_sent_transaction else R.drawable.ic_received_transaction
         val zecAbsoluteValue = tx.value.absoluteValue + if(tx.isSend) MINERS_FEE_ZATOSHI else 0
         val toOrFrom = if (useSend) "to" else "from"
-        val srcOrDestination = tx.address?.truncate() ?: "shielded mystery person"
-        timestamp.text = if ((!tx.isMined || tx.timeInSeconds == 0L) && !isChip) "Pending"
+        val srcOrDestination = tx.address?.truncate() ?: "shielded address"
+        timestamp.text = if (tx.timeInSeconds == 0L) "Pending"
                          else (if (isHistory) formatter.format(tx.timeInSeconds * 1000) else (tx.timeInSeconds * 1000L).toRelativeTimeString())
-        amount.text = "$sign${zecAbsoluteValue.convertZatoshiToZecString(4)}"
+        amount.text = "$sign${zecAbsoluteValue.convertZatoshiToZecString(2)}"
         amount.setTextColor(amountColor.toAppColor())
 
         // maybes - and if this gets to be too much, then pass in a custom holder when constructing the adapter, instead
         status?.setBackgroundColor(transactionColor.toAppColor())
-        address?.text = if (isChip) tx.address else "$toOrFrom $srcOrDestination"
+        address?.text = if (tx.isSend) tx.status else "$toOrFrom $srcOrDestination"
         memo?.text = tx.memo
         icon?.setImageResource(transactionIcon)
     }

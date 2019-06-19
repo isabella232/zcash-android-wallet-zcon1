@@ -32,8 +32,7 @@ import javax.inject.Inject
  * Fragment representing the home screen of the app. This is the screen most often seen by the user when launching the
  * application.
  */
-class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, TransactionPresenter.TransactionView,
-    ChipBucket.OnBucketChangedListener {
+class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, TransactionPresenter.TransactionView {
 
     private lateinit var binding: FragmentZcon1HomeBinding
     private var statusJob: Job? = null
@@ -41,8 +40,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     @Inject
     lateinit var transactionPresenter: TransactionPresenter
 
-    @Inject
-    lateinit var chipBucket: ChipBucket
+//    @Inject
+//    lateinit var chipBucket: ChipBucket
 
     private val balanceInfo: Wallet.WalletBalance get() = mainActivity?.balancePresenter?.lastBalance!!
 
@@ -68,17 +67,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.backgroundBalanceImage.setOnClickListener {
-            showStatus()
+            mainActivity?.onShowStatus()
         }
-    }
-
-    private fun showStatus() {
-        StatusDialog(
-            availableBalance = balanceInfo.available,
-            syncingBalance = balanceInfo.total - balanceInfo.available,
-            pendingChipBalance = chipBucket.valuePending(),
-            summary = determineStatusSummary()
-        ).show(activity!!.supportFragmentManager, "dialog_status")
     }
 
     private fun updateStatusIndicator() {
@@ -103,28 +93,11 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
             }
         }
 
-        binding.indicatorStatus.backgroundTintList = ContextCompat
-            .getColorStateList(ZcashWalletApplication.instance, statusColor)
+        binding.indicatorStatus.backgroundTintList = ZcashWalletApplication.instance.resources.getColorStateList(statusColor)
+
+//        binding.indicatorStatus.backgroundTintList = ContextCompat
+//            .getColorStateList(ZcashWalletApplication.instance, statusColor)
         binding.textStatus.text = statusMessage
-    }
-
-    private fun determineStatusSummary(): String {
-        val available = balanceInfo.available
-        val total = balanceInfo.total
-        val hasIncomingFunds = available < total
-        val isUnfunded = total == 0L && chipBucket.count() == 0
-        val hasPendingChips = chipBucket.valuePending() > 0
-        val hasEnoughForSwag = available > Zcon1Store.CartItem.SwagTee("").zatoshiValue
-
-
-        val statusResId = when {
-            isUnfunded -> R.string.status_wallet_unfunded
-            hasEnoughForSwag -> R.string.status_wallet_funds_available_for_swag
-            hasIncomingFunds -> R.string.status_wallet_incoming_funds
-            hasPendingChips -> R.string.status_wallet_chips_pending
-            else -> R.string.status_wallet_generic
-        }
-        return getString(statusResId) + "\n\nErrors: there was an error. J/k but if there was it would show up here."
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -142,8 +115,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     override fun onResume() {
         super.onResume()
         mainActivity?.balancePresenter?.addBalanceView(this)
-        chipBucket.setOnBucketChangedListener(this)
-        chipBucket.setOnBucketChangedListener(this)
+//        chipBucket.setOnBucketChangedListener(this)
+//        chipBucket.setOnBucketChangedListener(this)
         launch {
             transactionPresenter.start()
             statusJob = startStatusMonitor()
@@ -153,13 +126,13 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     override fun onPause() {
         super.onPause()
         mainActivity?.balancePresenter?.removeBalanceView(this)
-        chipBucket.removeOnBucketChangedListener(this)
+//        chipBucket.removeOnBucketChangedListener(this)
         transactionPresenter.stop()
         statusJob?.cancel().also { statusJob = null }
     }
 
     fun refreshBalance() {
-        val valuePending = chipBucket.valuePending()
+        val valuePending = mainActivity?.calculatePendingChipBalance() ?: 0L
         val balance = (balanceInfo.total + valuePending).convertZatoshiToZecString(6).split(".")
         binding.textIntegerDigits.text = balance[0]
         binding.textFractionalDigits.text = ""
@@ -185,11 +158,6 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
         refreshBalance()
     }
 
-    override fun onBucketChanged(bucket: ChipBucket) {
-        refreshBalance()
-        refreshTransactions()
-    }
-
 
     //
     // TransactionView Implementation
@@ -202,22 +170,26 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 
     fun refreshTransactions() {
         with (binding.recyclerTransactionHistory) {
-            (adapter as TransactionAdapter).submitList(addPokerChips(transactions))
+            (adapter as TransactionAdapter).submitList(transactions)
             postDelayed({
                 smoothScrollToPosition(0)
             }, 150L)
         }
     }
 
-    private fun addPokerChips(transactions: List<WalletTransaction>): MutableList<WalletTransaction> {
-        val mergedTransactions = mutableListOf<WalletTransaction>()
-        chipBucket.forEach { mergedTransactions.add(it.toWalletTransaction()) }
-        mergedTransactions.addAll(transactions)
-        mergedTransactions.sortByDescending {
-            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
-        }
-        return mergedTransactions
-    }
+//    private fun addPokerChips(transactions: List<WalletTransaction>): MutableList<WalletTransaction> {
+//        val mergedTransactions = mutableListOf<WalletTransaction>()
+//        mergedTransactions.addAll(transactions)
+//        chipBucket.forEach { chip ->
+//            // once the transaction is sent, we no longer need the bucket to provide chip information because the synchronizer.sender is now in charge of tracking the chip
+//            val memo = chip.toMemo()
+//            if (transactions.none { it.memo == memo }) mergedTransactions.add(chip.toWalletTransaction())
+//        }
+//        mergedTransactions.sortByDescending {
+//            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
+//        }
+//        return mergedTransactions
+//    }
 }
 
 private fun PokerChip.toWalletTransaction(): WalletTransaction {
@@ -225,8 +197,9 @@ private fun PokerChip.toWalletTransaction(): WalletTransaction {
         value = zatoshiValue - MINERS_FEE_ZATOSHI,
         isSend = true,
         timeInSeconds = created/1000L,
-        address = if (isRedeemed()) "Redeemed" else "Pending...",
-        memo = "Poker Chip Scanned"
+        status = "Verifying funds...",
+        address = "PokerChip",
+        memo = toMemo()
     )
 }
 

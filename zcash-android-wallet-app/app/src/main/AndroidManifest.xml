@@ -22,7 +22,18 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/ZcashTheme"
-        tools:replace="android:name">
+        tools:replace="android:name"
+        tools:ignore="GoogleAppIndexingWarning">
+
+        <!-- Mixpanel options -->
+        <meta-data android:name="com.mixpanel.android.MPConfig.AutoShowMixpanelUpdates" android:value="false" />
+        <meta-data android:name="com.mixpanel.android.MPConfig.EnableDebugLogging" android:value="false" />
+        <meta-data android:name="com.mixpanel.android.MPConfig.DisableDecideChecker" android:value="true" />
+        <meta-data android:name="com.mixpanel.android.MPConfig.DisableEmulatorBindingUI" android:value="true" />
+        <meta-data android:name="com.mixpanel.android.MPConfig.DisableGestureBindingUI" android:value="true" />
+        <meta-data android:name="com.mixpanel.android.MPConfig.DisableViewCrawler" android:value="true" />
+        <meta-data android:name="com.mixpanel.android.MPConfig.IgnoreInvisibleViewsVisualEditor" android:value="true" />
+
         <activity
             android:name="cash.z.android.wallet.ui.activity.MainActivity"
             android:label="@string/app_name"

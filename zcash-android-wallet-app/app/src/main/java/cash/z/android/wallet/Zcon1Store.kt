@@ -2,7 +2,7 @@ package cash.z.android.wallet
 
 
 object Zcon1Store {
-    const val address = "ztestsapling1yu2zy9aanf8pjf2qvm4qmn4k6q57y2d9fcs3vz0guthxx3m2aq57qm6hkx0580m9u9635xh6ttr"
+    const val address = "ztestsapling16rynkcwc5t7rxx3r9wen9l77s40l6sjq49ql6ffsqjqfqxwrrv4aezhnz73kuynw4e36zccl97f"
 
     sealed class CartItem(
         val id: Int = -1,
@@ -15,9 +15,9 @@ object Zcon1Store {
     ) {
         data class SwagTee(val buyerName: String) : CartItem(
             ID,
-            "T-Shirt",
-            199990000,
-            memo = buyerName,
+            "Swag T-Shirt",
+            1999900000,
+            memo = "T-Shirt swag for $buyerName",
             descriptionResId = R.string.swag_tee_description,
             imageResId = R.drawable.swag_tee
         ) { // 30 TAZ - miner's fee
@@ -28,9 +28,9 @@ object Zcon1Store {
 
         data class SwagPad(val buyerName: String) : CartItem(
             ID,
-            "Notebook",
-            399990000,
-            memo = buyerName,
+            "Swag Notebook",
+            3499900000,
+            memo = "Notebook swag for $buyerName",
             descriptionResId = R.string.swag_pad_description,
             imageResId = R.drawable.swag_pad
         ) { // 30 TAZ - miner's fee

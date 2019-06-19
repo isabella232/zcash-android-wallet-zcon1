@@ -81,6 +81,17 @@ object DaveWallet : WalletConfig {
         "ztestsapling1efxqj5256ywqdc3zntfa0hw6yn4f83k2h7fgngwmxr3h3w7zydlencvh30730ez6p8fwg56htgz" // carol's address
 }
 
+object DeviceWallet : WalletConfig {
+    override val displayName = "Device"
+    override val seedName = SeedGenerator.getDeviceId()
+    override val seedProvider = SampleSeedProvider(seedName)
+    override val spendingKeyProvider = SampleSpendingKeySharedPref(seedName)
+    override val cacheDbName = "test_cache_${displayName.sanitizeName()}.db"
+    override val dataDbName = "test_data_${displayName.sanitizeName()}.db"
+    override val defaultSendAddress =
+        "ztestsapling1y480yqw6h7lwmvw9wsn3h2xxg0np93cv8nq0j3m6g8edc79faevq5adrtzyxgsmu9jfc2hdf6al" // dave's address
+}
+
 object MyWallet : WalletConfig {
     override val displayName = "MyWallet"
     override val seedName = "test.reference.$displayName".sanitizeName()
@@ -98,7 +109,8 @@ enum class Servers(val host: String, val displayName: String) {
     WLAN1("10.0.2.24", "WLAN Conference"),
     WLAN2("192.168.1.134", "WLAN Office"),
     BOLT_TESTNET("ec2-34-228-10-162.compute-1.amazonaws.com", "Bolt Labs Testnet"),
-    ZCASH_TESTNET("lightwalletd.z.cash", "Zcash Testnet")
+    ZCASH_TESTNET("lightwalletd.z.cash", "Zcash Testnet"),
+    ZCON1("34.65.230.46", "Zcon1 Testnet")
 }
 
 
@@ -114,7 +126,7 @@ object SampleProperties {
     val USD_PER_ZEC = BigDecimal("62.86", MathContext.DECIMAL128)
 
     // Defaults
-    val DEFAULT_SERVER = Servers.WLAN2
+    val DEFAULT_SERVER = Servers.ZCON1
     val DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS = 50_000L
     val DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS = 10_000L
     val DEFAULT_BLOCK_BATCH_SIZE = 100

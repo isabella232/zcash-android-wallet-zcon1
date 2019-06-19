@@ -90,6 +90,7 @@
     <string name="send_tooltip_address_shortcut">Paste Sample Address</string>
     <string name="send_button_label">send %1$s</string>
     <string name="send_dialog_title">Send %1$s %2$s ($%3$s)?</string>
+    <string name="send_dialog_title_zcon1">Send %1$s %2$s?</string>
     <string name="send_alert_shortcut_clicked">Paste a valid sample address for testing?</string>
     <string name="send_error_address_too_short">Address is too short.</string>
     <string name="send_error_address_invalid_contents">Address appears to be invalid.</string>
@@ -140,4 +141,7 @@
         <item>Localhost</item>
         <item>Custom...</item>
     </string-array>
+
+    <string name="mixpanel_project_token_dev" translatable="false">17e08c2ca8e6d1fe4f88335a2d1635cf</string>
+    <string name="mixpanel_project_token_prod" translatable="false"></string>
 </resources>

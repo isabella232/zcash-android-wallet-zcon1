@@ -38,9 +38,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/main_app_bar"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintDimensionRatio="H,1:1.1676"
-            app:layout_constraintVertical_bias="0.062"
+            app:layout_constraintVertical_bias="0.08"
             app:layout_constraintWidth_default="percent"
             app:layout_constraintWidth_percent="0.84988" />
 

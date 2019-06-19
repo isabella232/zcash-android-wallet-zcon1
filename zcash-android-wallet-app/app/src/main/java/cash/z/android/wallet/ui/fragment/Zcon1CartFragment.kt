@@ -13,10 +13,14 @@ import cash.z.android.wallet.databinding.FragmentZcon1CartBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.dialog.Zcon1SwagDialog
 import cash.z.android.wallet.ui.presenter.BalancePresenter
+import cash.z.android.wallet.ui.util.Analytics
+import cash.z.android.wallet.ui.util.Analytics.PurchaseFunnel.*
+import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import kotlinx.android.synthetic.main.fragment_zcon1_cart.view.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,11 +56,18 @@ class Zcon1CartFragment : BaseFragment(), BalancePresenter.BalanceView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.buttonSwagShirt.setOnClickListener {
-            showSwagDialog(Zcon1Store.CartItem.SwagTee(buyerName))
+        binding.listItemProduct0.button_select_shirt.setOnClickListener {
+            val tee = Zcon1Store.CartItem.SwagTee(buyerName)
+            trackFunnelStep(SelectedItem(tee))
+            showSwagDialog(tee)
         }
-        binding.buttonSwagPad.setOnClickListener {
-            showSwagDialog(Zcon1Store.CartItem.SwagPad(buyerName))
+        binding.listItemProduct1.button_select_journal.setOnClickListener {
+            val pad = Zcon1Store.CartItem.SwagPad(buyerName)
+            trackFunnelStep(SelectedItem(pad))
+            showSwagDialog(pad)
+        }
+        binding.backgroundHeader.setOnClickListener {
+            mainActivity?.onShowStatus()
         }
     }
 

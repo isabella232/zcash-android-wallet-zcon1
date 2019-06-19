@@ -57,7 +57,7 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
     override fun onResume() {
         super.onResume()
         mainActivity?.setToolbarShown(false)
-        binding.lottieEccLogo.playToFrame(if(developmentShortcut) 240 else 240)
+        binding.lottieEccLogo.playToFrame(if(developmentShortcut) 24 else 240)
         binding.lottieEccLogo.speed = 1.4f
     }
 

@@ -20,34 +20,39 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import cash.z.android.wallet.*
 import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.data.StableSynchronizer
+import cash.z.android.wallet.data.db.isMined
+import cash.z.android.wallet.data.db.isSubmitted
 import cash.z.android.wallet.databinding.ActivityMainBinding
 import cash.z.android.wallet.di.annotation.ActivityScope
 import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.extention.copyToClipboard
+import cash.z.android.wallet.ui.dialog.StatusDialog
 import cash.z.android.wallet.ui.fragment.ScanFragment
 import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.MainPresenter
 import cash.z.android.wallet.ui.presenter.MainPresenterModule
 import cash.z.android.wallet.ui.util.Analytics
+import cash.z.android.wallet.ui.util.Analytics.FeedbackFunnel
+import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.FundsFound
 import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.StartSweep
-import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.Swept
+import cash.z.android.wallet.ui.util.Analytics.PurchaseFunnel.*
 import cash.z.android.wallet.ui.util.Analytics.Tap.*
 import cash.z.android.wallet.ui.util.Analytics.trackAction
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
-import dagger.Binds
+import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
-import dagger.Provides
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
 
 class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.BarcodeCallback, MainPresenter.MainView {
+
+
 
     @Inject
     lateinit var synchronizer: DataSyncronizer
@@ -58,8 +63,8 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     @Inject
     lateinit var broom: Broom
 
-    @Inject
-    lateinit var chipBucket: ChipBucket
+//    @Inject
+//    lateinit var chipBucket: ChipBucket
 
     lateinit var binding: ActivityMainBinding
     lateinit var loadMessages: List<String>
@@ -75,7 +80,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         super.onCreate(savedInstanceState)
         this.lifecycle
 
-        chipBucket.restore()
+//        chipBucket.restore()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         binding.activity = this
         initAppBar()
@@ -90,7 +95,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     override fun onResume() {
         super.onResume()
-        chipBucket.restore()
+//        chipBucket.restore()
         launch {
             synchronizer.onCriticalErrorListener = ::onCriticalError
             synchronizer.start(this)
@@ -116,7 +121,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         super.onPause()
         balancePresenter.stop()
         mainPresenter.stop()
-        chipBucket.save()
+//        chipBucket.save()
     }
 
     override fun onDestroy() {
@@ -238,7 +243,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
             0 -> R.id.nav_zcon1_home_fragment
             1 -> R.id.nav_send_fragment
             2 -> R.id.nav_receive_fragment
-            3 -> R.id.nav_zcon1_cart_fragment
+            3 -> R.id.nav_zcon1_cart_fragment.also { launch { trackFunnelStep(ViewedCart) } }
             else -> R.id.nav_zcon1_home_fragment
         }, null, navOptions)
     }
@@ -309,6 +314,10 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun onScanQr(view: View) {
         trackAction(TAPPED_SCAN_QR_HOME)
+        val isFirstRun = view.id == R.id.button_first_run_scan
+        if(isFirstRun) {
+            navController.navigate(R.id.nav_zcon1_home_fragment)
+        }
         supportFragmentManager.beginTransaction()
             .add(R.id.camera_placeholder, ScanFragment(), "camera_fragment")
             .addToBackStack("camera_fragment_scanning")
@@ -317,7 +326,39 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun onSendFeedback(view: View) {
         trackAction(TAPPED_GIVE_FEEDBACK)
+        trackFunnelStep(FeedbackFunnel.Started)
         navController.navigate(R.id.nav_feedback_fragment)
+    }
+
+    fun onShowStatus() {
+        launch {
+            val balanceInfo = balancePresenter.lastBalance
+            StatusDialog(
+                availableBalance = balanceInfo.available,
+                syncingBalance = balanceInfo.total - balanceInfo.available,
+                pendingChipBalance = calculatePendingChipBalance(),
+                summary = determineStatusSummary(balanceInfo)
+            ).show(supportFragmentManager, "dialog_status")
+        }
+    }
+
+    private fun determineStatusSummary(balanceInfo: Wallet.WalletBalance): String {
+        val available = balanceInfo.available
+        val total = balanceInfo.total
+        val hasIncomingFunds = available < total
+        val hasPendingChips = (calculatePendingChipBalance() ?: 0L) > 0L
+        val isUnfunded = total == 0L && !hasPendingChips
+        val hasEnoughForSwag = available > Zcon1Store.CartItem.SwagTee("").zatoshiValue
+
+
+        val statusResId = when {
+            isUnfunded -> R.string.status_wallet_unfunded
+            hasEnoughForSwag -> R.string.status_wallet_funds_available_for_swag
+            hasIncomingFunds -> R.string.status_wallet_incoming_funds
+            hasPendingChips -> R.string.status_wallet_chips_pending
+            else -> R.string.status_wallet_generic
+        }
+        return getString(statusResId)// + "\n\nErrors: there was an error. J/k but if there was it would show up here."
     }
 
     override fun onBarcodeScanned(value: String) {
@@ -325,9 +366,9 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
         // For now, empty happens when back is pressed
         if (value.isEmpty()) return
-        chipBucket.findChip(value)?.let {existingChip ->
-            if (existingChip.isRedeemed()) {
-                alert("Previously Redeemed!", "We scanned this one already and the funds went to this wallet.")
+        synchronizer.getPending()?.firstOrNull { it.memo.contains("#${value.hashCode()}") }?.let { existingTransaction ->
+            if (existingTransaction.isMined()) {
+                alert("Successfully Redeemed!", "We scanned this one already and the funds went to this wallet!")
             } else {
                 alert(
                     title = "Still Processing",
@@ -335,7 +376,16 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
                     positiveButtonResId = R.string.wait,
                     negativeButtonResId = R.string.abort,
                     negativeAction = {
-                        onAbortChip(existingChip)
+                        launch {
+                            if (existingTransaction.isSubmitted()) {
+                                alert(
+                                    title = "Oops! Too late.",
+                                    message = "Cannot abort because the transaction has already been uploaded to the network."
+                                )
+                            } else {
+                                broom.sender.cancel(existingTransaction)
+                            }
+                        }
                     }
                 )
             }
@@ -350,24 +400,29 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
             funQuote()
             launch {
                 val chip = PokerChip(value)
-                chipBucket.add(chip)
                 val result = sweepChip(chip)
                 twig("Sweep result? $result")
-                trackFunnelStep(Swept(chip, result))
+                trackFunnelStep(FundsFound(chip, result))
             }
         }
 
     }
 
-    private fun onAbortChip(chip: PokerChip) {
-        // TODO: don't remove until we're sure we can because this triggers a funnel event
-        chipBucket.remove(chip)
-    }
-
     private suspend fun sweepChip(chip: PokerChip): String? {
         trackFunnelStep(StartSweep(chip))
         val provider = PokerChipSeedProvider(chip)
-        return broom.sweep(provider, chip.zatoshiValue)
+        val memo = chip.toMemo()
+        val result = broom.sweep(provider, chip.zatoshiValue, memo)
+//        if (result != null) {
+//            alert(
+//                title = "Oops. Something went wrong!",
+//                message = "We were unable to sweep that poker chip!",
+//                positiveButtonResId = R.string.ok_allcaps,
+//                negativeButtonResId = R.string.details,
+//                negativeAction = { alert("Sweep error:\n$result") }
+//            )
+//        }
+        return result
     }
 
     val scanQuote = arrayOf(
@@ -414,6 +469,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     fun buyProduct(product: Zcon1Store.CartItem) {
+        trackFunnelStep(PurchasedItem(product))
         alert(
             message = "Are you sure you'd like to buy a ${product.name} for ${product.zatoshiValue.convertZatoshiToZecString(1)} TAZ?",
             positiveButtonResId = R.string.ok_allcaps,
@@ -423,11 +479,14 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     private fun sendPurchaseOrder(item: Zcon1Store.CartItem) {
+        trackFunnelStep(ConfirmedPurchase(item))
         launch {
             synchronizer.sendToAddress(item.zatoshiValue, item.toAddress, item.memo)
         }
+        navController.navigate(R.id.nav_zcon1_home_fragment)
     }
     override fun orderFailed(error: MainPresenter.PurchaseResult.Failure) {
+        trackFunnelStep(Submitted(error.reason))
         alert(
             title = "Purchase Failed",
             message = "${error.reason}"
@@ -435,7 +494,8 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     override fun orderUpdated(processing: MainPresenter.PurchaseResult.Processing) {
-        Toaster.short(processing.pendingTransaction.toString())
+        twig("order updated: ${processing.pendingTransaction}")
+        Toaster.short("Order updated: ${processing.pendingTransaction.memo}")
     }
 
     fun onSynchronizerError(error: Throwable?): Boolean {
@@ -454,23 +514,20 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     // Events from Layout Files
     //
 
-    fun onFeedbackSubmit(view: View) {
-        trackAction(TAPPED_SUBMIT_FEEDBACK)
-        Toaster.short("Feedback Submitted! (j/k)")
-        navController.navigateUp()
-    }
-    fun onFeedbackCancel(view: View) {
-        Toaster.short("Feedback cancelled")
-        trackAction(TAPPED_CANCEL_FEEDBACK)
-        navController.navigateUp()
-    }
-
     fun copyAddress(view: View) {
         trackAction(TAPPED_COPY_ADDRESS)
         Toaster.short("Address copied!")
         launch {
             copyToClipboard(synchronizer.getAddress())
         }
+    }
+
+    fun calculatePendingChipBalance(): Long {
+        return synchronizer.getPending()?.filter {
+                it.memo.contains("Poker Chip")
+            }?.fold(0L) { acc, item ->
+                acc + item.value
+            } ?: 0L
     }
 
 

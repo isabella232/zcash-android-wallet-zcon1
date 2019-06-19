@@ -117,7 +117,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
     override fun showSendDialog(zecString: String, usdString: String, toAddress: String, hasMemo: Boolean) {
         hideKeyboard()
         setSendEnabled(false) // partially because we need to lower the button elevation
-        binding.dialogTextTitle.text = getString(R.string.send_dialog_title, zecString, zec, usdString)
+        binding.dialogTextTitle.text = getString(R.string.send_dialog_title_zcon1, zecString, zec)
         binding.dialogTextAddress.text = toAddress
         binding.dialogTextMemoIncluded.visibility = if(hasMemo) View.VISIBLE else View.GONE
         binding.groupDialogSend.visibility = View.VISIBLE
@@ -201,7 +201,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
             TooltipCompat.setTooltipText(this, context.getString(R.string.send_tooltip_scan_qr))
         }
 
-        binding.dialogSendBackground.setOnClickListener { hideSendDialog() }
+        binding.dialogSendBackground4.setOnClickListener { hideSendDialog() }
         binding.dialogSubmitButton.setOnClickListener { onSendZec() }
         binding.imageScanQr.setOnClickListener(::onScanQrCode)
         binding.buttonSendZec.text = getString(R.string.send_button_label, zec)
@@ -283,7 +283,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
         binding.groupDialogSend.visibility = View.GONE
     }
 
-    private fun setAddressLineColor(@ColorRes colorRes: Int = R.color.zcashBlack_12) {
+    private fun setAddressLineColor(@ColorRes colorRes: Int = R.color.zcashPurple_accent) {
         if (mainActivity != null) {
             DrawableCompat.setTint(
                 binding.inputZcashAddress.background,

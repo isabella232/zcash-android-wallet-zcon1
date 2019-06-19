@@ -3,12 +3,11 @@ package cash.z.android.wallet.di.module
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import cash.z.android.wallet.BuildConfig
-import cash.z.android.wallet.ChipBucket
-import cash.z.android.wallet.InMemoryChipBucket
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.data.*
 import cash.z.android.wallet.extention.toDbPath
 import cash.z.android.wallet.sample.CarolWallet
+import cash.z.android.wallet.sample.DeviceWallet
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_SERVER
@@ -18,10 +17,12 @@ import cash.z.android.wallet.sample.Servers
 import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.block.*
-import cash.z.wallet.sdk.data.*
+import cash.z.wallet.sdk.data.ActiveTransactionManager
+import cash.z.wallet.sdk.data.PollingTransactionRepository
+import cash.z.wallet.sdk.data.TransactionRepository
+import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.DEFAULT_BATCH_SIZE
 import cash.z.wallet.sdk.ext.DEFAULT_RETRIES
-import cash.z.wallet.sdk.ext.DEFAULT_STALE_TOLERANCE
 import cash.z.wallet.sdk.jni.RustBackend
 import cash.z.wallet.sdk.jni.RustBackendWelding
 import cash.z.wallet.sdk.secure.Wallet
@@ -29,7 +30,6 @@ import cash.z.wallet.sdk.service.LightWalletGrpcService
 import cash.z.wallet.sdk.service.LightWalletService
 import dagger.Module
 import dagger.Provides
-import dagger.android.DispatchingAndroidInjector
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -39,6 +39,20 @@ import javax.inject.Singleton
  */
 @Module
 internal object SynchronizerModule {
+
+    private val walletConfig = DeviceWallet
+
+    private val rustBackend = RustBackend().also {
+        if (BuildConfig.DEBUG) it.initLogs()
+    }
+
+    private val pollingTransactionRepository = PollingTransactionRepository(
+        ZcashWalletApplication.instance,
+        walletConfig.dataDbName,
+        rustBackend,
+        DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
+    )
+
 
     @JvmStatic
     @Provides
@@ -51,16 +65,14 @@ internal object SynchronizerModule {
     @Provides
     @Singleton
     fun provideRustBackend(): RustBackendWelding {
-        return RustBackend().also {
-            if (BuildConfig.DEBUG) it.initLogs()
-        }
+        return rustBackend
     }
 
     @JvmStatic
     @Provides
     @Singleton
     fun provideWalletConfig(prefs: SharedPreferences): WalletConfig {
-        return CarolWallet
+        return walletConfig
 //        val walletName = prefs.getString(PREFS_WALLET_DISPLAY_NAME, BobWallet.displayName)
 //        twig("FOUND WALLET DISPLAY NAME : $walletName")
 //        return when(walletName) {
@@ -133,17 +145,15 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideRepository(
-        application: ZcashWalletApplication,
-        rustBackend: RustBackendWelding,
-        walletConfig: WalletConfig
-    ): TransactionRepository {
-        return PollingTransactionRepository(
-            application,
-            walletConfig.dataDbName,
-            rustBackend,
-            DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
-        )
+    fun provideRepository(): PollingTransactionRepository {
+        return pollingTransactionRepository
+    }
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    fun provideBaseRepository(): TransactionRepository {
+        return pollingTransactionRepository
     }
 
     @JvmStatic
@@ -201,12 +211,12 @@ internal object SynchronizerModule {
         )
     }
 
-    @JvmStatic
-    @Provides
-    @Singleton
-    fun provideChipBucket(): ChipBucket {
-        return InMemoryChipBucket()
-    }
+//    @JvmStatic
+//    @Provides
+//    @Singleton
+//    fun provideChipBucket(): ChipBucket {
+//        return InMemoryChipBucket()
+//    }
 
 
     @JvmStatic
@@ -220,7 +230,7 @@ internal object SynchronizerModule {
     @Provides
     @Singleton
     fun provideTransactionSender(manager: TransactionManager, service: LightWalletService): TransactionSender {
-        return PersistentTransactionMonitor(manager, service)
+        return PersistentTransactionSender(manager, service)
     }
 
     @JvmStatic
@@ -233,7 +243,7 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideDataSynchronizer(wallet: Wallet, encoder: RawTransactionEncoder, sender: TransactionSender, processor: CompactBlockProcessor) : DataSyncronizer {
-        return StableSynchronizer(wallet, encoder, sender, processor)
+    fun provideDataSynchronizer(wallet: Wallet, ledger: PollingTransactionRepository, sender: TransactionSender, processor: CompactBlockProcessor, encoder: RawTransactionEncoder) : DataSyncronizer {
+        return StableSynchronizer(wallet, ledger, sender, processor, encoder)
     }
 }

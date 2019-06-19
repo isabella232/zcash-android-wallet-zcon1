@@ -11,12 +11,12 @@ import kotlinx.coroutines.CoroutineScope
 class StaticTransactionRepository(dataDbName: String, rustBackend: RustBackendWelding, dbCallback: (DerivedDataDb) -> Unit = {}) :
     PollingTransactionRepository(ZcashWalletApplication.instance, dataDbName, rustBackend,2000L, dbCallback) {
 
-    override fun start(parentScope: CoroutineScope) {
-        twig("starting repository ignored because this DB does not poll")
-    }
-
-    override fun stop() {
-        twig("stopping repository ignored because this DB does not poll")
-    }
+//    override fun start(parentScope: CoroutineScope) {
+//        twig("starting repository ignored because this DB does not poll")
+//    }
+//
+//    override fun stop() {
+//        twig("stopping repository ignored because this DB does not poll")
+//    }
 
 }

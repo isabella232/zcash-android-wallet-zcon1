@@ -1,15 +1,17 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.data.DataSyncronizer
+import cash.z.android.wallet.data.db.*
 import cash.z.android.wallet.ui.fragment.Zcon1HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.dao.WalletTransaction
-import cash.z.wallet.sdk.data.*
+import cash.z.wallet.sdk.data.TransactionState
+import cash.z.wallet.sdk.data.Twig
+import cash.z.wallet.sdk.data.twig
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,8 +24,11 @@ class TransactionPresenter @Inject constructor(
         fun setTransactions(transactions: List<WalletTransaction>)
     }
 
-    private var transactionJob: Job? = null
+    private var pendingJob: Job? = null
+    private var clearedJob: Job? = null
 
+    private var latestPending: List<PendingTransactionEntity> = listOf()
+    private var latestCleared: List<WalletTransaction> = listOf()
 
     //
     // LifeCycle
@@ -33,55 +38,59 @@ class TransactionPresenter @Inject constructor(
         Twig.sprout("TransactionPresenter")
         twig("TransactionPresenter starting!")
 
-        transactionJob?.cancel()
-        transactionJob = Job()
-//        transactionJob = view.launchPurchaseBinder(synchronizer.activeTransactions())
-//        transactionJob = view.launchTransactionBinder(synchronizer.allTransactions())
+        pendingJob?.cancel()
+        pendingJob = view.launchPendingBinder()
+
+        clearedJob?.cancel()
+        clearedJob = view.launchClearedBinder()
     }
 
     override fun stop() {
         twig("TransactionPresenter stopping!")
         Twig.clip("TransactionPresenter")
-        transactionJob?.cancel()?.also { transactionJob = null }
+        pendingJob?.cancel()?.also { pendingJob = null }
+        clearedJob?.cancel()?.also { clearedJob = null }
     }
 
-    fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<Map<ActiveTransaction, TransactionState>>) = launch {
-        twig("main purchase binder starting!")
+    fun CoroutineScope.launchPendingBinder() = launch {
+        val channel = synchronizer.pendingTransactions()
+        twig("pending transaction binder starting")
         for (new in channel) {
-            twig("main polled a purchase info")
-            bind(new)
+            twig("pending transactions have been modified... binding to the view")
+            latestPending = new
+            bind()
         }
-        twig("main purchase binder exiting!")
+        twig("pending transaction binder exiting!")
     }
 
-    fun CoroutineScope.launchTransactionBinder(allTransactions: ReceiveChannel<List<WalletTransaction>>) = launch {
-        twig("transaction binder starting!")
-        for (walletTransactionList in allTransactions) {
-            twig("received ${walletTransactionList.size} transactions for presenting")
-            bind(walletTransactionList)
+    fun CoroutineScope.launchClearedBinder() = launch {
+        val channel = synchronizer.clearedTransactions()
+        twig("cleared transaction binder starting")
+        for (new in channel) {
+            twig("cleared transactions have been modified... binding to the view")
+            latestCleared = new
+            bind()
         }
-        twig("transaction binder exiting!")
+        twig("cleared transaction binder exiting!")
     }
+
 
     //
     // Events
     //
 
-    private fun bind(activeTransactions: Map<ActiveTransaction, TransactionState>) {
-//        val newestState = activeTransactions.entries.last().value
-//        if (newestState is TransactionState.Failure) {
-//            view.orderFailed(PurchaseResult.Failure(newestState.reason))
-//        } else {
-//            view.orderUpdated(PurchaseResult.Processing(newestState))
-//        }
+    private fun bind() {
+        twig("binding ${latestPending.size} pending transactions and ${latestCleared.size} cleared transactions")
+        // merge transactions
+        val mergedTransactions = mutableListOf<WalletTransaction>()
+        latestPending.forEach { mergedTransactions.add(it.toWalletTransaction()) }
+        mergedTransactions.addAll(latestCleared)
+        mergedTransactions.sortByDescending {
+            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
+        }
+        view.setTransactions(mergedTransactions)
     }
 
-    private fun bind(transactions: List<WalletTransaction>) {
-        twig("binding ${transactions.size} walletTransactions")
-        view.setTransactions(transactions.sortedByDescending {
-            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
-        })
-    }
 
     sealed class PurchaseResult {
         data class Processing(val state: TransactionState = TransactionState.Creating) : PurchaseResult()
@@ -89,6 +98,27 @@ class TransactionPresenter @Inject constructor(
     }
 }
 
+private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
+    var description = when {
+        isFailedEncoding() -> "Failed to create! Aborted."
+        isFailedSubmit() -> "Failed to send...Retying!"
+        isCreating() -> "Creating transaction..."
+        isSubmitted() && !isMined() -> "Submitted to network."
+        isSubmitted() && isMined() -> "Successfully mined!"
+        else -> "Pending..."
+    }
+    if (!isSubmitted() && (submitAttempts > 2 || encodeAttempts > 2)) {
+        description += " aborting in ${ttl() / 60L}m${ttl().rem(60)}s"
+    }
+    return WalletTransaction(
+        value = value,
+        isSend = true,
+        timeInSeconds = createTime / 1000L,
+        address = address,
+        status = description,
+        memo = memo
+    )
+}
 
 @Module
 abstract class TransactionPresenterModule {

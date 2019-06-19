@@ -7,18 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import cash.z.android.wallet.R
-import cash.z.android.wallet.ZcashWalletApplication.Companion.PREFS_PSEUDONYM
-import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.databinding.FragmentZcon1FeedbackBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
-import cash.z.android.wallet.ui.dialog.Zcon1SwagDialog
-import cash.z.android.wallet.ui.presenter.BalancePresenter
-import cash.z.wallet.sdk.ext.convertZatoshiToZecString
-import cash.z.wallet.sdk.secure.Wallet
+import cash.z.android.wallet.extention.Toaster
+import cash.z.android.wallet.ui.util.Analytics.FeedbackFunnel
+import cash.z.android.wallet.ui.util.Analytics.Tap.TAPPED_CANCEL_FEEDBACK
+import cash.z.android.wallet.ui.util.Analytics.Tap.TAPPED_SUBMIT_FEEDBACK
+import cash.z.android.wallet.ui.util.Analytics.trackAction
+import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 /**
@@ -31,6 +30,7 @@ class Zcon1FeedbackFragment : BaseFragment() {
     lateinit var prefs: SharedPreferences
     private lateinit var binding: FragmentZcon1FeedbackBinding
 
+    private lateinit var ratings: Array<View>
 
     //
     // LifeCycle
@@ -50,6 +50,15 @@ class Zcon1FeedbackFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        with(binding) {
+            buttonCancel.setOnClickListener(::onFeedbackCancel)
+            buttonSubmit.setOnClickListener(::onFeedbackSubmit)
+
+            ratings = arrayOf(feedbackExp1, feedbackExp2, feedbackExp3, feedbackExp4, feedbackExp5)
+            ratings.forEach {
+                it.setOnClickListener(::onRatingCilcked)
+            }
+        }
 
     }
 
@@ -64,6 +73,30 @@ class Zcon1FeedbackFragment : BaseFragment() {
     // Private API
     //
 
+    private fun onFeedbackSubmit(view: View) {
+        Toaster.long("Thanks for the feedback!")
+        trackAction(TAPPED_SUBMIT_FEEDBACK)
+
+        val q1 = binding.inputQuestion1.editText?.text.toString()
+        val q2 = binding.inputQuestion2.editText?.text.toString()
+        val q3 = binding.inputQuestion3.editText?.text.toString()
+        val rating = ratings.indexOfFirst { it.isActivated }
+        trackFunnelStep(FeedbackFunnel.Submitted(rating, q1, q2, q3))
+
+        mainActivity?.navController?.navigateUp()
+    }
+    private fun onFeedbackCancel(view: View) {
+        Toaster.short("Feedback cancelled")
+        trackAction(TAPPED_CANCEL_FEEDBACK)
+        trackFunnelStep(FeedbackFunnel.Cancelled)
+
+        mainActivity?.navController?.navigateUp()
+    }
+
+    private fun onRatingCilcked(view: View) {
+        ratings.forEach { it.isActivated = false }
+        view.isActivated = !view.isActivated
+    }
 }
 
 

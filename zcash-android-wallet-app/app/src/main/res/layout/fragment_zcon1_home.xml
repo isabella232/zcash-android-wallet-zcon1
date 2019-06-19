@@ -67,7 +67,7 @@
             android:id="@+id/text_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="status: syncing"
+            tools:text="status: syncing"
             android:paddingBottom="3dp"
             android:includeFontPadding="false"
             android:fontFamily="sans-serif-thin"
@@ -84,7 +84,7 @@
             android:layout_height="16dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/background_circle"
-            android:backgroundTint="@color/zcashGreen"
+            android:backgroundTint="@android:color/transparent"
             app:layout_constraintTop_toTopOf="@id/text_status"
             app:layout_constraintBottom_toBottomOf="@id/text_status"
             app:layout_constraintEnd_toStartOf="@id/text_status"/>

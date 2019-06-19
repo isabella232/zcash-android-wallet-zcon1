@@ -1,5 +1,8 @@
 package cash.z.android.wallet.data
 
+import cash.z.android.wallet.data.db.PendingTransactionEntity
+import cash.z.android.wallet.data.db.isPending
+import cash.z.android.wallet.extention.onErrorReturn
 import cash.z.android.wallet.extention.tryNull
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.service.LightWalletService
@@ -8,17 +11,20 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 
-class PersistentTransactionMonitor (
+class PersistentTransactionSender (
     private val manager: TransactionManager,
     private val service: LightWalletService
 ) : TransactionSender {
+
     private lateinit var channel: SendChannel<TransactionUpdateRequest>
     private var monitoringJob: Job? = null
     private val initialMonitorDelay = 45_000L
+    private var listenerChannel: SendChannel<List<PendingTransactionEntity>>? = null
+    override var onSubmissionError: ((Throwable) -> Unit)? = null
 
-    fun CoroutineScope.requestUpdate() = launch {
+    fun CoroutineScope.requestUpdate(triggerSend: Boolean) = launch {
         if (!channel.isClosedForSend) {
-            channel.send(SubmitPending)
+            channel.send(if (triggerSend) SubmitPendingTx else RefreshSentTx)
         }
     }
 
@@ -30,15 +36,17 @@ class PersistentTransactionMonitor (
         var pendingTransactionDao = 0 // actor state:
         for (msg in channel) { // iterate over incoming messages
             when (msg) {
-                is SubmitPending -> submitPendingTransactions()
+                is SubmitPendingTx -> submitPendingTransactions()
+                is RefreshSentTx -> refreshSentTransasctions()
             }
         }
     }
 
     private fun CoroutineScope.startMonitor() = launch {
+        delay(5000) // todo see if we need a formal initial delay
         while (!channel.isClosedForSend && isActive) {
+            requestUpdate(true)
             delay(calculateDelay())
-            requestUpdate()
         }
         twig("TransactionMonitor stopping!")
     }
@@ -60,6 +68,11 @@ class PersistentTransactionMonitor (
         manager.stop()
     }
 
+    override fun notifyOnChange(channel: SendChannel<List<PendingTransactionEntity>>) {
+        listenerChannel?.close()
+        listenerChannel = channel
+    }
+
     /**
      * Generates newly persisted information about a transaction so that other processes can send.
      */
@@ -69,10 +82,80 @@ class PersistentTransactionMonitor (
         toAddress: String,
         memo: String,
         fromAccountId: Int
-    ) = withContext(IO) {
-        manager.manageCreation(encoder, zatoshi, toAddress, memo)
-        requestUpdate()
-        Unit
+    ): PendingTransactionEntity = withContext(IO) {
+        val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
+        (manager as PersistentTransactionManager).manageCreation(encoder, zatoshi, toAddress, memo, currentHeight).also {
+            requestUpdate(true)
+        }
+    }
+
+    override suspend fun prepareTransaction(
+        zatoshiValue: Long,
+        address: String,
+        memo: String
+    ): PendingTransactionEntity? = withContext(IO) {
+        (manager as PersistentTransactionManager).initPlaceholder(zatoshiValue, address, memo).also {
+            // update UI to show what we've just created. No need to submit, it has no raw data yet!
+            requestUpdate(false)
+        }
+    }
+
+    override suspend fun sendPreparedTransaction(
+        encoder: RawTransactionEncoder,
+        tx: PendingTransactionEntity
+    ): PendingTransactionEntity = withContext(IO) {
+        val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
+        (manager as PersistentTransactionManager).manageCreation(encoder, tx, currentHeight).also {
+            // submit what we've just created
+            requestUpdate(true)
+        }
+    }
+
+    override suspend fun cleanupPreparedTransaction(tx: PendingTransactionEntity) {
+        if (tx.raw == null) {
+            (manager as PersistentTransactionManager).abortTransaction(tx)
+        }
+    }
+
+    //  TODO: get this from the channel instead
+    var previousPending: List<PendingTransactionEntity>? = null
+
+    private suspend fun notifyIfChanged(currentPending: List<PendingTransactionEntity>) = withContext(IO) {
+        if (hasChanged(previousPending, currentPending) && listenerChannel?.isClosedForSend != true) {
+            listenerChannel?.send(currentPending)
+            previousPending = currentPending
+        }
+    }
+
+    override suspend fun cancel(existingTransaction: PendingTransactionEntity) = withContext(IO) {
+        (manager as PersistentTransactionManager).abortTransaction(existingTransaction). also {
+            requestUpdate(false)
+        }
+    }
+
+    private fun hasChanged(
+        previousPending: List<PendingTransactionEntity>?,
+        currentPending: List<PendingTransactionEntity>
+    ): Boolean {
+        // shortcuts first
+        if (currentPending.isEmpty() && previousPending == null) return false.also { twig("checking pending txs: detected nothing happened yet") } // if nothing has happened, that doesn't count as a change
+        if (previousPending == null) return true.also { twig("checking pending txs: detected first set of txs!") } // the first set of transactions is automatically a change
+        if (previousPending.size != currentPending.size) return true.also { twig("checking pending txs: detected size change from ${previousPending.size} to ${currentPending.size}") } // can't be the same and have different sizes, duh
+
+        for (tx in currentPending) {
+            if (!previousPending.contains(tx)) return true.also { twig("checking pending txs: detected change for $tx") }
+        }
+        return false.also { twig("checking pending txs: detected no changes in pending txs") }
+    }
+
+    /**
+     * Submit all pending transactions that have not expired.
+     */
+    private suspend fun refreshSentTransasctions(): List<PendingTransactionEntity> = withContext(IO) {
+        twig("refreshing all sent transactions")
+        val allSentTransactions = (manager as PersistentTransactionManager).getAll() // TODO: make this crash and catch error gracefully
+        notifyIfChanged(allSentTransactions)
+        allSentTransactions
     }
 
     /**
@@ -80,18 +163,23 @@ class PersistentTransactionMonitor (
      */
     private suspend fun submitPendingTransactions() = withContext(IO) {
         twig("received request to submit pending transactions")
-        with(manager) {
-            val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
-            getAllPending(currentHeight).also { twig("found ${it.size} pending txs to submit") }.forEach { rawTx ->
-                manageSubmission(service, rawTx)
+        val allTransactions = refreshSentTransasctions()
+
+        var pendingCount = 0
+        val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
+        allTransactions.filter { it.isPending(currentHeight) }.forEach { tx ->
+            pendingCount++
+            onErrorReturn(onSubmissionError ?: {}) {
+                manager.manageSubmission(service, tx)
             }
         }
+        twig("given current height $currentHeight, we found $pendingCount pending txs to submit")
     }
 }
 
-
 sealed class TransactionUpdateRequest
-object SubmitPending : TransactionUpdateRequest()
+object SubmitPendingTx : TransactionUpdateRequest()
+object RefreshSentTx : TransactionUpdateRequest()
 
 
 

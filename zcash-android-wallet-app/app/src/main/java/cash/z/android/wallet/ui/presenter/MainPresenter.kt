@@ -1,5 +1,6 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.data.db.PendingTransactionEntity
 import cash.z.android.wallet.data.db.isFailure
@@ -50,8 +51,11 @@ class MainPresenter @Inject constructor(
     private fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<List<PendingTransactionEntity>>) = launch {
         twig("main purchase binder starting!")
         for (new in channel) {
-            twig("main polled a purchase info")
-            bind(new)
+            val mostRecent = new.sortedByDescending { it.createTime }.firstOrNull()
+            if (mostRecent?.isSwag() == true) {
+                twig("main polled a swag purchase")
+                bind(mostRecent)
+            }
         }
         twig("main purchase binder exiting!")
     }
@@ -61,12 +65,11 @@ class MainPresenter @Inject constructor(
     // Events
     //
 
-    private fun bind(activeTransactions: List<PendingTransactionEntity>) {
-        val newest = activeTransactions.last()
-        if (newest.isFailure()) {
-            view.orderFailed(PurchaseResult.Failure(newest.errorMessage))
+    private fun bind(swagPurchase: PendingTransactionEntity) {
+        if (swagPurchase.isFailure()) {
+            view.orderFailed(PurchaseResult.Failure(swagPurchase.errorMessage))
         } else {
-            view.orderUpdated(PurchaseResult.Processing(newest))
+            view.orderUpdated(PurchaseResult.Processing(swagPurchase))
         }
     }
 
@@ -74,6 +77,10 @@ class MainPresenter @Inject constructor(
         data class Processing(val pendingTransaction: PendingTransactionEntity) : PurchaseResult()
         data class Failure(val reason: String? = "") : PurchaseResult()
     }
+}
+
+private fun PendingTransactionEntity.isSwag(): Boolean {
+    return address == Zcon1Store.address && memo.toLowerCase().contains("swag")
 }
 
 

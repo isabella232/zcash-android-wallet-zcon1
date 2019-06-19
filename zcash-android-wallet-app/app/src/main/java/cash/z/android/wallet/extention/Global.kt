@@ -13,10 +13,21 @@ internal inline fun <T> tryNull(block: () -> T): T? {
     return try { block() } catch(ignored: Throwable) { null }
 }
 
+internal inline fun <T> onErrorReturn(noinline errorHandler: (Throwable) -> T, block: () -> T): T {
+    return try {
+        block()
+    } catch (error: Throwable) {
+        errorHandler(error)
+    }
+}
+
 internal inline fun String.truncate(): String {
     return "${substring(0..4)}...${substring(length-5, length)}"
 }
 
+internal inline fun String.masked(): String {
+    return "${substring(0..4)}.**masked**.${substring(length-5, length)}"
+}
 
 internal inline fun String.toDbPath(): String {
     return ZcashWalletApplication.instance.getDatabasePath(this).absolutePath

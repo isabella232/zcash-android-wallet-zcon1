@@ -92,12 +92,10 @@ class SendPresenter @Inject constructor(
     //
 
     fun sendFunds() {
-        //TODO: prehaps grab the activity scope or let the sycnchronizer have scope and make that function not suspend
-        // also, we need to handle cancellations. So yeah, definitely do this differently
-        GlobalScope.launch {
+        view.mainActivity?.launch {
             twig("Process: cash.z.android.wallet. checking....")
             twig("Process: cash.z.android.wallet. is it null??? $sendUiModel")
-            synchronizer.sendToAddress(sendUiModel.zatoshiValue!!, sendUiModel.toAddress)
+            synchronizer.sendToAddress(sendUiModel.zatoshiValue!!, sendUiModel.toAddress, sendUiModel.memo)
         }
         view.exit()
     }
@@ -110,7 +108,21 @@ class SendPresenter @Inject constructor(
     /**
      * Called when the user has tapped on the button for toggling currency, swapping zec for usd
      */
-    fun inputToggleCurrency() {
+    fun inputToggleCurrency() { // modified for zcon1 to disable USD
+        // tricky: this is not really a model update, instead it is a byproduct of using `isUsdSelected` for the
+        // currency instead of strong types. There are several todo's to fix that. if we update the model here then
+        // the UI will think the user took action and display errors prematurely.
+        sendUiModel = sendUiModel.copy(isUsdSelected = false)
+        with(sendUiModel) {
+            view.setHeaders(
+                isUsdSelected = isUsdSelected,
+                headerString = if (isUsdSelected) usdValue.toUsdString() else zatoshiValue.convertZatoshiToZecString(),
+                subheaderString = if (isUsdSelected) zatoshiValue.convertZatoshiToZecString() else usdValue.toUsdString()
+            )
+        }
+    }
+
+    fun inputToggleCurrency_actual() {
         // tricky: this is not really a model update, instead it is a byproduct of using `isUsdSelected` for the
         // currency instead of strong types. There are several todo's to fix that. if we update the model here then
         // the UI will think the user took action and display errors prematurely.

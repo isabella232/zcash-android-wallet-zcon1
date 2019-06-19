@@ -1,15 +1,17 @@
 package cash.z.android.wallet.data
 
-import android.os.Handler
-import android.os.Looper
 import cash.z.android.wallet.data.db.PendingTransactionEntity
+import cash.z.android.wallet.sample.SeedGenerator
+import cash.z.android.wallet.ui.util.Analytics.Error.*
+import cash.z.android.wallet.ui.util.Analytics.trackError
 import cash.z.wallet.sdk.block.CompactBlockProcessor
+import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.data.PollingTransactionRepository
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.exception.WalletException
 import cash.z.wallet.sdk.secure.Wallet
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import javax.inject.Inject
@@ -21,40 +23,89 @@ import kotlin.coroutines.CoroutineContext
 @ExperimentalCoroutinesApi
 class StableSynchronizer @Inject constructor(
     private val wallet: Wallet,
-    private val encoder: RawTransactionEncoder,
+    private val ledger: PollingTransactionRepository,
     private val sender: TransactionSender,
-    private val processor: CompactBlockProcessor
+    private val processor: CompactBlockProcessor,
+    private val encoder: RawTransactionEncoder
 ) : DataSyncronizer {
 
     /** This listener will not be called on the main thread. So it will need to switch to do anything with UI, like dialogs */
     override var onCriticalErrorListener: ((Throwable) -> Boolean)? = null
 
     private var syncJob: Job? = null
+    private var clearedJob: Job? = null
+    private var pendingJob: Job? = null
 
     private val balanceChannel = ConflatedBroadcastChannel<Wallet.WalletBalance>()
     private val progressChannel = ConflatedBroadcastChannel<Int>()
     private val pendingChannel = ConflatedBroadcastChannel<List<PendingTransactionEntity>>()
+    private val clearedChannel = ConflatedBroadcastChannel<List<WalletTransaction>>()
 
     override val isConnected: Boolean get() = processor.isConnected
     override val isSyncing: Boolean get() = processor.isSyncing
     override val isScanning: Boolean get() = processor.isScanning
 
     override fun start(scope: CoroutineScope) {
-        twig("Staring sender!")
+        twig("Starting sender! with ${SeedGenerator.getDeviceId()}")
         try {
             wallet.initialize()
         } catch (e: WalletException.AlreadyInitializedException) {
             twig("Warning: wallet already initialized but this is safe to ignore " +
                     "because the SDK now automatically detects where to start downloading.")
         }
+        sender.onSubmissionError = ::onFailedSend
         sender.start(scope)
+        pendingJob = scope.launchPendingMonitor()
+        clearedJob = scope.launchClearedMonitor()
         syncJob = scope.onReady()
     }
 
+    // TODO: consider removing the need for stopping by wrapping everything in a job that gets cancelled
+    // probably just returning the job from start
     override fun stop() {
         sender.stop()
+        // TODO: consider wrapping these in another object that helps with cleanup like job.toScopedJob()
+        // it would keep a reference to the job and then clear that reference when the scope ends
         syncJob?.cancel().also { syncJob = null }
+        pendingJob?.cancel().also { pendingJob = null }
+        clearedJob?.cancel().also { clearedJob = null }
     }
+
+
+    //
+    // Monitors
+    //
+
+    // begin the monitor that will output pending transactions into the pending channel
+    private fun CoroutineScope.launchPendingMonitor(): Job? = launch {
+        // ask to be notified when the sender notices anything new, while attempting to send
+        sender.notifyOnChange(pendingChannel)
+
+        // when those notifications come in, also update the balance
+        val channel = pendingChannel.openSubscription()
+        for (pending in channel) {
+            if(balanceChannel.isClosedForSend) break
+            twig("triggering a balance update because pending transactions have changed")
+            balanceChannel.send(wallet.getBalanceInfo())
+        }
+        twig("done monitoring for pending changes and balance changes")
+    }
+
+    // begin the monitor that will output cleared transactions into the cleared channel
+    private fun CoroutineScope.launchClearedMonitor(): Job? = launch {
+        // poll for modifications and send them into the cleared channel
+        ledger.poll(clearedChannel, 10_000L)
+
+        // when those notifications come in, also update the balance
+        val channel = clearedChannel.openSubscription()
+        for (cleared in channel) {
+            if(balanceChannel.isClosedForSend) break
+            twig("triggering a balance update because cleared transactions have changed")
+            balanceChannel.send(wallet.getBalanceInfo())
+        }
+        twig("done monitoring for cleared changes and balance changes")
+    }
+
 
     private fun CoroutineScope.onReady() = launch(CoroutineExceptionHandler(::onCriticalError)) {
         twig("Synchronizer Ready. Starting processor!")
@@ -74,18 +125,32 @@ class StableSynchronizer @Inject constructor(
         onCriticalErrorListener?.invoke(error)
     }
 
-    var sameErrorCount = 0
+    var sameErrorCount = 1
     var processorErrorMessage: String? = ""
     private fun onProcessorError(error: Throwable): Boolean {
+        val dummyContext = CoroutineName("bob")
         if (processorErrorMessage == error.message) sameErrorCount++
-        if (sameErrorCount == 5 || sameErrorCount.rem(20) == 0) {
-            onCriticalError(CoroutineName("bob"), error)
+        val isFrequent = sameErrorCount.rem(25) == 0
+        when {
+            sameErrorCount == 5 -> onCriticalError(dummyContext, error)
+            isFrequent -> trackError(ProcessorRepeatedFailure(error, sameErrorCount))
+            sameErrorCount == 120 -> {
+                trackError(ProcessorMaxFailureReached(error))
+                Thread.sleep(500)
+                throw error
+            }
         }
+
 
         processorErrorMessage = error.message
         twig("synchronizer sees your error and ignores it, willfully! Keep retrying ($sameErrorCount), processor!")
         return true
     }
+
+    fun onFailedSend(throwable: Throwable) {
+        trackError(ErrorSubmitting(throwable))
+    }
+
 
     //
     // Channels
@@ -103,6 +168,18 @@ class StableSynchronizer @Inject constructor(
         return pendingChannel.openSubscription()
     }
 
+    override fun clearedTransactions(): ReceiveChannel<List<WalletTransaction>> {
+        return clearedChannel.openSubscription()
+    }
+
+    override fun getPending(): List<PendingTransactionEntity>? {
+        return pendingChannel.valueOrNull
+    }
+
+    override fun getBalance(): Wallet.WalletBalance? {
+        return balanceChannel.valueOrNull
+    }
+
 
     //
     // Send / Receive
@@ -115,38 +192,29 @@ class StableSynchronizer @Inject constructor(
         toAddress: String,
         memo: String,
         fromAccountId: Int
-    ) = withContext(IO) {
+    ): PendingTransactionEntity = withContext(IO) {
         sender.sendToAddress(encoder, zatoshi, toAddress, memo, fromAccountId)
     }
 
-
-//    override fun activeTransactions(): Flow<Pair<ActiveTransaction, TransactionState>> {
-//    }
-//
-//    override fun transactions(): Flow<WalletTransaction> {
-//    }
-//
-//    override fun progress(): Flow<Int> {
-//    }
-//
-//    override fun status(): Flow<FlowSynchronizer.SyncStatus> {
-//    }
-
 }
+
 
 interface DataSyncronizer {
     fun start(scope: CoroutineScope)
     fun stop()
 
     suspend fun getAddress(accountId: Int = 0): String
-    suspend fun sendToAddress(zatoshi: Long, toAddress: String, memo: String = "", fromAccountId: Int = 0)
+    suspend fun sendToAddress(zatoshi: Long, toAddress: String, memo: String = "", fromAccountId: Int = 0): PendingTransactionEntity
 
     fun balances(): ReceiveChannel<Wallet.WalletBalance>
     fun progress(): ReceiveChannel<Int>
     fun pendingTransactions(): ReceiveChannel<List<PendingTransactionEntity>>
+    fun clearedTransactions(): ReceiveChannel<List<WalletTransaction>>
 
     val isConnected: Boolean
     val isSyncing: Boolean
     val isScanning: Boolean
     var onCriticalErrorListener: ((Throwable) -> Boolean)?
+    fun getPending(): List<PendingTransactionEntity>?
+    fun getBalance(): Wallet.WalletBalance?
 }
