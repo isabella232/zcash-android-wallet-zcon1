@@ -71,13 +71,11 @@ class Broom(
         // TODO: maybe let this one live and make a new one?
         DATA_DB_PATH.absoluteFile.delete()
         val wallet = Wallet(
-            ZcashWalletApplication.instance,
-            rustBackend,
-            DATA_DB_PATH.absolutePath,
-            ZcashWalletApplication.instance.cacheDir.absolutePath,
-            arrayOf(0),
-            seedProvider,
-            Delegates.notNull()
+            context = ZcashWalletApplication.instance,
+            rustBackend = rustBackend,
+            dataDbName = DATA_DB_NAME,
+            seedProvider = seedProvider,
+            spendingKeyProvider = Delegates.notNull()
         ).also {
             tryIgnore {
                 it.initialize()

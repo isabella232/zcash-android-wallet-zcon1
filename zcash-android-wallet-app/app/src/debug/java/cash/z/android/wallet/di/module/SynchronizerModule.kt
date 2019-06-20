@@ -166,13 +166,11 @@ internal object SynchronizerModule {
         walletConfig: WalletConfig
     ): Wallet {
         return Wallet(
-            application,
-            rustBackend,
-            walletConfig.dataDbName.toDbPath(),
-            "${application.cacheDir.absolutePath}/params",
-            arrayOf(0),
-            walletConfig.seedProvider,
-            walletConfig.spendingKeyProvider
+            context = application,
+            rustBackend = rustBackend,
+            dataDbName = walletConfig.dataDbName,
+            seedProvider = walletConfig.seedProvider,
+            spendingKeyProvider = walletConfig.spendingKeyProvider
         )
     }
 
