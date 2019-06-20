@@ -6,6 +6,9 @@ import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.data.db.PendingTransactionDao
 import cash.z.android.wallet.data.db.PendingTransactionDb
 import cash.z.android.wallet.data.db.PendingTransactionEntity
+import cash.z.android.wallet.ui.util.Analytics
+import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.Redeemed
+import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.EXPIRY_OFFSET
 import cash.z.wallet.sdk.service.LightWalletService
@@ -138,10 +141,11 @@ class PersistentTransactionManager : TransactionManager {
     }
 
     suspend fun manageMined(pendingTx: PendingTransactionEntity, matchingMinedTx: PendingTransactionEntity) = withContext(IO) {
-        require(matchingMinedTx.minedHeight > 0) TODO: find why this breaks
+        require(matchingMinedTx.minedHeight > 0)
 
         requireDb()
         twig("a pending transaction has been mined!")
+        trackFunnelStep(Redeemed(pendingTx,true))
 
         val tx = pendingTx.copy(minedHeight = matchingMinedTx.minedHeight)
         dao?.insert(tx)

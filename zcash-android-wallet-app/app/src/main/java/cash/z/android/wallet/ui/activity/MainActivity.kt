@@ -106,9 +106,21 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     private fun onCriticalError(error: Throwable): Boolean {
         Handler(Looper.getMainLooper()).post {
+            //TODO proper error parsing, with strongly typed exceptions
+            var title: String? = null
+            var message: String? = null
+
+            when {
+                (error.message?.contains("UNAVAILABLE") == true) -> {
+                    title = "Server Error!"
+                    message = "Unable to reach the server. Either it is down or you are not connected to the internet."
+                }
+                else -> message = "WARNING: A criticallll error has occurred and " +
+                        "this app will not function properly until that is corrected!"
+            }
             alert(
-                message = "WARNING: A critical error has occurred and " +
-                        "this app will not function properly until that is corrected!",
+                title = title,
+                message = message,
                 positiveButtonResId = R.string.ignore,
                 negativeButtonResId = R.string.details,
                 negativeAction = { alert("Synchronization error:\n\n$error") }
@@ -477,8 +489,13 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
             message = "Are you sure you'd like to buy a ${product.name} for ${product.zatoshiValue.convertZatoshiToZecString(1)} TAZ?",
             positiveButtonResId = R.string.ok_allcaps,
             negativeButtonResId = R.string.cancel,
-            positiveAction = { sendPurchaseOrder(product) }
+            positiveAction = { sendPurchaseOrder(product) },
+            negativeAction = { onPurchaseCancelled(product) }
         )
+    }
+
+    private fun onPurchaseCancelled(product: Zcon1Store.CartItem) {
+        trackFunnelStep(CancelledPurchase(product))
     }
 
     private fun sendPurchaseOrder(item: Zcon1Store.CartItem) {

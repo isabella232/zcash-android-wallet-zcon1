@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorRes
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -45,6 +46,7 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
 
     fun bind(tx: WalletTransaction) {
         val isChip = tx.isPokerChip()
+        val isSwag = tx.isSend && (tx.memo ?: "").toLowerCase().contains("swag")
         val useSend = tx.isSend && !isChip
         val isHistory = icon != null
         val sign = if (useSend) "- " else "+ "
@@ -54,19 +56,33 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
         val zecAbsoluteValue = tx.value.absoluteValue + if(tx.isSend) MINERS_FEE_ZATOSHI else 0
         val toOrFrom = if (useSend) "to" else "from"
         val srcOrDestination = tx.address?.truncate() ?: "shielded address"
+
+        fun createActionText(): Pair<String, Int> {
+            return when {
+                tx.isSend && isChip -> "Scan" to R.color.text_light_dimmed
+                tx.isMined -> "$sign${zecAbsoluteValue.convertZatoshiToZecString(2)}" to amountColor
+                isSwag -> "Purchase" to R.color.text_light_dimmed
+                else -> "Pending" to R.color.text_light_dimmed
+            }
+        }
+
+        val actionText = createActionText()
         timestamp.text = if (tx.timeInSeconds == 0L) "Pending"
                          else (if (isHistory) formatter.format(tx.timeInSeconds * 1000) else (tx.timeInSeconds * 1000L).toRelativeTimeString())
-        amount.text = "$sign${zecAbsoluteValue.convertZatoshiToZecString(2)}"
-        amount.setTextColor(amountColor.toAppColor())
+        amount.text = actionText.first
+        amount.setTextColor(actionText.second.toAppColor())
 
         // maybes - and if this gets to be too much, then pass in a custom holder when constructing the adapter, instead
         status?.setBackgroundColor(transactionColor.toAppColor())
-        address?.text = if (tx.isSend) tx.status else "$toOrFrom $srcOrDestination"
+        address?.text = if (tx.isSend) {
+            if (isSwag && tx.isMined) "Purchase accepted."
+            else tx.status
+        } else "$toOrFrom $srcOrDestination"
         memo?.text = tx.memo
         icon?.setImageResource(transactionIcon)
     }
 }
 
 private fun WalletTransaction.isPokerChip(): Boolean {
-    return memo?.contains("Poker") == true
+    return memo?.contains("Poker Chip") == true
 }

@@ -138,11 +138,12 @@ class FirstrunFragment : ProgressFragment(R.id.progress_firstrun), Transition.Tr
     }
 
     private fun onSaveName(input: String): Boolean {
-        return if(input.all { it.isLetterOrDigit() }) {
-            prefs.edit().putString(ZcashWalletApplication.PREFS_PSEUDONYM, input).apply()
+        return if(input.isEmpty() || input.isBlank()) false
+        else {
+            prefs.edit()
+                .putString(ZcashWalletApplication.PREFS_PSEUDONYM, input.replace("\\W".toRegex(), "_"))
+                .apply()
             true
-        } else {
-            false
         }
     }
 

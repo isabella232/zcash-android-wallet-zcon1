@@ -6,8 +6,10 @@ import cash.z.android.wallet.PokerChip
 import cash.z.android.wallet.R
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.Zcon1Store
+import cash.z.android.wallet.data.db.PendingTransactionEntity
 import cash.z.android.wallet.extention.toAppString
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 
 /**
@@ -63,7 +65,7 @@ object Analytics {
         fun toProperties(): MutableMap<String, Any> {
             return mutableMapOf(
                 "deviceTimestamp" to deviceTimestamp(),
-                "pseudonym" to (pseudonym ?: "Unknown")
+                "pseudonym" to (pseudonym ?: getPseudonm() ?: "Unknown")
             )
         }
     }
@@ -125,6 +127,7 @@ object Analytics {
 
         open class PurchasedItem(cartItem: Zcon1Store.CartItem) : SelectedItem(cartItem)
         open class ConfirmedPurchase(cartItem: Zcon1Store.CartItem) : PurchasedItem(cartItem)
+        open class CancelledPurchase(cartItem: Zcon1Store.CartItem) : PurchasedItem(cartItem)
         open class TransactionCreated(val errorMessage: String?) : PurchaseFunnel() {
             override fun toProperties(): MutableMap<String, Any> {
                 return super.toProperties().apply {
@@ -171,7 +174,15 @@ object Analytics {
             }
         }
 
-        class Redeemed(chip: PokerChip, isSuccess: Boolean) : PokerChipFunnel(chip, isSuccess)
+        class Redeemed(private val tx: PendingTransactionEntity, isSuccess: Boolean) : PokerChipFunnel(tx.toChip(), isSuccess) {
+            override fun toProperties(): MutableMap<String, Any> {
+                return super.toProperties().apply {
+                    this["encodeAttempts"] = tx.encodeAttempts
+                    this["submitAttempts"] = tx.submitAttempts
+                    this["expiryHeight"] = tx.expiryHeight
+                }
+            }
+        }
 
         override fun toProperties(): MutableMap<String, Any> {
             return pokerChip.toProperties().apply {
@@ -184,6 +195,14 @@ object Analytics {
             return "${PokerChipFunnel::class.simpleName}.${javaClass.simpleName}"
         }
     }
+}
+
+private fun PendingTransactionEntity.toChip(): PokerChip {
+    return PokerChip(
+        "mined($minedHeight)-value(${value.convertZatoshiToZecString(2)})-memo($memo)",
+        System.currentTimeMillis(),
+        createTime
+    )
 }
 
 private fun PokerChip.toProperties(): MutableMap<String, Any> {

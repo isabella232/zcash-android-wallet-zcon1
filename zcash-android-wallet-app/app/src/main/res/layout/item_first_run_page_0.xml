@@ -65,6 +65,7 @@
         android:layout_width="0dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="48dp"
+        android:maxLength="128"
         android:paddingRight="8dp"
         android:paddingTop="0dp"
         android:singleLine="true"

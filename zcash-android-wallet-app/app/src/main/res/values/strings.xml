@@ -122,8 +122,8 @@
     <!-- Status Messages -->
     <string name="status_wallet_unfunded">Our wallet is unfunded! Let\'s get out there and earn some poker chips or convince a friend to send us some funds!</string>
     <string name="status_wallet_funds_available_for_swag">We have enough to buy some swag! Open the cart and pick some swag or maybe use this app\'s send feature to gift funds to a friend!</string>
-    <string name="status_wallet_incoming_funds">We have incoming funds that are awaiting confirmations in order to be available for spending.</string>
-    <string name="status_wallet_chips_pending">We are waiting for poker chips to finish funding. Once they are fully mined and confirmed, the funds will be available to use!</string>
+    <string name="status_wallet_incoming_funds">We have funds that are awaiting at least 20 network confirmations in order to be available for spending.</string>
+    <string name="status_wallet_chips_pending">We are waiting for poker chips to finish funding. Once they are fully mined and receive at least 20 network confirmations, the funds will be available to use!</string>
     <string name="status_wallet_generic">You really have the hang of this!</string>
 
     <string-array name="demo_user_names">

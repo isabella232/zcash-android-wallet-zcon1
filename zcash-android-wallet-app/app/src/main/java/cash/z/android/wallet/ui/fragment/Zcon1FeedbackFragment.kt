@@ -80,7 +80,7 @@ class Zcon1FeedbackFragment : BaseFragment() {
         val q1 = binding.inputQuestion1.editText?.text.toString()
         val q2 = binding.inputQuestion2.editText?.text.toString()
         val q3 = binding.inputQuestion3.editText?.text.toString()
-        val rating = ratings.indexOfFirst { it.isActivated }
+        val rating = ratings.indexOfFirst { it.isActivated } + 1
         trackFunnelStep(FeedbackFunnel.Submitted(rating, q1, q2, q3))
 
         mainActivity?.navController?.navigateUp()

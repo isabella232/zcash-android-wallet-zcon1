@@ -1,9 +1,6 @@
 package cash.z.android.wallet.data
 
-import cash.z.android.wallet.data.db.PendingTransactionEntity
-import cash.z.android.wallet.data.db.isMined
-import cash.z.android.wallet.data.db.isPending
-import cash.z.android.wallet.data.db.isSameTxId
+import cash.z.android.wallet.data.db.*
 import cash.z.android.wallet.extention.onErrorReturn
 import cash.z.android.wallet.extention.tryNull
 import cash.z.wallet.sdk.dao.WalletTransaction
@@ -44,7 +41,7 @@ class PersistentTransactionSender (
     private fun CoroutineScope.startActor() = actor<TransactionUpdateRequest> {
         var pendingTransactionDao = 0 // actor state:
         for (msg in channel) { // iterate over incoming messages
-            twig("actor received message: ${msg}")
+            twig("actor received message: ${msg.javaClass.simpleName}")
             when (msg) {
                 is SubmitPendingTx -> updatePendingTransactions()
                 is RefreshSentTx -> refreshSentTransactions()
@@ -178,33 +175,42 @@ class PersistentTransactionSender (
      * Submit all pending transactions that have not expired.
      */
     private suspend fun updatePendingTransactions() = withContext(IO) {
-        twig("received request to submit pending transactions")
-        val allTransactions = refreshSentTransactions()
-
-        var pendingCount = 0
-        val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
-        allTransactions.filter { !it.isMined() }.forEach { tx ->
-            if (tx.isPending(currentHeight)) {
-                pendingCount++
-                onErrorReturn(onSubmissionError ?: {}) {
-                    manager.manageSubmission(service, tx)
-                }
-            } else {
-                findMatchingClearedTx(tx)?.let {
-                    (manager as PersistentTransactionManager).manageMined(tx, it)
-                    refreshSentTransactions()
+        try {
+            twig("received request to submit pending transactions")
+            val allTransactions = refreshSentTransactions()
+            var pendingCount = 0
+            val currentHeight = tryNull { service.getLatestBlockHeight() } ?: -1
+            allTransactions.filter { !it.isMined() }.forEach { tx ->
+                if (tx.isPending(currentHeight)) {
+                    pendingCount++
+                    onErrorReturn(onSubmissionError ?: {}) {
+                        manager.manageSubmission(service, tx)
+                    }
+                } else if (tx.isPokerChip()) { // TODO: make more generic for any send with an address of this wallet
+                    findMatchingClearedTx(tx)?.let {
+                        (manager as PersistentTransactionManager).manageMined(tx, it)
+                        refreshSentTransactions()
+                    }
                 }
             }
+            twig("given current height $currentHeight, we found $pendingCount pending txs to submit")
+        } catch (t: Throwable) {
+            twig("Error during updatePendingTransactions: $t caused by ${t.cause}")
         }
-        twig("given current height $currentHeight, we found $pendingCount pending txs to submit")
     }
 
     private fun findMatchingClearedTx(tx: PendingTransactionEntity): PendingTransactionEntity? {
         return clearedTxProvider.getCleared().firstOrNull { clearedTx ->
-            tx.isSameTxId(clearedTx).apply {
-                twig("trying to map the memos like a rebel!!")
-                if(this) clearedTx.memo = tx.memo
-            }
+            // TODO: remove this troubleshooting code
+            if (tx.isSameTxId(clearedTx)) {
+                twig("found a matching cleared transaction with id: ${clearedTx.id}...")
+                if (clearedTx.height.let { it ?: 0 } <= 0) {
+                    twig("...but it didn't have a mined height. That probably shouldn't happen so investigate this.")
+                    false
+                } else {
+                    true
+                }
+            } else false
         }.toPendingTransactionEntity()
     }
 }

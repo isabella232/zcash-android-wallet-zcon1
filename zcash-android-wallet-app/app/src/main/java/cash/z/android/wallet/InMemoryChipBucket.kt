@@ -32,17 +32,17 @@ open class InMemoryChipBucket : ChipBucket {
     }
 
     override fun redeem(chip: PokerChip) {
-        if (!chip.isRedeemed()) {
-            chips.remove(chip)
-            chips.add(chip.copy(redeemed = System.currentTimeMillis()))
-            listener?.onBucketChanged(this)
-            Analytics.trackFunnelStep(
-                Analytics.PokerChipFunnel.Redeemed(
-                    chip,
-                    true
-                )
-            )
-        }
+//        if (!chip.isRedeemed()) {
+//            chips.remove(chip)
+//            chips.add(chip.copy(redeemed = System.currentTimeMillis()))
+//            listener?.onBucketChanged(this)
+//            Analytics.trackFunnelStep(
+//                Analytics.PokerChipFunnel.Redeemed(
+//                    chip,
+//                    true
+//                )
+//            )
+//        }
     }
 
     override fun forEach(block: (PokerChip) -> Unit) {
