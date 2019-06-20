@@ -89,6 +89,11 @@ class TransactionPresenter @Inject constructor(
             it.timeInSeconds
         }
         view.setTransactions(mergedTransactions)
+//        twig("MERGED_TX---------vvvvvv")
+//        mergedTransactions.forEach {
+//            twig("MERGED_TX: ${it.toString()}")
+//        }
+//        twig("MERGED_TX---------^^^^^^")
     }
 
 
@@ -103,7 +108,7 @@ private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
         isFailedEncoding() -> "Failed to create! Aborted."
         isFailedSubmit() -> "Failed to send...Retying!"
         isCreating() -> if (isPokerChip()) "Redeeming..." else "Creating transaction..."
-        isSubmitted() && !isMined() -> "Submitted to network."
+        isSubmitted() && !isMined() -> "Submitted, awaiting response."
         isSubmitted() && isMined() -> "Successfully mined!"
         else -> "Pending..."
     }

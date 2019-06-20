@@ -20,6 +20,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import cash.z.android.wallet.*
 import cash.z.android.wallet.data.DataSyncronizer
+import cash.z.android.wallet.data.StableSynchronizer
 import cash.z.android.wallet.data.db.isMined
 import cash.z.android.wallet.data.db.isSubmitted
 import cash.z.android.wallet.databinding.ActivityMainBinding
@@ -344,6 +345,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun onShowStatus() {
         launch {
+            (synchronizer as StableSynchronizer).refreshBalance()
             val balanceInfo = balancePresenter.lastBalance
             StatusDialog(
                 availableBalance = balanceInfo.available,

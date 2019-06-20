@@ -141,8 +141,6 @@ class PersistentTransactionManager : TransactionManager {
     }
 
     suspend fun manageMined(pendingTx: PendingTransactionEntity, matchingMinedTx: PendingTransactionEntity) = withContext(IO) {
-        require(matchingMinedTx.minedHeight > 0)
-
         requireDb()
         twig("a pending transaction has been mined!")
         trackFunnelStep(Redeemed(pendingTx,true))

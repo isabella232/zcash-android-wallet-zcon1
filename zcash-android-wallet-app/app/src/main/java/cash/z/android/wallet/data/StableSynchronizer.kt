@@ -131,7 +131,7 @@ class StableSynchronizer @Inject constructor(
         twig("done monitoring for cleared changes and balance changes")
     }
 
-    private suspend fun refreshBalance() {
+    suspend fun refreshBalance() = withContext(IO) {
         balanceChannel.send(wallet.getBalanceInfo())
     }
 

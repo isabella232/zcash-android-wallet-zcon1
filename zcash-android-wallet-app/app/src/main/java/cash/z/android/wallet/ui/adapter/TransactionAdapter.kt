@@ -60,9 +60,9 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
         fun createActionText(): Pair<String, Int> {
             return when {
                 tx.isSend && isChip -> "Scan" to R.color.text_light_dimmed
-                tx.isMined -> "$sign${zecAbsoluteValue.convertZatoshiToZecString(2)}" to amountColor
+                tx.isMined && !(tx.isSend && tx.noteId <= 0) -> "$sign${zecAbsoluteValue.convertZatoshiToZecString(2)}" to amountColor
                 isSwag -> "Purchase" to R.color.text_light_dimmed
-                else -> "Pending" to R.color.text_light_dimmed
+                else -> (if (tx.isSend) "Transfer" else "Pending") to R.color.text_light_dimmed
             }
         }
 
@@ -75,8 +75,10 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
         // maybes - and if this gets to be too much, then pass in a custom holder when constructing the adapter, instead
         status?.setBackgroundColor(transactionColor.toAppColor())
         address?.text = if (tx.isSend) {
-            if (isSwag && tx.isMined) "Purchase accepted."
-            else tx.status
+            if (tx.isMined) {
+                if (isSwag && tx.isMined && tx.status == null) "Purchase accepted."
+                else (if (tx.noteId > 0) "Transfer complete." else "Submitted to network.")
+            } else tx.status
         } else "$toOrFrom $srcOrDestination"
         memo?.text = tx.memo
         icon?.setImageResource(transactionIcon)

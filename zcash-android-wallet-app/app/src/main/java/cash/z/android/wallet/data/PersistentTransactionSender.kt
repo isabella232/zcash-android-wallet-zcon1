@@ -186,8 +186,9 @@ class PersistentTransactionSender (
                     onErrorReturn(onSubmissionError ?: {}) {
                         manager.manageSubmission(service, tx)
                     }
-                } else if (tx.isPokerChip()) { // TODO: make more generic for any send with an address of this wallet
+                } else {
                     findMatchingClearedTx(tx)?.let {
+                        twig("matching cleared transaction found!")
                         (manager as PersistentTransactionManager).manageMined(tx, it)
                         refreshSentTransactions()
                     }

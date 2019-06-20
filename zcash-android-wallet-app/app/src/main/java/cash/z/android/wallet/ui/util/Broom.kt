@@ -72,6 +72,7 @@ class Broom(
         DATA_DB_PATH.absoluteFile.delete()
         val wallet = Wallet(
             context = ZcashWalletApplication.instance,
+            birthday = Wallet.loadBirthdayFromAssets(ZcashWalletApplication.instance, 523240),
             rustBackend = rustBackend,
             dataDbName = DATA_DB_NAME,
             seedProvider = seedProvider,
