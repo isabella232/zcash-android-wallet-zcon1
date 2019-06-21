@@ -14,8 +14,8 @@ android {
         applicationId "cash.z.android.zcon1"
         minSdkVersion buildConfig.minSdkVersion
         targetSdkVersion buildConfig.targetSdkVersion
-        versionCode 1_00_00 // todo: change this to 1_00_04 format, once we graduate beyond zero for the major version number because leading zeros indicate on octal number.
-        versionName "1.0.0-alpha"
+        versionCode 1_00_01
+        versionName "1.0.1-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true

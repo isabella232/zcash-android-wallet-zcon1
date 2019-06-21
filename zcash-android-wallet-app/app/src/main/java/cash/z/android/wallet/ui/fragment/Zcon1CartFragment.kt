@@ -61,7 +61,7 @@ class Zcon1CartFragment : BaseFragment(), BalancePresenter.BalanceView {
             trackFunnelStep(SelectedItem(tee))
             showSwagDialog(tee)
         }
-        binding.listItemProduct1.button_select_journal.setOnClickListener {
+        binding.listItemProductPad.button_select_pad.setOnClickListener {
             val pad = Zcon1Store.CartItem.SwagPad(buyerName)
             trackFunnelStep(SelectedItem(pad))
             showSwagDialog(pad)

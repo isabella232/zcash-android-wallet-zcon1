@@ -20,14 +20,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_begin="32dp" />
+                app:layout_constraintGuide_begin="16dp" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline_content_end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_end="32dp" />
+                app:layout_constraintGuide_end="16dp" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline_content_balance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.306" />
 
             <ImageView
                 android:layout_width="match_parent"
@@ -51,24 +58,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                android:layout_marginStart="24dp"
                 android:textColor="@color/text_light"
                 android:textSize="@dimen/text_size_h3"
                 app:layout_constraintBottom_toBottomOf="@id/background_header"
                 app:layout_constraintStart_toStartOf="@id/guideline_content_start"
+                app:layout_constraintEnd_toEndOf="@id/guideline_content_balance"
                 tools:text="25" />
 
             <TextView
                 android:id="@+id/text_available"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorAccent"
-                android:textSize="@dimen/text_size_caption"
                 android:text="available funds"
                 android:textAllCaps="true"
-                app:layout_constraintTop_toBottomOf="@id/text_integer_digits"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/text_size_caption"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintTop_toBottomOf="@id/text_integer_digits" />
 
             <TextView
                 android:id="@+id/text_fractional_digits"
@@ -105,13 +112,13 @@
                 android:id="@+id/list_item_product_0"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:elevation="4dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/background_rounded_corners_opaque"
                 android:backgroundTint="@color/colorPrimaryDark"
-                android:paddingTop="16dp"
-                android:paddingLeft="16dp"
-                android:paddingBottom="16dp"
+                android:elevation="4dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="12dp"
                 app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
                 app:layout_constraintStart_toStartOf="@id/guideline_content_start"
                 app:layout_constraintTop_toBottomOf="@id/background_header">
@@ -124,27 +131,32 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="W,1:1"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/text_item_name"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintHorizontal_weight="2"
                     app:srcCompat="@drawable/swag_tee" />
 
                 <TextView
                     android:id="@+id/text_item_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="8dp"
+                    style="@style/TextAppearance.MaterialComponents.Body2"
                     android:fontFamily="sans-serif-thin"
                     android:text="Electric Coin Company"
                     android:textColor="@color/text_light"
-                    android:textSize="14dp"
+                    android:textFontWeight="1"
+                    app:layout_constraintHorizontal_weight="4"
                     app:layout_constraintStart_toEndOf="@id/swag_image"
+                    app:layout_constraintEnd_toStartOf="@id/divider_vertical"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/text_item_name_2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-
+                    android:layout_marginLeft="8dp"
                     android:fontFamily="sans-serif-thin"
                     android:text="T-Shirt"
                     android:textColor="@color/text_light"
@@ -167,116 +179,138 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="8dp"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:text="20 TAZ"
                     android:textColor="@color/text_light"
-                    android:textSize="22dp"
                     app:layout_constraintStart_toEndOf="@id/swag_image"
                     app:layout_constraintTop_toBottomOf="@id/text_item_name_2" />
 
-                <Button
-                    android:id="@+id/button_select_shirt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    style="@style/Zcash.Button.Alert"
-                    android:text="Select"
-                    android:textAllCaps="true"
-                    android:textSize="12dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
                 <View
                     android:id="@+id/divider_vertical"
                     android:layout_width="1dp"
                     android:layout_height="0dp"
                     android:alpha="0.5"
                     android:background="@color/zcashPurple_accent"
-                    app:layout_constraintStart_toStartOf="@id/button_select_shirt"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/text_item_name"
+                    app:layout_constraintEnd_toStartOf="@id/button_select_shirt"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Button
+                    android:id="@+id/button_select_shirt"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    style="@style/Zcash.Button.Alert"
+                    android:text="Select"
+                    android:textAllCaps="true"
+                    android:textSize="12dp"
+                    android:paddingLeft="0dp"
+                    android:paddingRight="0dp"
+                    app:layout_constraintHorizontal_weight="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/divider_vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/list_item_product_1"
+                android:id="@+id/list_item_product_pad"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:elevation="4dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/background_rounded_corners_opaque"
                 android:backgroundTint="@color/colorPrimaryDark"
-                android:paddingTop="16dp"
-                android:paddingLeft="16dp"
-                android:paddingBottom="16dp"
+                android:elevation="4dp"
+                android:paddingBottom="12dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="12dp"
                 app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
                 app:layout_constraintStart_toStartOf="@id/guideline_content_start"
                 app:layout_constraintTop_toBottomOf="@id/list_item_product_0">
 
                 <ImageView
-                    android:id="@+id/swag_image_two"
+                    android:id="@+id/swag_image_pad"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:tint="@color/zcashBlack_12"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="W,1:1"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/text_item_name_pad"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintHorizontal_weight="2"
                     app:srcCompat="@drawable/swag_pad" />
 
                 <TextView
-                    android:id="@+id/text_item_name_two"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/text_item_name_pad"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="8dp"
+                    style="@style/TextAppearance.MaterialComponents.Body2"
                     android:fontFamily="sans-serif-thin"
                     android:text="Electric Coin Company"
                     android:textColor="@color/text_light"
-                    android:textSize="14dp"
-                    app:layout_constraintStart_toEndOf="@id/swag_image_two"
+                    android:textFontWeight="1"
+                    app:layout_constraintHorizontal_weight="4"
+                    app:layout_constraintStart_toEndOf="@id/swag_image_pad"
+                    app:layout_constraintEnd_toStartOf="@id/divider_vertical_pad"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/text_item_name_2_two"
+                    android:id="@+id/text_item_name_2_pad"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-
+                    android:layout_marginLeft="8dp"
                     android:fontFamily="sans-serif-thin"
                     android:text="Moleskine® Notebook"
                     android:textColor="@color/text_light"
                     android:textSize="14dp"
-                    app:layout_constraintStart_toEndOf="@id/swag_image_two"
-                    app:layout_constraintTop_toBottomOf="@id/text_item_name_two" />
+                    app:layout_constraintStart_toEndOf="@id/swag_image_pad"
+                    app:layout_constraintTop_toBottomOf="@id/text_item_name_pad" />
+
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
+                    android:layout_marginLeft="8dp"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:text="35 TAZ"
                     android:textColor="@color/text_light"
-                    android:textSize="22dp"
-                    app:layout_constraintStart_toEndOf="@id/swag_image_two"
-                    app:layout_constraintTop_toBottomOf="@id/text_item_name_2_two" />
+                    app:layout_constraintStart_toEndOf="@id/swag_image_pad"
+                    app:layout_constraintTop_toBottomOf="@id/text_item_name_2_pad" />
+
+                <View
+                    android:id="@+id/divider_vertical_pad"
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:alpha="0.5"
+                    android:background="@color/zcashPurple_accent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/text_item_name_pad"
+                    app:layout_constraintEnd_toStartOf="@id/button_select_pad"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <Button
-                    android:id="@+id/button_select_journal"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/button_select_pad"
+                    android:layout_width="0dp"
                     android:layout_height="0dp"
                     style="@style/Zcash.Button.Alert"
                     android:text="Select"
                     android:textAllCaps="true"
                     android:textSize="12dp"
-                    app:layout_constraintTop_toTopOf="parent"
+                    android:paddingLeft="0dp"
+                    android:paddingRight="0dp"
+                    app:layout_constraintHorizontal_weight="2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/divider_vertical_pad"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-                <View
-                    android:id="@+id/divider_vertical_two"
-                    android:layout_width="1dp"
-                    android:layout_height="0dp"
-                    android:alpha="0.5"
-                    android:background="@color/zcashPurple_accent"
-                    app:layout_constraintStart_toStartOf="@id/button_select_journal"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
+                    app:layout_constraintTop_toTopOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <TextView
                 android:id="@+id/text_info"
                 android:layout_width="0dp"
@@ -289,7 +323,7 @@
                 android:textSize="@dimen/text_size_body_1"
                 app:layout_constraintEnd_toEndOf="@id/guideline_content_end"
                 app:layout_constraintStart_toStartOf="@id/guideline_content_start"
-                app:layout_constraintTop_toBottomOf="@+id/list_item_product_1" />
+                app:layout_constraintTop_toBottomOf="@+id/list_item_product_pad" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
