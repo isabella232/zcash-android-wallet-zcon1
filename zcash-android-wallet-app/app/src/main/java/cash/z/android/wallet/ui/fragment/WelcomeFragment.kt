@@ -1,6 +1,7 @@
 package cash.z.android.wallet.ui.fragment
 
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.FragmentNavigatorExtras
+import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.R
 import cash.z.android.wallet.ZcashWalletApplication.Companion.PREFS_PSEUDONYM
 import cash.z.android.wallet.databinding.FragmentZcon1WelcomeBinding
@@ -52,6 +54,7 @@ class WelcomeFragment : ProgressFragment(R.id.progress_welcome) {
         binding.lottieEccLogo.doOnComplete {
             launch { onNext() }
         }
+        binding.textWelcomeBuildInfo.text = "This application is running on testnet\nand only uses TAZ funds.\nVersion: ${BuildConfig.VERSION_NAME}"
     }
 
     override fun onResume() {

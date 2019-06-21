@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="This application is running on testnet\nand only uses TAZ funds."
+            tools:text="This application is running on testnet\nand only uses TAZ funds."
             android:textColor="@color/text_light_dimmed"
             android:textSize="14dp"
             app:layout_constraintBottom_toBottomOf="parent"
