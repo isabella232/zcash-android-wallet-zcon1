@@ -14,8 +14,8 @@ android {
         applicationId "cash.z.android.zcon1"
         minSdkVersion buildConfig.minSdkVersion
         targetSdkVersion buildConfig.targetSdkVersion
-        versionCode 1_00_02
-        versionName "1.0.2-alpha"
+        versionCode 1_00_03
+        versionName "1.0.3-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true
@@ -57,7 +57,7 @@ android {
     signingConfigs {
         debug {
             debug {
-                storeFile file("zcon1.keystore")
+                storeFile file("debug.keystore")
                 keyAlias "androiddebugkey"
                 keyPassword "android"
                 storePassword "android"

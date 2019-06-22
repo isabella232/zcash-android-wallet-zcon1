@@ -9,99 +9,92 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container_dialog"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingEnd="16dp"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingTop="16dp">
 
-        <ScrollView
-            android:id="@+id/swag_container"
+        <ImageView
+            android:id="@+id/swag_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:tint="@color/zcashBlack_12"
+            app:layout_constraintDimensionRatio="W,1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_default="percent"
+            app:layout_constraintHeight_percent="0.38"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@drawable/swag_pad" />
+
+        <TextView
+            android:id="@+id/swag_header"
             android:layout_width="wrap_content"
-            android:layout_height="548dp"
-            android:fillViewport="true"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-thin"
+            android:text="Electric Coin Company"
+            android:textAllCaps="true"
+            android:textColor="@color/text_light"
+            android:textSize="@dimen/text_size_subtitle_1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/swag_image" />
+
+
+        <TextView
+            android:id="@+id/swag_product"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/TextAppearance.MaterialComponents.Headline5"
+            android:fontFamily="sans-serif-thin"
+            android:textAllCaps="true"
+            android:textColor="@color/text_light"
+            android:textFontWeight="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/swag_header"
+            tools:text="Tee Shirt" />
+
+        <TextView
+            android:id="@+id/swag_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-thin"
+            android:textAllCaps="true"
+            android:textColor="@color/text_light"
+            android:textSize="@dimen/text_size_h5"
+            app:layout_constraintBaseline_toBaselineOf="@id/swag_product"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="20 TAZ" />
+
+        <TextView
+            android:id="@+id/swag_description"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:textColor="@color/text_light"
+            android:textSize="@dimen/text_size_body_2"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="6sp"
+            app:autoSizeMaxTextSize="16sp"
+            app:autoSizeStepGranularity="2sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ImageView
-                    android:id="@+id/swag_image"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:tint="@color/zcashBlack_12"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:srcCompat="@drawable/swag_pad" />
-
-                <TextView
-                    android:id="@+id/swag_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:fontFamily="sans-serif-thin"
-                    android:text="Electric Coin Company"
-                    android:textAllCaps="true"
-                    android:textColor="@color/text_light"
-                    android:textSize="@dimen/text_size_subtitle_1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/swag_image" />
-
-                <TextView
-                    android:id="@+id/swag_product"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-thin"
-                    android:textAllCaps="true"
-                    android:textColor="@color/text_light"
-                    android:textSize="@dimen/text_size_h5"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/swag_header"
-                    tools:text="Tee Shirt" />
-
-                <TextView
-                    android:id="@+id/swag_price"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="sans-serif-thin"
-                    android:textAllCaps="true"
-                    android:textColor="@color/text_light"
-                    android:textSize="@dimen/text_size_h5"
-                    app:layout_constraintBaseline_toBaselineOf="@id/swag_product"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    tools:text="20 TAZ" />
-
-                <TextView
-                    android:id="@+id/swag_description"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:textColor="@color/text_light"
-                    android:textSize="@dimen/text_size_body_2"
-                    app:layout_constraintEnd_toEndOf="@id/swag_image"
-                    app:layout_constraintStart_toStartOf="@+id/swag_image"
-                    app:layout_constraintTop_toBottomOf="@+id/swag_product"
-                    tools:text="@string/swag_tee_description" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </ScrollView>
+            app:layout_constraintTop_toBottomOf="@+id/swag_product"
+            app:layout_constraintBottom_toTopOf="@id/button_purchase"
+            tools:text="@string/swag_tee_description" />
 
         <Button
             android:id="@+id/button_purchase"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="purchase"
             style="@style/Zcash.Button.Alert"
-            app:layout_constraintBottom_toBottomOf="@id/swag_container"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:text="purchase"
+            app:layout_constraintBottom_toBottomOf="@id/container_dialog"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="16dp"/>
 
         <Button
             android:id="@+id/button_cancel"

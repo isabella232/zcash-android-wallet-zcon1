@@ -1,24 +1,46 @@
 {
   "project_info": {
-    "project_number": "dummyValue",
-    "firebase_url": "https://dummyValue",
-    "project_id": "dummyValue",
-    "storage_bucket": "dummyValue"
+    "project_number": "301603887640",
+    "firebase_url": "https://zcash-android-reference-zcon1.firebaseio.com",
+    "project_id": "zcash-android-reference-zcon1",
+    "storage_bucket": "zcash-android-reference-zcon1.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1:android:cafebabe",
+        "mobilesdk_app_id": "1:301603887640:android:fc65732ca2177c40",
         "android_client_info": {
           "package_name": "cash.z.android.zcon1.testnet"
         }
       },
+      "oauth_client": [
+        {
+          "client_id": "301603887640-kn34hbfiaeq8pftnhs1r5hi4v09tr95g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "cash.z.android.zcon1.testnet",
+            "certificate_hash": "0fc00c7fed72121c262a30ba0e141b326982da94"
+          }
+        },
+        {
+          "client_id": "301603887640-mkdgkt2k3g479l7ocmdbkudder2olt44.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "dummyValue"
+          "current_key": "AIzaSyBZLWvxc5Kzsytl6lOX0yvL47DP1ntRxLM"
         }
       ],
       "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "301603887640-mkdgkt2k3g479l7ocmdbkudder2olt44.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
       }
     }
   ],

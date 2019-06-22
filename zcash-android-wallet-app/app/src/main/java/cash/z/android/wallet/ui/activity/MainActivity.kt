@@ -22,6 +22,7 @@ import cash.z.android.wallet.*
 import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.data.StableSynchronizer
 import cash.z.android.wallet.data.db.isMined
+import cash.z.android.wallet.data.db.isPokerChip
 import cash.z.android.wallet.data.db.isSubmitted
 import cash.z.android.wallet.databinding.ActivityMainBinding
 import cash.z.android.wallet.di.annotation.ActivityScope
@@ -43,6 +44,7 @@ import cash.z.android.wallet.ui.util.Analytics.trackAction
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
@@ -487,13 +489,27 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun buyProduct(product: Zcon1Store.CartItem) {
         trackFunnelStep(PurchasedItem(product))
-        alert(
-            message = "Are you sure you'd like to buy a ${product.name} for ${product.zatoshiValue.convertZatoshiToZecString(1)} TAZ?",
-            positiveButtonResId = R.string.ok_allcaps,
-            negativeButtonResId = R.string.cancel,
-            positiveAction = { sendPurchaseOrder(product) },
-            negativeAction = { onPurchaseCancelled(product) }
-        )
+        val balance = (synchronizer as StableSynchronizer).getBalance()
+        if (balance.available < (product.zatoshiValue + MINERS_FEE_ZATOSHI)) {
+            val message = if (balance.total >= (product.zatoshiValue + MINERS_FEE_ZATOSHI)) {
+                "Sorry, some of your funds are still awaiting 20 network confirmations before they are available for spending! Try again after your \"amount syncing\" is zero."
+            } else {
+                "Sorry, you do not have enough funds available for this purchase.\n\nMaybe find poker chips or convince a friend to send you funds by scanning your QR code on the previous tab."
+            }
+            alert(
+                title = "Oops. Insufficient funds!",
+                message = message,
+                positiveButtonResId = R.string.ok_allcaps
+            )
+        } else {
+            alert(
+                message = "Are you sure you'd like to buy a ${product.name} for ${product.zatoshiValue.convertZatoshiToZecString(1)} TAZ?",
+                positiveButtonResId = R.string.ok_allcaps,
+                negativeButtonResId = R.string.cancel,
+                positiveAction = { sendPurchaseOrder(product) },
+                negativeAction = { onPurchaseCancelled(product) }
+            )
+        }
     }
 
     private fun onPurchaseCancelled(product: Zcon1Store.CartItem) {
@@ -546,7 +562,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun calculatePendingChipBalance(): Long {
         return synchronizer.getPending()?.filter {
-                it.memo.contains("Poker Chip") && !it.isMined()
+                it.isPokerChip() && !it.isMined()
             }?.fold(0L) { acc, item ->
                 acc + item.value
             } ?: 0L

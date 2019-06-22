@@ -199,7 +199,7 @@ object Analytics {
 
 private fun PendingTransactionEntity.toChip(): PokerChip {
     return PokerChip(
-        "mined($minedHeight)-value(${value.convertZatoshiToZecString(2)})-memo($memo)",
+        "r-mined($minedHeight)value(${value.convertZatoshiToZecString(2)})-memo($memo)",
         System.currentTimeMillis(),
         createTime
     )
