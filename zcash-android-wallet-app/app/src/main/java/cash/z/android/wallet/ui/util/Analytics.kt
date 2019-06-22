@@ -53,6 +53,16 @@ object Analytics {
             .getString(ZcashWalletApplication.PREFS_PSEUDONYM, null).also { pseudonym = it }
     }
 
+    fun trackCrash(error: Throwable?, otherInfo: String) {
+        mixpanel.trackMap("AppCrashed", mapOf(
+            "otherInfo" to otherInfo,
+            "error" to error,
+            "cause" to error?.cause,
+            "cause2" to error?.cause?.cause,
+            "cause3" to error?.cause?.cause?.cause
+        ))
+    }
+
     /**
      * An action is an event with no properties other than timestamp
      */

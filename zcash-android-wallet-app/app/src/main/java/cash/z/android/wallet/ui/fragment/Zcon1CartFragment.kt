@@ -13,8 +13,7 @@ import cash.z.android.wallet.databinding.FragmentZcon1CartBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.dialog.Zcon1SwagDialog
 import cash.z.android.wallet.ui.presenter.BalancePresenter
-import cash.z.android.wallet.ui.util.Analytics
-import cash.z.android.wallet.ui.util.Analytics.PurchaseFunnel.*
+import cash.z.android.wallet.ui.util.Analytics.PurchaseFunnel.SelectedItem
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
@@ -22,7 +21,6 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.android.synthetic.main.fragment_zcon1_cart.view.*
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
 /**

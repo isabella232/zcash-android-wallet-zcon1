@@ -106,7 +106,7 @@ class TransactionPresenter @Inject constructor(
 private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
     var description = when {
         isFailedEncoding() -> "Failed to create! Aborted."
-        isFailedSubmit() -> "Failed to send...Retying!"
+        isFailedSubmit() -> "Failed to send...Retrying!"
         isCreating() -> if (isPokerChip()) "Redeeming..." else "Creating transaction..."
         isSubmitted() && !isMined() -> "Submitted, awaiting response."
         isSubmitted() && isMined() -> "Successfully mined!"

@@ -41,6 +41,7 @@ import cash.z.android.wallet.ui.util.Analytics.PokerChipFunnel.StartSweep
 import cash.z.android.wallet.ui.util.Analytics.PurchaseFunnel.*
 import cash.z.android.wallet.ui.util.Analytics.Tap.*
 import cash.z.android.wallet.ui.util.Analytics.trackAction
+import cash.z.android.wallet.ui.util.Analytics.trackCrash
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.data.twig
@@ -49,7 +50,9 @@ import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.RuntimeException
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -328,15 +331,25 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     fun onScanQr(view: View) {
-        trackAction(TAPPED_SCAN_QR_HOME)
-        val isFirstRun = view.id == R.id.button_first_run_scan
-        if(isFirstRun) {
-            navController.navigate(R.id.nav_zcon1_home_fragment)
+        try {
+            trackAction(TAPPED_SCAN_QR_HOME)
+            val isFirstRun = view.id == R.id.button_first_run_scan
+            if (isFirstRun) {
+                navController.navigate(R.id.nav_zcon1_home_fragment)
+            }
+            supportFragmentManager.beginTransaction()
+                .add(R.id.camera_placeholder, ScanFragment(), "camera_fragment")
+                .addToBackStack("camera_fragment_scanning")
+                .commit()
+        } catch (t: Throwable) {
+            Toaster.long("Error opening scanner on this device! This error has been reported. Thanks for testing the beta app!")
+            trackCrash(t, "Crash while scanning qr code")
+            launch {
+                delay(1000L)
+                Analytics.clear()
+                exitScanMode()
+            }
         }
-        supportFragmentManager.beginTransaction()
-            .add(R.id.camera_placeholder, ScanFragment(), "camera_fragment")
-            .addToBackStack("camera_fragment_scanning")
-            .commit()
     }
 
     fun onSendFeedback(view: View) {

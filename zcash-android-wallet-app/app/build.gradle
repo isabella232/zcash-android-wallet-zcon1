@@ -14,8 +14,8 @@ android {
         applicationId "cash.z.android.zcon1"
         minSdkVersion buildConfig.minSdkVersion
         targetSdkVersion buildConfig.targetSdkVersion
-        versionCode 1_00_03
-        versionName "1.0.3-alpha"
+        versionCode 1_00_04
+        versionName "1.0.4-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true
