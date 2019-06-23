@@ -11,6 +11,9 @@ import cash.z.android.wallet.extention.toAppString
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import com.mixpanel.android.mpmetrics.MixpanelAPI
+import java.io.PrintWriter
+import java.io.StringWriter
+
 
 /**
  * Since this is, effectively, an internal QA build and only runs on testnet with test funds, we use Analytics to get
@@ -54,13 +57,19 @@ object Analytics {
     }
 
     fun trackCrash(error: Throwable?, otherInfo: String) {
-        mixpanel.trackMap("AppCrashed", mapOf(
+        val stringWriter = StringWriter()
+        error?.printStackTrace(PrintWriter(stringWriter))
+        val properties = mutableMapOf<String, Any>(
             "otherInfo" to otherInfo,
-            "error" to error,
-            "cause" to error?.cause,
-            "cause2" to error?.cause?.cause,
-            "cause3" to error?.cause?.cause?.cause
-        ))
+            "error" to "$error",
+            "cause" to "${error?.cause}",
+            "cause2" to "${error?.cause?.cause}",
+            "cause3" to "${error?.cause?.cause?.cause}"
+        )
+        stringWriter.toString().chunked(250).forEachIndexed { index, chunk ->
+            properties["stacktrace$index"] = chunk
+        }
+        mixpanel.trackMap("AppCrashed", properties)
     }
 
     /**

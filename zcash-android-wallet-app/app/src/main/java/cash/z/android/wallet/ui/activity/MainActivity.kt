@@ -121,7 +121,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
                     title = "Server Error!"
                     message = "Unable to reach the server. Either it is down or you are not connected to the internet."
                 }
-                else -> message = "WARNING: A criticallll error has occurred and " +
+                else -> message = "WARNING: A critical error has occurred and " +
                         "this app will not function properly until that is corrected!"
             }
             alert(
