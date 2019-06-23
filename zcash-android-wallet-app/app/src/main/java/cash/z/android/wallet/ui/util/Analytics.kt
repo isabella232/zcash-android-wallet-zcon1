@@ -60,6 +60,7 @@ object Analytics {
         val stringWriter = StringWriter()
         error?.printStackTrace(PrintWriter(stringWriter))
         val properties = mutableMapOf<String, Any>(
+            "deviceTimestamp" to System.currentTimeMillis(),
             "otherInfo" to otherInfo,
             "error" to "$error",
             "cause" to "${error?.cause}",

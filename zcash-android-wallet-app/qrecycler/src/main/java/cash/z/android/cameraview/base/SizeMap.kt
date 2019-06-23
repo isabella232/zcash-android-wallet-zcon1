@@ -66,8 +66,10 @@ internal class SizeMap {
      *
      * @param ratio The aspect ratio to be removed.
      */
-    fun remove(ratio: AspectRatio) {
-        mRatios.remove(ratio)
+    fun remove(ratio: AspectRatio?) {
+        if (ratio != null) {
+            mRatios.remove(ratio)
+        }
     }
 
     fun ratios(): Set<AspectRatio> {
