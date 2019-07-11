@@ -316,6 +316,15 @@
                 app:layout_constraintEnd_toEndOf="@id/text_area_memo"
                 app:layout_constraintTop_toBottomOf="@id/text_area_memo" />
 
+            <Button
+                android:id="@+id/button_share_zec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="16dp"
+                android:text="SHARE TAZ"
+                app:layout_constraintTop_toTopOf="@id/button_send_zec"
+                app:layout_constraintEnd_toStartOf="@id/button_send_zec"/>
+
             <ProgressBar
                 android:id="@+id/progress_send"
                 android:layout_width="wrap_content"

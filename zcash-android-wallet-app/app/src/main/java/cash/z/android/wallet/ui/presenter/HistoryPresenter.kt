@@ -1,22 +1,18 @@
 package cash.z.android.wallet.ui.presenter
 
-import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.fragment.HistoryFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.dao.WalletTransaction
-import cash.z.wallet.sdk.data.Synchronizer
+import cash.z.wallet.sdk.data.DataSyncronizer
 import cash.z.wallet.sdk.data.twig
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 class HistoryPresenter @Inject constructor(
     private val view: HistoryFragment,

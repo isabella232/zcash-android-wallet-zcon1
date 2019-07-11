@@ -1,6 +1,8 @@
 package cash.z.android.wallet.ui.fragment
 
 import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Spanned
@@ -12,24 +14,27 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.ColorRes
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.text.toSpannable
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.R
+import cash.z.android.wallet.data.SendReceiver
 import cash.z.android.wallet.databinding.FragmentSendBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.*
 import cash.z.android.wallet.sample.SampleProperties
 import cash.z.android.wallet.ui.presenter.SendPresenter
 import cash.z.android.wallet.ui.presenter.SendPresenterModule
+import cash.z.android.wallet.ui.util.Analytics
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -159,6 +164,7 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
     /**
      * Initialize view logic only. Click listeners, text change handlers and tooltips.
      */
+    @SuppressLint("NewApi")
     private fun init() {
 
         /* Init - Text Input */
@@ -187,6 +193,30 @@ class SendFragment : BaseFragment(), SendPresenter.SendView, ScanFragment.Barcod
         binding.buttonSendZec.setOnClickListener{
             exitScanMode()
             sendPresenter.inputSendPressed()
+        }
+
+
+        binding.buttonShareZec.setOnClickListener{
+            exitScanMode()
+            val amount = binding.textValueHeader.text.toString()
+            val name = Analytics.getPseudonm()
+            val uuid = UUID.randomUUID()
+
+
+            if (sendPresenter.inputHeaderUpdated(amount)) {
+                val receiver = Intent(mainActivity!!, SendReceiver::class.java)
+                    .putExtra("name", name)
+                    .putExtra("amount", amount)
+                    .putExtra("uuid", uuid.toString())
+                val pendingIntent = PendingIntent.getBroadcast(context, 0, receiver, PendingIntent.FLAG_UPDATE_CURRENT)
+                val shareIntent = ShareCompat.IntentBuilder.from(activity)
+                    .setType("text/plain")
+                    .setText("I'm sending you $amount TAZ!\nhttps://z.cash/send/$name/$amount/$uuid\n\nClick here to download a wallet to hold it: https://github.com/zcash-hackworks/zcash-android-wallet-zcon1/releases/download/1.0.7/Zcon1-PoC.apk")
+                    .getIntent()
+                startActivity(Intent.createChooser(shareIntent, "Share $amount TAZ with:", pendingIntent.intentSender))
+            } else {
+                mainActivity?.alert("Sorry, not enough funds available to share $amount TAZ.")
+            }
         }
 
         // allow background taps to dismiss the keyboard and clear focus

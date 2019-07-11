@@ -7,6 +7,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'deploygate'
 apply plugin: 'com.github.ben-manes.versions'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'androidx.navigation.safeargs.kotlin'
 
 android {
     compileSdkVersion buildConfig.compileSdkVersion
@@ -14,8 +15,8 @@ android {
         applicationId "cash.z.android.zcon1"
         minSdkVersion buildConfig.minSdkVersion
         targetSdkVersion buildConfig.targetSdkVersion
-        versionCode 1_00_06
-        versionName "1.0.6-alpha"
+        versionCode 1_00_08
+        versionName "1.0.8-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         vectorDrawables.useSupportLibrary = true
@@ -90,8 +91,9 @@ dependencies {
     implementation deps.androidx.navigation.uiKtx
     implementation deps.material
     implementation deps.androidx.multidex
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha01"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha01" // provides lifecycleScope!
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.2.0-alpha02"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha02" // provides lifecycleScope!
+
 
     // Kotlin
     implementation deps.kotlin.stdlib

@@ -5,15 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cash.z.android.wallet.*
 import cash.z.android.wallet.databinding.FragmentZcon1HomeBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
+import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
-import cash.z.android.wallet.ui.dialog.StatusDialog
 import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenterModule
@@ -48,6 +48,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     private var transactions: List<WalletTransaction> = emptyList()
 
 
+
     //
     // LifeCycle
     //
@@ -66,6 +67,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+//        Toaster.short("Found args: $navArguments")
+//        Toaster.long("arguments: ${arguments?.getString("sender")}")
         binding.backgroundBalanceImage.setOnClickListener {
             mainActivity?.onShowStatus()
         }
@@ -90,6 +93,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
             else -> {
                 statusColor = R.color.zcashGreen
                 statusMessage = "synced"
+                mainActivity?.handleDeepLink()
             }
         }
 

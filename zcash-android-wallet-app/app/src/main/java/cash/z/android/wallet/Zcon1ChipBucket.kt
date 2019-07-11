@@ -1,6 +1,10 @@
 package cash.z.android.wallet
 
-import cash.z.wallet.sdk.ext.ZATOSHI
+import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
+import cash.z.wallet.sdk.ext.ZATOSHI_PER_ZEC
+import cash.z.wallet.sdk.ext.convertZecToZatoshi
+import cash.z.wallet.sdk.ext.safelyConvertToBigDecimal
+import java.lang.IllegalStateException
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -31,7 +35,7 @@ data class PokerChip(val id: String = "", var redeemed: Long = -1L, val created:
     constructor(id: String) : this(id, created = System.currentTimeMillis())
 
     init {
-        require(id.startsWith("r-") || id.startsWith("b-"))
+        require(id.startsWith("r-") || id.startsWith("b-") || id.startsWith("c-"))
     }
 
     val maskedId: String get() = id.split("-").let { "${it[0]}-${it[1]}-${it[2]}-**masked**" }
@@ -51,14 +55,28 @@ data class PokerChip(val id: String = "", var redeemed: Long = -1L, val created:
         return other is PokerChip && other.id == id
     }
 
-    enum class ChipColor(val zatoshiValue: Long, val idPrefix: String, val colorName: String) {
-        RED(5L * ZATOSHI, "r-", "Red"),
-        BLACK(25L * ZATOSHI, "b-", "Black");
+
+    sealed class ChipColor(val zatoshiValue: Long, val idPrefix: String, val colorName: String) {
+        object RED : ChipColor(5L * ZATOSHI_PER_ZEC, "r-", "Red")
+        object BLACK : ChipColor(25L * ZATOSHI_PER_ZEC, "b-", "Black")
+        // c-{amount}-{name}-{uuid}
+        class CUSTOM private constructor(customValue: Long, customName: String) : ChipColor(customValue, "c-", customName) {
+            constructor(id: String) : this(toZatoshi(id), toName(id))
+        }
 
         companion object {
+            fun toZatoshi(id: String): Long {
+                return id.split("-")[1].safelyConvertToBigDecimal().convertZecToZatoshi()
+            }
+            fun toName(id: String): String {
+                return id.split("-")[2]
+            }
             fun from(chip: PokerChip): ChipColor? {
-                for (color in values()) {
-                    if(chip.id.startsWith(color.idPrefix)) return color
+                return when {
+                    chip.id.startsWith(RED.idPrefix) -> RED
+                    chip.id.startsWith(BLACK.idPrefix) -> BLACK
+                    chip.id.startsWith("c-") -> CUSTOM(chip.id)
+                    else -> throw IllegalStateException("unrecognized chip id: ${chip.id}")
                 }
                 return null
             }
@@ -68,7 +86,8 @@ data class PokerChip(val id: String = "", var redeemed: Long = -1L, val created:
 
 
 fun PokerChip.toMemo(): String {
-    return "${chipColor.colorName} Poker Chip Scanned #${id.hashCode()}"
+    return if (chipColor is PokerChip.ChipColor.CUSTOM) "${chipColor.colorName} sent us magic money! Isn't that nice and it's in the form of a Poker Chip." //must have poker chip in the name so make it off screen for now :D
+    else "${chipColor.colorName} Poker Chip Scanned #${id.hashCode()}"
 }
 
 class PokerChipSeedProvider(val chipId: String) : ReadOnlyProperty<Any?, ByteArray> {

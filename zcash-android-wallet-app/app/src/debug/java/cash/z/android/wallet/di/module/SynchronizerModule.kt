@@ -4,8 +4,7 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.ZcashWalletApplication
-import cash.z.android.wallet.data.*
-import cash.z.android.wallet.extention.toDbPath
+import cash.z.android.wallet.data.ChannelListValueProvider
 import cash.z.android.wallet.sample.DeviceWallet
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS
@@ -17,10 +16,7 @@ import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.block.*
 import cash.z.wallet.sdk.dao.WalletTransaction
-import cash.z.wallet.sdk.data.ActiveTransactionManager
-import cash.z.wallet.sdk.data.PollingTransactionRepository
-import cash.z.wallet.sdk.data.TransactionRepository
-import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.data.*
 import cash.z.wallet.sdk.ext.DEFAULT_BATCH_SIZE
 import cash.z.wallet.sdk.ext.DEFAULT_RETRIES
 import cash.z.wallet.sdk.jni.RustBackend
@@ -222,7 +218,7 @@ internal object SynchronizerModule {
     @Provides
     @Singleton
     fun provideTransactionManager(): TransactionManager {
-        return PersistentTransactionManager()
+        return PersistentTransactionManager(ZcashWalletApplication.instance)
     }
 
     @JvmStatic

@@ -70,6 +70,15 @@
         <action
             android:id="@+id/action_zcon1_home_fragment_to_history_fragment"
             app:destination="@id/nav_history_fragment" />
+        <argument
+            android:name="sender"
+            android:defaultValue="Unknown" />
+        <argument
+            android:name="amount"
+            android:defaultValue="Unknown" />
+        <argument
+            android:name="tx_id"
+            android:defaultValue="Unknown" />
     </fragment>
     <fragment
         android:id="@+id/nav_send_fragment"
@@ -113,4 +122,7 @@
         android:name="cash.z.android.wallet.ui.fragment.Zcon1FeedbackFragment"
         tools:layout="@layout/fragment_zcon1_feedback" />
 
+    <deepLink
+        android:id="@+id/deepLink"
+        app:uri="z.cash/send/{sender}/{amount}/{tx_id}" />
 </navigation>

@@ -1,13 +1,12 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.R
-import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.toAppString
 import cash.z.android.wallet.sample.SampleProperties
 import cash.z.android.wallet.ui.fragment.SendFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.data.Synchronizer
+import cash.z.wallet.sdk.data.DataSyncronizer
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.*
@@ -15,7 +14,6 @@ import cash.z.wallet.sdk.secure.Wallet
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch

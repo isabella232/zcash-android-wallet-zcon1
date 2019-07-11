@@ -4,9 +4,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.IdRes
-import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.ui.presenter.ProgressPresenter
-import cash.z.wallet.sdk.data.Synchronizer
+import cash.z.wallet.sdk.data.DataSyncronizer
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

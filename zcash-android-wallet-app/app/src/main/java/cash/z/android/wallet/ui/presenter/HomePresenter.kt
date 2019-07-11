@@ -1,8 +1,5 @@
 package cash.z.android.wallet.ui.presenter
 
-import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.di.annotation.FragmentScope
-import cash.z.android.wallet.extention.alert
 import cash.z.android.wallet.ui.fragment.HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.dao.WalletTransaction

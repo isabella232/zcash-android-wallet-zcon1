@@ -2,6 +2,7 @@ package cash.z.android.wallet.di.component
 
 import cash.z.android.wallet.ui.activity.MainActivityModule
 import cash.z.android.wallet.ZcashWalletApplication
+import cash.z.android.wallet.data.SendReceiverModule
 import cash.z.android.wallet.di.module.ApplicationModule
 import cash.z.android.wallet.di.module.SynchronizerModule
 import cash.z.android.wallet.ui.fragment.*
@@ -39,7 +40,10 @@ import javax.inject.Singleton
         // Zcon1 Fragments
         Zcon1HomeFragmentModule::class,
         Zcon1CartFragmentModule::class,
-        Zcon1FeedbackFragmentModule::class
+        Zcon1FeedbackFragmentModule::class,
+
+        // Receivers
+        SendReceiverModule::class
     ]
 )
 interface ApplicationComponent : AndroidInjector<ZcashWalletApplication> {

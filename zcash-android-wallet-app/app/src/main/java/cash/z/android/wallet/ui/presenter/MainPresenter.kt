@@ -1,13 +1,13 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.Zcon1Store
-import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.data.db.PendingTransactionEntity
-import cash.z.android.wallet.data.db.isFailure
 import cash.z.android.wallet.ui.activity.MainActivity
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
+import cash.z.wallet.sdk.data.DataSyncronizer
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.db.PendingTransactionEntity
+import cash.z.wallet.sdk.db.isFailure
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope

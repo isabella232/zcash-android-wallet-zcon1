@@ -6,9 +6,9 @@ import cash.z.android.wallet.PokerChip
 import cash.z.android.wallet.R
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.Zcon1Store
-import cash.z.android.wallet.data.db.PendingTransactionEntity
 import cash.z.android.wallet.extention.toAppString
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.db.PendingTransactionEntity
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import java.io.PrintWriter
@@ -50,7 +50,7 @@ object Analytics {
         mixpanel.trackMap(action.eventName(), action.toProperties())
     }
 
-    private fun getPseudonm(): String? {
+    fun getPseudonm(): String? {
         return pseudonym ?: PreferenceManager
             .getDefaultSharedPreferences(ZcashWalletApplication.instance)
             .getString(ZcashWalletApplication.PREFS_PSEUDONYM, null).also { pseudonym = it }

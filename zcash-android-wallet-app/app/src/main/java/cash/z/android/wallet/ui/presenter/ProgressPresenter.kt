@@ -1,14 +1,14 @@
 package cash.z.android.wallet.ui.presenter
 
-import cash.z.android.wallet.data.DataSyncronizer
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.data.Synchronizer
+import cash.z.wallet.sdk.data.DataSyncronizer
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 class ProgressPresenter @Inject constructor(
     private val view: ProgressView,

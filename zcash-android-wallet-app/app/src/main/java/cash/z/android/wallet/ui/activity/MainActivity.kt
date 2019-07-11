@@ -1,6 +1,7 @@
 package cash.z.android.wallet.ui.activity
 
 import android.animation.Animator
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -19,11 +20,6 @@ import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import cash.z.android.wallet.*
-import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.data.StableSynchronizer
-import cash.z.android.wallet.data.db.isMined
-import cash.z.android.wallet.data.db.isPokerChip
-import cash.z.android.wallet.data.db.isSubmitted
 import cash.z.android.wallet.databinding.ActivityMainBinding
 import cash.z.android.wallet.di.annotation.ActivityScope
 import cash.z.android.wallet.extention.Toaster
@@ -44,7 +40,11 @@ import cash.z.android.wallet.ui.util.Analytics.trackAction
 import cash.z.android.wallet.ui.util.Analytics.trackCrash
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
+import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.data.StableSynchronizer
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.db.isMined
+import cash.z.wallet.sdk.db.isSubmitted
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
@@ -52,12 +52,10 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.RuntimeException
 import javax.inject.Inject
 import kotlin.random.Random
 
 class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.BarcodeCallback, MainPresenter.MainView {
-
 
 
     @Inject
@@ -107,6 +105,23 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
             synchronizer.start(this)
             balancePresenter.start(this, synchronizer.balances())
             mainPresenter.start()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Toaster.long("onActivityResult")
+    }
+
+    var deepLinkHandled = false
+    fun handleDeepLink() {
+        if (!deepLinkHandled && intent.data != null) {
+            //lazy parsing!
+            val name = intent.data.pathSegments[1]
+            val amount = intent.data.pathSegments[2]
+            val uuid = intent.data.pathSegments[3]
+            onBarcodeScanned("c-$amount-$name-$uuid")
+            deepLinkHandled = true
         }
     }
 
@@ -421,18 +436,35 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
             return
         }
 
-        alert(
-            title = "You found a token!",
-            message = "Would you like to magically convert this poker chip into digital money?"
-        ) {
-            playSound(Random.nextBoolean())
-            funQuote()
-            launch {
-                val chip = PokerChip(value)
-                val result = sweepChip(chip)
-                twig("Sweep result? $result")
-                trackFunnelStep(FundsFound(chip, result))
+        if (value.startsWith("c-")) {
+            val chip = PokerChip(value)
+            alert(
+                title = "You received magic money from ${chip.chipColor.colorName}!",
+                message = "How nice! ${chip.chipColor.colorName} send you ${chip.zatoshiValue.convertZatoshiToZecString(2)} TAZ. Would you like to add it to your wallet?"
+            ) {
+                playSound(Random.nextBoolean())
+                funQuote()
+                launch {
+                    val result = sweepChip(chip)
+                    twig("Sweep result? $result")
+                    trackFunnelStep(FundsFound(chip, result))
+                }
             }
+        } else {
+            alert(
+                title = "You found a token!",
+                message = "Would you like to magically convert this poker chip into digital money?"
+            ) {
+                playSound(Random.nextBoolean())
+                funQuote()
+                launch {
+                    val chip = PokerChip(value)
+                    val result = sweepChip(chip)
+                    twig("Sweep result? $result")
+                    trackFunnelStep(FundsFound(chip, result))
+                }
+            }
+
         }
 
     }
@@ -575,7 +607,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun calculatePendingChipBalance(): Long {
         return synchronizer.getPending()?.filter {
-                it.isPokerChip() && !it.isMined()
+            it.memo.toLowerCase().contains("poker chip") && !it.isMined()
             }?.fold(0L) { acc, item ->
                 acc + item.value
             } ?: 0L

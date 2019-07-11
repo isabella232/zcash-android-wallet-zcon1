@@ -1,13 +1,13 @@
 package cash.z.android.wallet.ui.presenter
 
-import cash.z.android.wallet.data.DataSyncronizer
-import cash.z.android.wallet.data.db.*
 import cash.z.android.wallet.ui.fragment.Zcon1HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
 import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.data.DataSyncronizer
 import cash.z.wallet.sdk.data.TransactionState
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.db.*
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope
@@ -107,7 +107,7 @@ private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
     var description = when {
         isFailedEncoding() -> "Failed to create! Aborted."
         isFailedSubmit() -> "Failed to send...Retrying!"
-        isCreating() -> if (isPokerChip()) "Redeeming..." else "Creating transaction..."
+        isCreating() -> if (memo.toLowerCase().contains("poker chip")) "Redeeming..." else "Creating transaction..."
         isSubmitted() && !isMined() -> "Submitted, awaiting response."
         isSubmitted() && isMined() -> "Successfully mined!"
         else -> "Pending..."
