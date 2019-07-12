@@ -14,7 +14,7 @@ import cash.z.android.wallet.ui.adapter.TransactionAdapter
 import cash.z.android.wallet.ui.presenter.HistoryPresenter
 import cash.z.android.wallet.ui.presenter.HistoryPresenterModule
 import cash.z.android.wallet.ui.util.AlternatingRowColorDecoration
-import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.dao.ClearedTransaction
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.launch
@@ -58,7 +58,7 @@ class HistoryFragment : BaseFragment(), HistoryPresenter.HistoryView {
         historyPresenter.stop()
     }
 
-    override fun setTransactions(transactions: List<WalletTransaction>) {
+    override fun setTransactions(transactions: List<ClearedTransaction>) {
         mainActivity?.supportActionBar?.title = resources.getQuantityString(R.plurals.history_transaction_count_title,
             transactions.size, transactions.size)
         with (binding.recyclerTransactionsHistory) {

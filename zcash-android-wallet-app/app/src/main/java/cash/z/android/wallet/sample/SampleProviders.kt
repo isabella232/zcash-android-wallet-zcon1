@@ -63,28 +63,6 @@ class SampleSpendingKeySharedPref(private val fileName: String) : ReadWritePrope
     }
 }
 
-/**
- * This is intentionally insecure. Wallet makers have told us storing keys is their specialty so we don't put a lot of
- * energy here. A true implementation would create a key using user interaction, perhaps with a password they know that
- * is never stored, along with requiring user authentication for key use (i.e. fingerprint/PIN/pattern/etc). From there,
- * one of these approaches might be helpful to store the key securely:
- *
- * https://developer.android.com/training/articles/keystore.html
- * https://github.com/scottyab/AESCrypt-Android/blob/master/aescrypt/src/main/java/com/scottyab/aescrypt/AESCrypt.java
- * https://github.com/iamMehedi/Secured-Preference-Store
- */
-@SuppressLint("HardwareIds")
-@Deprecated(message = InsecureWarning.message)
-class SeedGenerator {
-    companion object {
-        @Deprecated(message = InsecureWarning.message)
-        fun getDeviceId(): String {
-            val id = Build.FINGERPRINT + "ZCon1" + Settings.Secure.getString(ZcashWalletApplication.instance.contentResolver, Settings.Secure.ANDROID_ID)
-            return id.replace("\\W".toRegex(), "_")
-        }
-    }
-}
-
 
 internal object InsecureWarning {
     const val message = "Do not use this because it is insecure and only intended for test code and samples. " +

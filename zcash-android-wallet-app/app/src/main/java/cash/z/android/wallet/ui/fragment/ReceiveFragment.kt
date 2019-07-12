@@ -12,7 +12,7 @@ import cash.z.android.qrecycler.QRecycler
 import cash.z.android.wallet.R
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.util.AddressPartNumberSpan
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.data.DataSynchronizer
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.android.synthetic.main.fragment_receive.*
@@ -28,7 +28,7 @@ class ReceiveFragment : BaseFragment() {
     lateinit var qrecycler: QRecycler
 
     @Inject
-    lateinit var synchronizer: DataSyncronizer
+    lateinit var synchronizer: DataSynchronizer
 
     lateinit var addressParts: Array<TextView>
 

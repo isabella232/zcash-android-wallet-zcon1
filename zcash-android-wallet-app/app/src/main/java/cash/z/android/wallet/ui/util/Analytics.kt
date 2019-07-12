@@ -8,7 +8,7 @@ import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.extention.toAppString
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.PendingTransactionEntity
+import cash.z.wallet.sdk.db.PendingTransaction
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import java.io.PrintWriter
@@ -194,7 +194,7 @@ object Analytics {
             }
         }
 
-        class Redeemed(private val tx: PendingTransactionEntity, isSuccess: Boolean) : PokerChipFunnel(tx.toChip(), isSuccess) {
+        class Redeemed(private val tx: PendingTransaction, isSuccess: Boolean) : PokerChipFunnel(tx.toChip(), isSuccess) {
             override fun toProperties(): MutableMap<String, Any> {
                 return super.toProperties().apply {
                     this["encodeAttempts"] = tx.encodeAttempts
@@ -217,7 +217,7 @@ object Analytics {
     }
 }
 
-private fun PendingTransactionEntity.toChip(): PokerChip {
+private fun PendingTransaction.toChip(): PokerChip {
     return PokerChip(
         "r-mined($minedHeight)value(${value.convertZatoshiToZecString(2)})-memo($memo)",
         System.currentTimeMillis(),

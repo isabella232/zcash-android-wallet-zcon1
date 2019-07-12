@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.ProgressBar
 import androidx.annotation.IdRes
 import cash.z.android.wallet.ui.presenter.ProgressPresenter
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.data.DataSynchronizer
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,7 +15,7 @@ abstract class ProgressFragment(
     ProgressPresenter.ProgressView {
 
     @Inject
-    protected lateinit var synchronizer: DataSyncronizer
+    protected lateinit var synchronizer: DataSynchronizer
 
     protected lateinit var progressPresenter: ProgressPresenter
     private lateinit var progressBar: ProgressBar

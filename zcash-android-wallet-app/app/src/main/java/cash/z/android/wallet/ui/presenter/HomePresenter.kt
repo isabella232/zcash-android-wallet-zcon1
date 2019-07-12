@@ -2,7 +2,7 @@ package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.ui.fragment.HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.data.*
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Binds
@@ -16,13 +16,13 @@ import javax.inject.Singleton
 
 class HomePresenter @Inject constructor(
     private val view: HomeFragment,
-    private val synchronizer: DataSyncronizer
+    private val synchronizer: DataSynchronizer
 ) : Presenter {
 
     private var job: Job? = null
 
     interface HomeView : PresenterView {
-        fun setTransactions(transactions: List<WalletTransaction>)
+        fun setTransactions(transactions: List<ClearedTransaction>)
         fun updateBalance(old: Long, new: Long)
         fun setActiveTransactions(activeTransactionMap: Map<ActiveTransaction, TransactionState>)
         fun onCancelledTooLate()
@@ -56,11 +56,11 @@ class HomePresenter @Inject constructor(
         twig("balance binder exiting!")
     }
 
-    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<WalletTransaction>>) = launch {
+    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<ClearedTransaction>>) = launch {
         twig("transaction binder starting!")
-        for (walletTransactionList in channel) {
-            twig("received ${walletTransactionList.size} transactions for presenting")
-            bind(walletTransactionList)
+        for (clearedTransactionList in channel) {
+            twig("received ${clearedTransactionList.size} transactions for presenting")
+            bind(clearedTransactionList)
         }
         twig("transaction binder exiting!")
     }
@@ -84,8 +84,8 @@ class HomePresenter @Inject constructor(
     }
 
 
-    private fun bind(transactions: List<WalletTransaction>) {
-        twig("binding ${transactions.size} walletTransactions")
+    private fun bind(transactions: List<ClearedTransaction>) {
+        twig("binding ${transactions.size} clearedTransactions")
         view.setTransactions(transactions.sortedByDescending {
             if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
         })

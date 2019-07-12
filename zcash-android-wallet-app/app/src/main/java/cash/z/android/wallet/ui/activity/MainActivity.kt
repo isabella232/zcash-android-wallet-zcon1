@@ -40,7 +40,7 @@ import cash.z.android.wallet.ui.util.Analytics.trackAction
 import cash.z.android.wallet.ui.util.Analytics.trackCrash
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.data.DataSynchronizer
 import cash.z.wallet.sdk.data.StableSynchronizer
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.db.isMined
@@ -59,7 +59,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
 
     @Inject
-    lateinit var synchronizer: DataSyncronizer
+    lateinit var synchronizer: DataSynchronizer
 
     @Inject
     lateinit var mainPresenter: MainPresenter
@@ -537,7 +537,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         val balance = (synchronizer as StableSynchronizer).getBalance()
         if (balance.available < (product.zatoshiValue + MINERS_FEE_ZATOSHI)) {
             val message = if (balance.total >= (product.zatoshiValue + MINERS_FEE_ZATOSHI)) {
-                "Sorry, some of your funds are still awaiting 20 network confirmations before they are available for spending! Try again after your \"amount syncing\" is zero."
+                "Sorry, some of your funds are still awaiting 10 network confirmations before they are available for spending! Try again after your \"amount syncing\" is zero."
             } else {
                 "Sorry, you do not have enough funds available for this purchase.\n\nMaybe find poker chips or convince a friend to send you funds by scanning your QR code on the previous tab."
             }

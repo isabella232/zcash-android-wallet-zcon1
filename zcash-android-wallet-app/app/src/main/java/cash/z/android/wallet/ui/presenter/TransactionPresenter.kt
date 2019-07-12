@@ -2,8 +2,8 @@ package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.ui.fragment.Zcon1HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.dao.WalletTransaction
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.dao.ClearedTransaction
+import cash.z.wallet.sdk.data.DataSynchronizer
 import cash.z.wallet.sdk.data.TransactionState
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
@@ -17,18 +17,18 @@ import javax.inject.Inject
 
 class TransactionPresenter @Inject constructor(
     private val view: Zcon1HomeFragment,
-    private val synchronizer: DataSyncronizer
+    private val synchronizer: DataSynchronizer
 ) : Presenter {
 
     interface TransactionView : PresenterView {
-        fun setTransactions(transactions: List<WalletTransaction>)
+        fun setTransactions(transactions: List<ClearedTransaction>)
     }
 
     private var pendingJob: Job? = null
     private var clearedJob: Job? = null
 
-    private var latestPending: List<PendingTransactionEntity> = listOf()
-    private var latestCleared: List<WalletTransaction> = listOf()
+    private var latestPending: List<PendingTransaction> = listOf()
+    private var latestCleared: List<ClearedTransaction> = listOf()
 
     //
     // LifeCycle
@@ -82,8 +82,8 @@ class TransactionPresenter @Inject constructor(
     private fun bind() {
         twig("binding ${latestPending.size} pending transactions and ${latestCleared.size} cleared transactions")
         // merge transactions
-        val mergedTransactions = mutableListOf<WalletTransaction>()
-        latestPending.forEach { mergedTransactions.add(it.toWalletTransaction()) }
+        val mergedTransactions = mutableListOf<ClearedTransaction>()
+        latestPending.forEach { mergedTransactions.add(it.toClearedTransaction()) }
         mergedTransactions.addAll(latestCleared)
         mergedTransactions.sortByDescending {
             it.timeInSeconds
@@ -103,7 +103,7 @@ class TransactionPresenter @Inject constructor(
     }
 }
 
-private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
+private fun PendingTransaction.toClearedTransaction(): ClearedTransaction {
     var description = when {
         isFailedEncoding() -> "Failed to create! Aborted."
         isFailedSubmit() -> "Failed to send...Retrying!"
@@ -115,7 +115,7 @@ private fun PendingTransactionEntity.toWalletTransaction(): WalletTransaction {
     if (!isSubmitted() && (submitAttempts > 2 || encodeAttempts > 2)) {
         description += " aborting in ${ttl() / 60L}m${ttl().rem(60)}s"
     }
-    return WalletTransaction(
+    return ClearedTransaction(
         value = value,
         isSend = true,
         isMined = isMined(),

@@ -32,7 +32,7 @@ import cash.z.android.wallet.ui.presenter.HomePresenterModule
 import cash.z.android.wallet.ui.util.AlternatingRowColorDecoration
 import cash.z.android.wallet.ui.util.LottieLooper
 import cash.z.android.wallet.ui.util.TopAlignedSpan
-import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.data.ActiveSendTransaction
 import cash.z.wallet.sdk.data.ActiveTransaction
 import cash.z.wallet.sdk.data.TransactionState
@@ -136,7 +136,7 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
     // SendView Implementation
     //
 
-    override fun setTransactions(transactions: List<WalletTransaction>) {
+    override fun setTransactions(transactions: List<ClearedTransaction>) {
         val recent = if(transactions.size > maxTransactionsShown) transactions.subList(0, maxTransactionsShown) else transactions
         with (binding.includeContent.recyclerTransactions) {
             (adapter as TransactionAdapter).submitList(recent)

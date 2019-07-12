@@ -2,8 +2,8 @@ package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.ui.fragment.HistoryFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.dao.WalletTransaction
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.dao.ClearedTransaction
+import cash.z.wallet.sdk.data.DataSynchronizer
 import cash.z.wallet.sdk.data.twig
 import dagger.Binds
 import dagger.Module
@@ -16,13 +16,13 @@ import javax.inject.Singleton
 
 class HistoryPresenter @Inject constructor(
     private val view: HistoryFragment,
-    private var synchronizer: DataSyncronizer
+    private var synchronizer: DataSynchronizer
 ) : Presenter {
 
     private var job: Job? = null
 
     interface HistoryView : PresenterView {
-        fun setTransactions(transactions: List<WalletTransaction>)
+        fun setTransactions(transactions: List<ClearedTransaction>)
     }
 
     override suspend fun start() {
@@ -37,11 +37,11 @@ class HistoryPresenter @Inject constructor(
         job?.cancel()?.also { job = null }
     }
 
-    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<WalletTransaction>>) = launch {
+    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<ClearedTransaction>>) = launch {
         twig("transaction binder starting!")
-        for (walletTransactionList in channel) {
-            twig("received ${walletTransactionList.size} transactions for presenting")
-            bind(walletTransactionList)
+        for (clearedTransactionList in channel) {
+            twig("received ${clearedTransactionList.size} transactions for presenting")
+            bind(clearedTransactionList)
         }
         twig("transaction binder exiting!")
     }
@@ -51,8 +51,8 @@ class HistoryPresenter @Inject constructor(
     // View Callbacks on Main Thread
     //
 
-    private fun bind(transactions: List<WalletTransaction>) {
-        twig("binding ${transactions.size} walletTransactions")
+    private fun bind(transactions: List<ClearedTransaction>) {
+        twig("binding ${transactions.size} clearedTransactions")
         view.setTransactions(transactions.sortedByDescending {
             if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
         })

@@ -17,7 +17,7 @@ import cash.z.android.wallet.ui.adapter.TransactionAdapter
 import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenterModule
-import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.data.twig
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
@@ -45,7 +45,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 
     private val balanceInfo: Wallet.WalletBalance get() = mainActivity?.balancePresenter?.lastBalance!!
 
-    private var transactions: List<WalletTransaction> = emptyList()
+    private var transactions: List<ClearedTransaction> = emptyList()
 
 
 
@@ -167,7 +167,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     // TransactionView Implementation
     //
     
-    override fun setTransactions(transactions: List<WalletTransaction>) {
+    override fun setTransactions(transactions: List<ClearedTransaction>) {
         this.transactions = transactions
         refreshTransactions()
     }
@@ -181,13 +181,13 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
         }
     }
 
-//    private fun addPokerChips(transactions: List<WalletTransaction>): MutableList<WalletTransaction> {
-//        val mergedTransactions = mutableListOf<WalletTransaction>()
+//    private fun addPokerChips(transactions: List<ClearedTransaction>): MutableList<ClearedTransaction> {
+//        val mergedTransactions = mutableListOf<ClearedTransaction>()
 //        mergedTransactions.addAll(transactions)
 //        chipBucket.forEach { chip ->
 //            // once the transaction is sent, we no longer need the bucket to provide chip information because the synchronizer.sender is now in charge of tracking the chip
 //            val memo = chip.toMemo()
-//            if (transactions.none { it.memo == memo }) mergedTransactions.add(chip.toWalletTransaction())
+//            if (transactions.none { it.memo == memo }) mergedTransactions.add(chip.toClearedTransaction())
 //        }
 //        mergedTransactions.sortByDescending {
 //            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
@@ -196,8 +196,8 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 //    }
 }
 
-private fun PokerChip.toWalletTransaction(): WalletTransaction {
-    return WalletTransaction(
+private fun PokerChip.toClearedTransaction(): ClearedTransaction {
+    return ClearedTransaction(
         value = zatoshiValue - MINERS_FEE_ZATOSHI,
         isSend = true,
         timeInSeconds = created/1000L,

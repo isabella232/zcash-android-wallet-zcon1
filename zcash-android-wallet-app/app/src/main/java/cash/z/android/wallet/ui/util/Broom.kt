@@ -8,7 +8,7 @@ import cash.z.wallet.sdk.data.TransactionSender
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.WalletTransactionEncoder
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.PendingTransactionEntity
+import cash.z.wallet.sdk.db.PendingTransaction
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.jni.RustBackendWelding
@@ -36,7 +36,7 @@ class Broom(
         // copy cache db
 //        cloneCachedBlocks() // optional?
 
-        var tx = PendingTransactionEntity()
+        var tx = PendingTransaction()
         try {
             tx = sender.prepareTransaction(amount, appWallet.getAddress(), memo)!!
             val encoder = initEncoder(walletSeedProvider)

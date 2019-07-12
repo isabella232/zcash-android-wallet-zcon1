@@ -3,10 +3,10 @@ package cash.z.android.wallet.ui.presenter
 import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.ui.activity.MainActivity
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.data.DataSynchronizer
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.PendingTransactionEntity
+import cash.z.wallet.sdk.db.PendingTransaction
 import cash.z.wallet.sdk.db.isFailure
 import dagger.Binds
 import dagger.Module
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 class MainPresenter @Inject constructor(
     private val view: MainActivity,
-    private val synchronizer: DataSyncronizer
+    private val synchronizer: DataSynchronizer
 ) : Presenter {
 
     interface MainView : PresenterView {
@@ -48,7 +48,7 @@ class MainPresenter @Inject constructor(
         purchaseJob?.cancel()?.also { purchaseJob = null }
     }
 
-    private fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<List<PendingTransactionEntity>>) = launch {
+    private fun CoroutineScope.launchPurchaseBinder(channel: ReceiveChannel<List<PendingTransaction>>) = launch {
         twig("main purchase binder starting!")
         for (new in channel) {
             val mostRecent = new.sortedByDescending { it.createTime }.firstOrNull()
@@ -65,7 +65,7 @@ class MainPresenter @Inject constructor(
     // Events
     //
 
-    private fun bind(swagPurchase: PendingTransactionEntity) {
+    private fun bind(swagPurchase: PendingTransaction) {
         if (swagPurchase.isFailure()) {
             view.orderFailed(PurchaseResult.Failure(swagPurchase.errorMessage))
         } else {
@@ -74,12 +74,12 @@ class MainPresenter @Inject constructor(
     }
 
     sealed class PurchaseResult {
-        data class Processing(val pendingTransaction: PendingTransactionEntity) : PurchaseResult()
+        data class Processing(val pendingTransaction: PendingTransaction) : PurchaseResult()
         data class Failure(val reason: String? = "") : PurchaseResult()
     }
 }
 
-private fun PendingTransactionEntity.isSwag(): Boolean {
+private fun PendingTransaction.isSwag(): Boolean {
     return address == Zcon1Store.address && memo.toLowerCase().contains("swag")
 }
 

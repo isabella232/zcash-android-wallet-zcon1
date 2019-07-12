@@ -7,7 +7,7 @@ import cash.z.android.wallet.PokerChipSeedProvider
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.extention.tryIgnore
-import cash.z.wallet.sdk.data.DataSyncronizer
+import cash.z.wallet.sdk.data.DataSynchronizer
 import cash.z.wallet.sdk.data.StableSynchronizer
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZecToZatoshi
@@ -27,7 +27,7 @@ import kotlin.properties.ReadOnlyProperty
 class SendReceiver : DaggerBroadcastReceiver() {
 
     @Inject
-    lateinit var synchronizer: DataSyncronizer
+    lateinit var synchronizer: DataSynchronizer
 
     @Inject
     lateinit var rustBackend: RustBackendWelding
@@ -43,7 +43,7 @@ class SendReceiver : DaggerBroadcastReceiver() {
 
         val selectedAppPackage = intent.extras.get(EXTRA_CHOSEN_COMPONENT)?.toString()
         Toaster.center("Sending $amount TAZ in the background!")
-        (synchronizer as StableSynchronizer).internalScope.launch {
+        (synchronizer as StableSynchronizer).coroutineScope.launch {
             synchronizer.sendToAddress(amount.safelyConvertToBigDecimal().convertZecToZatoshi() + (MINERS_FEE_ZATOSHI * 2), wallet.getAddress(), "Shared funds from $name")
         }
     }
@@ -61,7 +61,7 @@ class SendReceiver : DaggerBroadcastReceiver() {
 //        // copy cache db
 ////        cloneCachedBlocks() // optional?
 //
-//        var tx = PendingTransactionEntity()
+//        var tx = PendingTransaction()
 //        try {
 //            // verify & scan
 //            //TODO: for now, assume validation is happening elsewhere and just scan here

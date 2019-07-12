@@ -1,7 +1,9 @@
 package cash.z.android.wallet.sample
 
 import android.provider.Settings
-import cash.z.wallet.sdk.data.SampleSeedProvider
+import cash.z.android.wallet.ZcashWalletApplication
+import cash.z.wallet.sdk.ext.SampleSeedProvider
+import cash.z.wallet.sdk.ext.SeedGenerator
 import java.math.BigDecimal
 import java.math.MathContext
 import kotlin.properties.ReadOnlyProperty
@@ -83,7 +85,7 @@ object DaveWallet : WalletConfig {
 
 object DeviceWallet : WalletConfig {
     override val displayName = "Device"
-    override val seedName = SeedGenerator.getDeviceId()
+    override val seedName = SeedGenerator.getDeviceId(ZcashWalletApplication.instance)
     override val seedProvider = SampleSeedProvider(seedName)
     override val spendingKeyProvider = SampleSpendingKeySharedPref(seedName)
     override val cacheDbName = "test_cache_${displayName.sanitizeName()}.db"

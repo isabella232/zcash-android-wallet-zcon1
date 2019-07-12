@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.ColorRes
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -14,7 +13,7 @@ import cash.z.android.wallet.R
 import cash.z.android.wallet.extention.toAppColor
 import cash.z.android.wallet.extention.toRelativeTimeString
 import cash.z.android.wallet.extention.truncate
-import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import java.text.SimpleDateFormat
@@ -22,7 +21,7 @@ import java.util.*
 import kotlin.math.absoluteValue
 
 
-class TransactionAdapter(@LayoutRes val itemResId: Int = R.layout.item_transaction) : ListAdapter<WalletTransaction, TransactionViewHolder>(DIFF_CALLBACK) {
+class TransactionAdapter(@LayoutRes val itemResId: Int = R.layout.item_transaction) : ListAdapter<ClearedTransaction, TransactionViewHolder>(DIFF_CALLBACK) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(itemResId, parent, false)
         return TransactionViewHolder(itemView)
@@ -30,9 +29,9 @@ class TransactionAdapter(@LayoutRes val itemResId: Int = R.layout.item_transacti
     override fun onBindViewHolder(holder: TransactionViewHolder, position: Int) = holder.bind(getItem(position))
 }
 
-private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<WalletTransaction>() {
-    override fun areItemsTheSame(oldItem: WalletTransaction, newItem: WalletTransaction) = oldItem.height == newItem.height
-    override fun areContentsTheSame(oldItem: WalletTransaction, newItem: WalletTransaction) = oldItem == newItem
+private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ClearedTransaction>() {
+    override fun areItemsTheSame(oldItem: ClearedTransaction, newItem: ClearedTransaction) = oldItem.height == newItem.height
+    override fun areContentsTheSame(oldItem: ClearedTransaction, newItem: ClearedTransaction) = oldItem == newItem
 }
 
 class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -44,7 +43,7 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
     private val memo = itemView.findViewById<TextView>(R.id.text_transaction_memo)
     private val formatter = SimpleDateFormat("M/d h:mma", Locale.getDefault())
 
-    fun bind(tx: WalletTransaction) {
+    fun bind(tx: ClearedTransaction) {
         val isChip = tx.isPokerChip()
         val isSwag = tx.isSend && (tx.memo ?: "").toLowerCase().contains("swag")
         val useSend = tx.isSend && !isChip
@@ -77,7 +76,7 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
         address?.text = if (tx.isSend) {
             if (tx.isMined) {
                 if (isSwag && tx.isMined && tx.status == null) "Purchase accepted."
-                else (if (tx.noteId > 0) "Transfer complete." else "Submitted to network.")
+                else "Transfer complete."
             } else tx.status
         } else "$toOrFrom $srcOrDestination"
         memo?.text = tx.memo
@@ -85,6 +84,6 @@ class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
     }
 }
 
-private fun WalletTransaction.isPokerChip(): Boolean {
+private fun ClearedTransaction.isPokerChip(): Boolean {
     return memo?.contains("Poker Chip") == true
 }

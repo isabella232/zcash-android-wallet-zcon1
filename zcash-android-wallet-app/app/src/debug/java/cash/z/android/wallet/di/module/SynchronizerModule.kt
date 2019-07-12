@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import cash.z.android.wallet.BuildConfig
 import cash.z.android.wallet.ZcashWalletApplication
-import cash.z.android.wallet.data.ChannelListValueProvider
 import cash.z.android.wallet.sample.DeviceWallet
 import cash.z.android.wallet.sample.SampleProperties.COMPACT_BLOCK_PORT
 import cash.z.android.wallet.sample.SampleProperties.DEFAULT_BLOCK_POLL_FREQUENCY_MILLIS
@@ -15,7 +14,7 @@ import cash.z.android.wallet.sample.Servers
 import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.block.*
-import cash.z.wallet.sdk.dao.WalletTransaction
+import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.data.*
 import cash.z.wallet.sdk.ext.DEFAULT_BATCH_SIZE
 import cash.z.wallet.sdk.ext.DEFAULT_RETRIES
@@ -26,7 +25,6 @@ import cash.z.wallet.sdk.service.LightWalletGrpcService
 import cash.z.wallet.sdk.service.LightWalletService
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -227,20 +225,9 @@ internal object SynchronizerModule {
     fun provideTransactionSender(
         manager: TransactionManager,
         service: LightWalletService,
-        clearedTxProvider: ChannelListValueProvider<WalletTransaction>
+        ledger: PollingTransactionRepository
     ): TransactionSender {
-        return PersistentTransactionSender(manager, service, object : ClearedTransactionProvider {
-            override fun getCleared(): List<WalletTransaction> {
-                return clearedTxProvider.getLatestValue()
-            }
-        })
-    }
-
-    @JvmStatic
-    @Provides
-    @Singleton
-    fun provideClearedTransactionProvider(): ChannelListValueProvider<WalletTransaction> {
-        return ChannelListValueProvider(ConflatedBroadcastChannel(listOf()))
+        return PersistentTransactionSender(manager, service, ledger)
     }
 
     @JvmStatic
@@ -258,9 +245,8 @@ internal object SynchronizerModule {
         ledger: PollingTransactionRepository,
         sender: TransactionSender,
         processor: CompactBlockProcessor,
-        encoder: RawTransactionEncoder,
-        clearedTxProvider: ChannelListValueProvider<WalletTransaction>
-    ): DataSyncronizer {
-        return StableSynchronizer(wallet, ledger, sender, processor, encoder, clearedTxProvider)
+        encoder: RawTransactionEncoder
+    ): DataSynchronizer {
+        return StableSynchronizer(wallet, ledger, sender, processor, encoder)
     }
 }
