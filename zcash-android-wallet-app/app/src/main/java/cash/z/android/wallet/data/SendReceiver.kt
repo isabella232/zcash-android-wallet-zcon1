@@ -7,7 +7,7 @@ import cash.z.android.wallet.PokerChipSeedProvider
 import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.extention.tryIgnore
-import cash.z.wallet.sdk.data.DataSynchronizer
+import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.StableSynchronizer
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZecToZatoshi
@@ -27,7 +27,7 @@ import kotlin.properties.ReadOnlyProperty
 class SendReceiver : DaggerBroadcastReceiver() {
 
     @Inject
-    lateinit var synchronizer: DataSynchronizer
+    lateinit var synchronizer: Synchronizer
 
     @Inject
     lateinit var rustBackend: RustBackendWelding

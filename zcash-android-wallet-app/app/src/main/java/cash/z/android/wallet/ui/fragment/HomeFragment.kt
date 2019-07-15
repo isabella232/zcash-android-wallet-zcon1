@@ -27,16 +27,14 @@ import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.extention.*
 import cash.z.android.wallet.sample.SampleProperties
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
+import cash.z.android.wallet.ui.adapter.TransactionUiModel
 import cash.z.android.wallet.ui.presenter.HomePresenter
 import cash.z.android.wallet.ui.presenter.HomePresenterModule
 import cash.z.android.wallet.ui.util.AlternatingRowColorDecoration
 import cash.z.android.wallet.ui.util.LottieLooper
 import cash.z.android.wallet.ui.util.TopAlignedSpan
-import cash.z.wallet.sdk.dao.ClearedTransaction
-import cash.z.wallet.sdk.data.ActiveSendTransaction
-import cash.z.wallet.sdk.data.ActiveTransaction
-import cash.z.wallet.sdk.data.TransactionState
 import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.entity.ClearedTransaction
 import cash.z.wallet.sdk.ext.*
 import com.google.android.material.snackbar.Snackbar
 import com.leinardi.android.speeddial.SpeedDialActionItem
@@ -136,7 +134,7 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
     // SendView Implementation
     //
 
-    override fun setTransactions(transactions: List<ClearedTransaction>) {
+    override fun setTransactions(transactions: List<TransactionUiModel>) {
         val recent = if(transactions.size > maxTransactionsShown) transactions.subList(0, maxTransactionsShown) else transactions
         with (binding.includeContent.recyclerTransactions) {
             (adapter as TransactionAdapter).submitList(recent)
@@ -160,21 +158,21 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
 
         onContentRefreshComplete(new <= 0)
     }
-
-    override fun setActiveTransactions(activeTransactionMap: Map<ActiveTransaction, TransactionState>) {
-        if (activeTransactionMap.isEmpty()) {
-            twig("A.T.: setActiveTransactionsShown(false) because map is empty")
-            setActiveTransactionsShown(false)
-            return
-        }
-
-        val transactions = activeTransactionMap.entries.toTypedArray()
-        // primary is the last one that was inserted
-        val primaryEntry = transactions[transactions.size - 1]
-        updatePrimaryTransaction(primaryEntry.key, primaryEntry.value)
-
-        onContentRefreshComplete(false)
-    }
+//
+//    override fun setActiveTransactions(activeTransactionMap: Map<ActiveTransaction, TransactionState>) {
+//        if (activeTransactionMap.isEmpty()) {
+//            twig("A.T.: setActiveTransactionsShown(false) because map is empty")
+//            setActiveTransactionsShown(false)
+//            return
+//        }
+//
+//        val transactions = activeTransactionMap.entries.toTypedArray()
+//        // primary is the last one that was inserted
+//        val primaryEntry = transactions[transactions.size - 1]
+//        updatePrimaryTransaction(primaryEntry.key, primaryEntry.value)
+//
+//        onContentRefreshComplete(false)
+//    }
 
     override fun onCancelledTooLate() {
         snackbar = snackbar.showOk(view!!, "Oops! It was too late to cancel!")
@@ -236,82 +234,82 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
         setRefreshAnimationPlaying(false).also { twig("refresh false from onInitialLoadComplete") }
     }
 
-    private fun updatePrimaryTransaction(transaction: ActiveTransaction, transactionState: TransactionState) {
-
-        twig("setting transaction state to ${transactionState::class.simpleName}")
-        var title = binding.includeContent.textActiveTransactionTitle.text?.toString()  ?: ""
-        var subtitle: CharSequence = binding.includeContent.textActiveTransactionSubtitle.text?.toString() ?: ""
-        var isShown = binding.includeContent.textActiveTransactionHeader.visibility == View.VISIBLE
-        var isShownDelay = 10L
-        when (transactionState) {
-            TransactionState.Creating -> {
-                binding.includeContent.headerActiveTransaction.visibility = View.VISIBLE
-                title = "Preparing ${transaction.value.convertZatoshiToZecString(3)} ZEC"
-                subtitle = "to ${(transaction as ActiveSendTransaction).toAddress.truncate()}"
-                setTransactionActive(transaction, true)
-                isShown = true
-            }
-            TransactionState.SendingToNetwork -> {
-                title = "Sending Transaction"
-                subtitle = "to ${(transaction as ActiveSendTransaction).toAddress.truncate()}"
-                binding.includeContent.textActiveTransactionValue.text = "${transaction.value.convertZatoshiToZecString(3)}"
-                binding.includeContent.textActiveTransactionValue.visibility = View.VISIBLE
-                binding.includeContent.buttonActiveTransactionCancel.visibility = View.GONE
-                setTransactionActive(transaction, true)
-                isShown = true
-            }
-            is TransactionState.Failure -> {
-                binding.includeContent.lottieActiveTransaction.setAnimation(R.raw.lottie_send_failure)
-                binding.includeContent.lottieActiveTransaction.playAnimation()
-                title = "Failed"
-                subtitle = when(transactionState.failedStep) {
-                    TransactionState.Creating -> "Failed to create transaction"
-                    TransactionState.SendingToNetwork -> "Failed to submit transaction to the network"
-                    else -> "Unrecoginzed error"
-                }
-                binding.includeContent.buttonActiveTransactionCancel.visibility = View.GONE
-                binding.includeContent.textActiveTransactionValue.visibility = View.GONE
-                setTransactionActive(transaction, false)
-                isShown = false
-                isShownDelay = 10_000L
-            }
-            is TransactionState.AwaitingConfirmations -> {
-                if (transactionState.confirmationCount < 1) {
-                    binding.includeContent.lottieActiveTransaction.setAnimation(R.raw.lottie_send_success)
-                    binding.includeContent.lottieActiveTransaction.playAnimation()
-                    title = "ZEC Sent"
-                    subtitle = "Waiting to be mined..."
-                    binding.includeContent.textActiveTransactionValue.text = transaction.value.convertZatoshiToZecString(3)
-                    binding.includeContent.textActiveTransactionValue.visibility = View.VISIBLE
-                    binding.includeContent.buttonActiveTransactionCancel.visibility = View.GONE
-                    isShown = true
-                } else if (transactionState.confirmationCount > 1) {
-                    isShown = false
-                } else {
-                    title = "Confirmation Received"
-                    subtitle = transactionState.timestamp.toRelativeTimeString()
-                    isShown = false
-                    isShownDelay = 5_000L
-                    // take it out of the list in a bit and skip counting confirmation animation for now (i.e. one is enough)
-                }
-            }
-            is TransactionState.Cancelled -> {
-                title = binding.includeContent.textActiveTransactionTitle.text.toString()
-                subtitle = binding.includeContent.textActiveTransactionSubtitle.text.toString()
-                setTransactionActive(transaction, false)
-                isShown = false
-                isShownDelay = 10_000L
-            }
-            else -> {
-                Log.e(javaClass.simpleName, "Warning: unrecognized transaction state $transactionState is being ignored")
-                return
-            }
-        }
-        binding.includeContent.textActiveTransactionTitle.text = title
-        binding.includeContent.textActiveTransactionSubtitle.text = subtitle
-        twig("A.T.: setActiveTransactionsShown($isShown, $isShownDelay) because ${transactionState}")
-        setActiveTransactionsShown(isShown, isShownDelay)
-    }
+//    private fun updatePrimaryTransaction(transaction: ActiveTransaction, transactionState: TransactionState) {
+//
+//        twig("setting transaction state to ${transactionState::class.simpleName}")
+//        var title = binding.includeContent.textActiveTransactionTitle.text?.toString()  ?: ""
+//        var subtitle: CharSequence = binding.includeContent.textActiveTransactionSubtitle.text?.toString() ?: ""
+//        var isShown = binding.includeContent.textActiveTransactionHeader.visibility == View.VISIBLE
+//        var isShownDelay = 10L
+//        when (transactionState) {
+//            TransactionState.Creating -> {
+//                binding.includeContent.headerActiveTransaction.visibility = View.VISIBLE
+//                title = "Preparing ${transaction.value.convertZatoshiToZecString(3)} ZEC"
+//                subtitle = "to ${(transaction as ActiveSendTransaction).toAddress.truncate()}"
+//                setTransactionActive(transaction, true)
+//                isShown = true
+//            }
+//            TransactionState.SendingToNetwork -> {
+//                title = "Sending Transaction"
+//                subtitle = "to ${(transaction as ActiveSendTransaction).toAddress.truncate()}"
+//                binding.includeContent.textActiveTransactionValue.text = "${transaction.value.convertZatoshiToZecString(3)}"
+//                binding.includeContent.textActiveTransactionValue.visibility = View.VISIBLE
+//                binding.includeContent.buttonActiveTransactionCancel.visibility = View.GONE
+//                setTransactionActive(transaction, true)
+//                isShown = true
+//            }
+//            is TransactionState.Failure -> {
+//                binding.includeContent.lottieActiveTransaction.setAnimation(R.raw.lottie_send_failure)
+//                binding.includeContent.lottieActiveTransaction.playAnimation()
+//                title = "Failed"
+//                subtitle = when(transactionState.failedStep) {
+//                    TransactionState.Creating -> "Failed to create transaction"
+//                    TransactionState.SendingToNetwork -> "Failed to submit transaction to the network"
+//                    else -> "Unrecoginzed error"
+//                }
+//                binding.includeContent.buttonActiveTransactionCancel.visibility = View.GONE
+//                binding.includeContent.textActiveTransactionValue.visibility = View.GONE
+//                setTransactionActive(transaction, false)
+//                isShown = false
+//                isShownDelay = 10_000L
+//            }
+//            is TransactionState.AwaitingConfirmations -> {
+//                if (transactionState.confirmationCount < 1) {
+//                    binding.includeContent.lottieActiveTransaction.setAnimation(R.raw.lottie_send_success)
+//                    binding.includeContent.lottieActiveTransaction.playAnimation()
+//                    title = "ZEC Sent"
+//                    subtitle = "Waiting to be mined..."
+//                    binding.includeContent.textActiveTransactionValue.text = transaction.value.convertZatoshiToZecString(3)
+//                    binding.includeContent.textActiveTransactionValue.visibility = View.VISIBLE
+//                    binding.includeContent.buttonActiveTransactionCancel.visibility = View.GONE
+//                    isShown = true
+//                } else if (transactionState.confirmationCount > 1) {
+//                    isShown = false
+//                } else {
+//                    title = "Confirmation Received"
+//                    subtitle = transactionState.timestamp.toRelativeTimeString()
+//                    isShown = false
+//                    isShownDelay = 5_000L
+//                    // take it out of the list in a bit and skip counting confirmation animation for now (i.e. one is enough)
+//                }
+//            }
+//            is TransactionState.Cancelled -> {
+//                title = binding.includeContent.textActiveTransactionTitle.text.toString()
+//                subtitle = binding.includeContent.textActiveTransactionSubtitle.text.toString()
+//                setTransactionActive(transaction, false)
+//                isShown = false
+//                isShownDelay = 10_000L
+//            }
+//            else -> {
+//                Log.e(javaClass.simpleName, "Warning: unrecognized transaction state $transactionState is being ignored")
+//                return
+//            }
+//        }
+//        binding.includeContent.textActiveTransactionTitle.text = title
+//        binding.includeContent.textActiveTransactionSubtitle.text = subtitle
+//        twig("A.T.: setActiveTransactionsShown($isShown, $isShownDelay) because ${transactionState}")
+//        setActiveTransactionsShown(isShown, isShownDelay)
+//    }
 
 
     //
@@ -335,12 +333,12 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
     private fun init() {
         zcashLogoAnimation = LottieLooper(binding.lottieZcashBadge, 20..47, 69)
         binding.includeContent.buttonActiveTransactionCancel.setOnClickListener {
-            val transaction = it.tag as? ActiveSendTransaction
-            if (transaction != null) {
-                homePresenter.onCancelActiveTransaction(transaction)
-            } else {
+//            val transaction = it.tag as? ActiveSendTransaction
+//            if (transaction != null) {
+//                homePresenter.onCancelActiveTransaction(transaction)
+//            } else {
                 Toaster.short("Error: unable to find transaction to cancel!")
-            }
+//            }
         }
         binding.lottieZcashBadge.setOnClickListener {
             binding.lottieZcashBadge.playAnimation()
@@ -471,29 +469,29 @@ class HomeFragment : BaseFragment(), SwipeRefreshLayout.OnRefreshListener, HomeP
         }
     }
 
-    private fun setTransactionActive(transaction: ActiveTransaction, isActive: Boolean) {
-        // TODO: get view for transaction, mostly likely keep a sparse array of these or something
-        if (isActive) {
-            binding.includeContent.buttonActiveTransactionCancel.setText(R.string.cancel)
-            binding.includeContent.buttonActiveTransactionCancel.isEnabled = true
-            binding.includeContent.buttonActiveTransactionCancel.tag = transaction
-            binding.includeContent.headerActiveTransaction.animate().apply {
-                translationZ(10f)
-                duration = 200L
-                interpolator = DecelerateInterpolator()
-            }
-        } else {
-            binding.includeContent.buttonActiveTransactionCancel.setText(R.string.cancelled)
-            binding.includeContent.buttonActiveTransactionCancel.isEnabled = false
-            binding.includeContent.buttonActiveTransactionCancel.tag = null
-            binding.includeContent.headerActiveTransaction.animate().apply {
-                translationZ(2f)
-                duration = 300L
-                interpolator = AccelerateInterpolator()
-            }
-            binding.includeContent.lottieActiveTransaction.cancelAnimation()
-        }
-    }
+//    private fun setTransactionActive(transaction: ActiveTransaction, isActive: Boolean) {
+//        // TODO: get view for transaction, mostly likely keep a sparse array of these or something
+//        if (isActive) {
+//            binding.includeContent.buttonActiveTransactionCancel.setText(R.string.cancel)
+//            binding.includeContent.buttonActiveTransactionCancel.isEnabled = true
+//            binding.includeContent.buttonActiveTransactionCancel.tag = transaction
+//            binding.includeContent.headerActiveTransaction.animate().apply {
+//                translationZ(10f)
+//                duration = 200L
+//                interpolator = DecelerateInterpolator()
+//            }
+//        } else {
+//            binding.includeContent.buttonActiveTransactionCancel.setText(R.string.cancelled)
+//            binding.includeContent.buttonActiveTransactionCancel.isEnabled = false
+//            binding.includeContent.buttonActiveTransactionCancel.tag = null
+//            binding.includeContent.headerActiveTransaction.animate().apply {
+//                translationZ(2f)
+//                duration = 300L
+//                interpolator = AccelerateInterpolator()
+//            }
+//            binding.includeContent.lottieActiveTransaction.cancelAnimation()
+//        }
+//    }
 
     private inner class Ticker : Runnable {
         override fun run() {

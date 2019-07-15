@@ -40,11 +40,11 @@ import cash.z.android.wallet.ui.util.Analytics.trackAction
 import cash.z.android.wallet.ui.util.Analytics.trackCrash
 import cash.z.android.wallet.ui.util.Analytics.trackFunnelStep
 import cash.z.android.wallet.ui.util.Broom
-import cash.z.wallet.sdk.data.DataSynchronizer
+import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.StableSynchronizer
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.isMined
-import cash.z.wallet.sdk.db.isSubmitted
+import cash.z.wallet.sdk.entity.isMined
+import cash.z.wallet.sdk.entity.isSubmitted
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
@@ -59,7 +59,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
 
     @Inject
-    lateinit var synchronizer: DataSynchronizer
+    lateinit var synchronizer: Synchronizer
 
     @Inject
     lateinit var mainPresenter: MainPresenter
@@ -101,7 +101,9 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         super.onResume()
 //        chipBucket.restore()
         launch {
-            synchronizer.onCriticalErrorListener = ::onCriticalError
+            synchronizer.onCriticalErrorHandler = ::onCriticalError
+            synchronizer.onProcessorErrorHandler = ::onProcessorError
+            synchronizer.onSubmissionErrorHandler = ::onCriticalError
             synchronizer.start(this)
             balancePresenter.start(this, synchronizer.balances())
             mainPresenter.start()
@@ -125,14 +127,14 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
         }
     }
 
-    private fun onCriticalError(error: Throwable): Boolean {
+    private fun onCriticalError(error: Throwable?): Boolean {
         Handler(Looper.getMainLooper()).post {
             //TODO proper error parsing, with strongly typed exceptions
             var title: String? = null
             var message: String? = null
 
             when {
-                (error.message?.contains("UNAVAILABLE") == true) -> {
+                (error?.message?.contains("UNAVAILABLE") == true) -> {
                     title = "Server Error!"
                     message = "Unable to reach the server. Either it is down or you are not connected to the internet."
                 }
@@ -147,6 +149,12 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
                 negativeAction = { alert("Synchronization error:\n\n$error") }
             )
         }
+        return true
+    }
+
+    private fun onProcessorError(error: Throwable?): Boolean {
+        twig("Error while processing blocks: $error")
+        twig("The processor will keep trying and then throw a critical error after a while so this can be ignored for now.")
         return true
     }
 
@@ -410,7 +418,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
         // For now, empty happens when back is pressed
         if (value.isEmpty()) return
-        synchronizer.getPending()?.firstOrNull { it.memo.contains("#${value.hashCode()}") }?.let { existingTransaction ->
+        synchronizer.lastPending().firstOrNull { it.memo?.contains("#${value.hashCode()}") == true }?.let { existingTransaction ->
             if (existingTransaction.isMined()) {
                 alert(title = "Successfully Redeemed!", message = "We scanned this one already and the funds went to this wallet!")
             } else {
@@ -534,7 +542,7 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
 
     fun buyProduct(product: Zcon1Store.CartItem) {
         trackFunnelStep(PurchasedItem(product))
-        val balance = (synchronizer as StableSynchronizer).getBalance()
+        val balance = (synchronizer as StableSynchronizer).lastBalance()
         if (balance.available < (product.zatoshiValue + MINERS_FEE_ZATOSHI)) {
             val message = if (balance.total >= (product.zatoshiValue + MINERS_FEE_ZATOSHI)) {
                 "Sorry, some of your funds are still awaiting 10 network confirmations before they are available for spending! Try again after your \"amount syncing\" is zero."
@@ -606,8 +614,8 @@ class MainActivity : BaseActivity(), Animator.AnimatorListener, ScanFragment.Bar
     }
 
     fun calculatePendingChipBalance(): Long {
-        return synchronizer.getPending()?.filter {
-            it.memo.toLowerCase().contains("poker chip") && !it.isMined()
+        return synchronizer.lastPending()?.filter {
+            it.memo?.toLowerCase()?.contains("poker chip") == true && !it.isMined()
             }?.fold(0L) { acc, item ->
                 acc + item.value
             } ?: 0L

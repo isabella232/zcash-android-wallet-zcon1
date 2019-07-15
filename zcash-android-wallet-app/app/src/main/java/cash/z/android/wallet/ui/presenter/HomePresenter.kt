@@ -1,9 +1,11 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.ui.adapter.TransactionUiModel
 import cash.z.android.wallet.ui.fragment.HomeFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.dao.ClearedTransaction
-import cash.z.wallet.sdk.data.*
+import cash.z.wallet.sdk.data.Synchronizer
+import cash.z.wallet.sdk.data.twig
+import cash.z.wallet.sdk.entity.ClearedTransaction
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Binds
 import dagger.Module
@@ -16,15 +18,15 @@ import javax.inject.Singleton
 
 class HomePresenter @Inject constructor(
     private val view: HomeFragment,
-    private val synchronizer: DataSynchronizer
+    private val synchronizer: Synchronizer
 ) : Presenter {
 
     private var job: Job? = null
 
     interface HomeView : PresenterView {
-        fun setTransactions(transactions: List<ClearedTransaction>)
+        fun setTransactions(transactions: List<TransactionUiModel>)
         fun updateBalance(old: Long, new: Long)
-        fun setActiveTransactions(activeTransactionMap: Map<ActiveTransaction, TransactionState>)
+//        fun setActiveTransactions(activeTransactionMap: Map<ActiveTransaction, TransactionState>)
         fun onCancelledTooLate()
         fun onSynchronizerError(error: Throwable?): Boolean
     }
@@ -56,7 +58,7 @@ class HomePresenter @Inject constructor(
         twig("balance binder exiting!")
     }
 
-    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<ClearedTransaction>>) = launch {
+    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<TransactionUiModel>>) = launch {
         twig("transaction binder starting!")
         for (clearedTransactionList in channel) {
             twig("received ${clearedTransactionList.size} transactions for presenting")
@@ -65,13 +67,13 @@ class HomePresenter @Inject constructor(
         twig("transaction binder exiting!")
     }
 
-    private fun CoroutineScope.launchActiveTransactionMonitor(channel: ReceiveChannel<Map<ActiveTransaction, TransactionState>>) = launch {
-        twig("active transaction monitor starting!")
-        for (i in channel) {
-            bind(i)
-        }
-        twig("active transaction monitor exiting!")
-    }
+//    private fun CoroutineScope.launchActiveTransactionMonitor(channel: ReceiveChannel<Map<ActiveTransaction, TransactionState>>) = launch {
+//        twig("active transaction monitor starting!")
+//        for (i in channel) {
+//            bind(i)
+//        }
+//        twig("active transaction monitor exiting!")
+//    }
 
 
     //
@@ -84,25 +86,23 @@ class HomePresenter @Inject constructor(
     }
 
 
-    private fun bind(transactions: List<ClearedTransaction>) {
+    private fun bind(transactions: List<TransactionUiModel>) {
         twig("binding ${transactions.size} clearedTransactions")
-        view.setTransactions(transactions.sortedByDescending {
-            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
-        })
+        view.setTransactions(transactions)
     }
 
-    private fun bind(activeTransactionMap: Map<ActiveTransaction, TransactionState>) {
-        twig("binding a.t. map of size ${activeTransactionMap.size}")
-        if (activeTransactionMap.isNotEmpty()) view.setActiveTransactions(activeTransactionMap)
-    }
+//    private fun bind(activeTransactionMap: Map<ActiveTransaction, TransactionState>) {
+//        twig("binding a.t. map of size ${activeTransactionMap.size}")
+//        if (activeTransactionMap.isNotEmpty()) view.setActiveTransactions(activeTransactionMap)
+//    }
 
-    fun onCancelActiveTransaction(transaction: ActiveSendTransaction) {
+//    fun onCancelActiveTransaction(transaction: ActiveSendTransaction) {
 //        twig("requesting to cancel send for transaction ${transaction.internalId}")
 //        val isTooLate = !synchronizer.cancelSend(transaction)
 //        if (isTooLate) {
 //            view.onCancelledTooLate()
 //        }
-    }
+//    }
 
 }
 

@@ -11,10 +11,11 @@ import cash.z.android.wallet.R
 import cash.z.android.wallet.databinding.FragmentHistoryBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
+import cash.z.android.wallet.ui.adapter.TransactionUiModel
 import cash.z.android.wallet.ui.presenter.HistoryPresenter
 import cash.z.android.wallet.ui.presenter.HistoryPresenterModule
 import cash.z.android.wallet.ui.util.AlternatingRowColorDecoration
-import cash.z.wallet.sdk.dao.ClearedTransaction
+import cash.z.wallet.sdk.entity.ClearedTransaction
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.launch
@@ -58,7 +59,7 @@ class HistoryFragment : BaseFragment(), HistoryPresenter.HistoryView {
         historyPresenter.stop()
     }
 
-    override fun setTransactions(transactions: List<ClearedTransaction>) {
+    override fun setTransactions(transactions: List<TransactionUiModel>) {
         mainActivity?.supportActionBar?.title = resources.getQuantityString(R.plurals.history_transaction_count_title,
             transactions.size, transactions.size)
         with (binding.recyclerTransactionsHistory) {

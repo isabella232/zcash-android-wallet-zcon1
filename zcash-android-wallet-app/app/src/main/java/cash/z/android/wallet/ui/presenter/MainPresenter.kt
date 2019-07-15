@@ -1,13 +1,14 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.Zcon1Store
+import cash.z.android.wallet.Zcon1Store.address
 import cash.z.android.wallet.ui.activity.MainActivity
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.data.DataSynchronizer
+import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.PendingTransaction
-import cash.z.wallet.sdk.db.isFailure
+import cash.z.wallet.sdk.entity.PendingTransaction
+import cash.z.wallet.sdk.entity.isFailure
 import dagger.Binds
 import dagger.Module
 import kotlinx.coroutines.CoroutineScope
@@ -18,7 +19,7 @@ import javax.inject.Inject
 
 class MainPresenter @Inject constructor(
     private val view: MainActivity,
-    private val synchronizer: DataSynchronizer
+    private val synchronizer: Synchronizer
 ) : Presenter {
 
     interface MainView : PresenterView {
@@ -80,7 +81,7 @@ class MainPresenter @Inject constructor(
 }
 
 private fun PendingTransaction.isSwag(): Boolean {
-    return address == Zcon1Store.address && memo.toLowerCase().contains("swag")
+    return address == Zcon1Store.address && (memo?.toLowerCase()?.contains("swag") == true)
 }
 
 

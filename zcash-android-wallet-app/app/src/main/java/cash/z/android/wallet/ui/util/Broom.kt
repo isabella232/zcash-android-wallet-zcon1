@@ -8,7 +8,7 @@ import cash.z.wallet.sdk.data.TransactionSender
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.WalletTransactionEncoder
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.PendingTransaction
+import cash.z.wallet.sdk.entity.PendingTransaction
 import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.jni.RustBackendWelding

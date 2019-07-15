@@ -1,7 +1,7 @@
 package cash.z.android.wallet.ui.presenter
 
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.data.DataSynchronizer
+import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.Twig
 import cash.z.wallet.sdk.data.twig
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class ProgressPresenter @Inject constructor(
     private val view: ProgressView,
-    private var synchronizer: DataSynchronizer
+    private var synchronizer: Synchronizer
 ) : Presenter {
 
     private var job: Job? = null

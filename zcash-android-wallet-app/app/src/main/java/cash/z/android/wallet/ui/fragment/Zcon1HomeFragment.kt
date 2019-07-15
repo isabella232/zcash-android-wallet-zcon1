@@ -6,20 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cash.z.android.wallet.*
+import cash.z.android.wallet.R
+import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.databinding.FragmentZcon1HomeBinding
 import cash.z.android.wallet.di.annotation.FragmentScope
-import cash.z.android.wallet.extention.Toaster
 import cash.z.android.wallet.ui.adapter.TransactionAdapter
+import cash.z.android.wallet.ui.adapter.TransactionUiModel
 import cash.z.android.wallet.ui.presenter.BalancePresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenter
 import cash.z.android.wallet.ui.presenter.TransactionPresenterModule
-import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.ext.MINERS_FEE_ZATOSHI
+import cash.z.wallet.sdk.entity.ClearedTransaction
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import cash.z.wallet.sdk.secure.Wallet
 import dagger.Module
@@ -45,7 +44,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 
     private val balanceInfo: Wallet.WalletBalance get() = mainActivity?.balancePresenter?.lastBalance!!
 
-    private var transactions: List<ClearedTransaction> = emptyList()
+    private var transactions: List<TransactionUiModel> = emptyList()
 
 
 
@@ -167,7 +166,7 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
     // TransactionView Implementation
     //
     
-    override fun setTransactions(transactions: List<ClearedTransaction>) {
+    override fun setTransactions(transactions: List<TransactionUiModel>) {
         this.transactions = transactions
         refreshTransactions()
     }
@@ -196,16 +195,16 @@ class Zcon1HomeFragment : BaseFragment(), BalancePresenter.BalanceView, Transact
 //    }
 }
 
-private fun PokerChip.toClearedTransaction(): ClearedTransaction {
-    return ClearedTransaction(
-        value = zatoshiValue - MINERS_FEE_ZATOSHI,
-        isSend = true,
-        timeInSeconds = created/1000L,
-        status = "Verifying funds...",
-        address = "PokerChip",
-        memo = toMemo()
-    )
-}
+//private fun PokerChip.toClearedTransaction(): ClearedTransaction {
+//    return ClearedTransaction(
+//        value = zatoshiValue - MINERS_FEE_ZATOSHI,
+//        isSend = true,
+//        timeInSeconds = created/1000L,
+//        status = "Verifying funds...",
+//        address = "PokerChip",
+//        memo = toMemo()
+//    )
+//}
 
 
 @Module

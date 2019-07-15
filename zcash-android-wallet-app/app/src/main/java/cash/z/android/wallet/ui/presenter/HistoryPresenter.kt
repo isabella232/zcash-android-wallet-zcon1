@@ -1,9 +1,9 @@
 package cash.z.android.wallet.ui.presenter
 
+import cash.z.android.wallet.ui.adapter.TransactionUiModel
 import cash.z.android.wallet.ui.fragment.HistoryFragment
 import cash.z.android.wallet.ui.presenter.Presenter.PresenterView
-import cash.z.wallet.sdk.dao.ClearedTransaction
-import cash.z.wallet.sdk.data.DataSynchronizer
+import cash.z.wallet.sdk.data.Synchronizer
 import cash.z.wallet.sdk.data.twig
 import dagger.Binds
 import dagger.Module
@@ -16,13 +16,13 @@ import javax.inject.Singleton
 
 class HistoryPresenter @Inject constructor(
     private val view: HistoryFragment,
-    private var synchronizer: DataSynchronizer
+    private var synchronizer: Synchronizer
 ) : Presenter {
 
     private var job: Job? = null
 
     interface HistoryView : PresenterView {
-        fun setTransactions(transactions: List<ClearedTransaction>)
+        fun setTransactions(transactions: List<TransactionUiModel>)
     }
 
     override suspend fun start() {
@@ -37,7 +37,7 @@ class HistoryPresenter @Inject constructor(
         job?.cancel()?.also { job = null }
     }
 
-    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<ClearedTransaction>>) = launch {
+    private fun CoroutineScope.launchTransactionBinder(channel: ReceiveChannel<List<TransactionUiModel>>) = launch {
         twig("transaction binder starting!")
         for (clearedTransactionList in channel) {
             twig("received ${clearedTransactionList.size} transactions for presenting")
@@ -51,11 +51,9 @@ class HistoryPresenter @Inject constructor(
     // View Callbacks on Main Thread
     //
 
-    private fun bind(transactions: List<ClearedTransaction>) {
+    private fun bind(transactions: List<TransactionUiModel>) {
         twig("binding ${transactions.size} clearedTransactions")
-        view.setTransactions(transactions.sortedByDescending {
-            if (!it.isMined && it.isSend) Long.MAX_VALUE else it.timeInSeconds
-        })
+        view.setTransactions(transactions)
     }
 
 }

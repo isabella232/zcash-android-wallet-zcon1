@@ -8,7 +8,7 @@ import cash.z.android.wallet.ZcashWalletApplication
 import cash.z.android.wallet.Zcon1Store
 import cash.z.android.wallet.extention.toAppString
 import cash.z.wallet.sdk.data.twig
-import cash.z.wallet.sdk.db.PendingTransaction
+import cash.z.wallet.sdk.entity.PendingTransaction
 import cash.z.wallet.sdk.ext.convertZatoshiToZecString
 import com.mixpanel.android.mpmetrics.MixpanelAPI
 import java.io.PrintWriter

@@ -14,7 +14,6 @@ import cash.z.android.wallet.sample.Servers
 import cash.z.android.wallet.sample.WalletConfig
 import cash.z.android.wallet.ui.util.Broom
 import cash.z.wallet.sdk.block.*
-import cash.z.wallet.sdk.dao.ClearedTransaction
 import cash.z.wallet.sdk.data.*
 import cash.z.wallet.sdk.ext.DEFAULT_BATCH_SIZE
 import cash.z.wallet.sdk.ext.DEFAULT_RETRIES
@@ -44,7 +43,6 @@ internal object SynchronizerModule {
     private val pollingTransactionRepository = PollingTransactionRepository(
         ZcashWalletApplication.instance,
         walletConfig.dataDbName,
-        rustBackend,
         DEFAULT_TRANSACTION_POLL_FREQUENCY_MILLIS
     )
 
@@ -171,25 +169,6 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideManager(wallet: Wallet, repository: TransactionRepository, service: LightWalletService): ActiveTransactionManager {
-        return ActiveTransactionManager(repository, service, wallet)
-    }
-//
-//    @JvmStatic
-//    @Provides
-//    @Singleton
-//    fun provideSynchronizer(
-//        processor: CompactBlockProcessor,
-//        repository: TransactionRepository,
-//        manager: ActiveTransactionManager,
-//        wallet: Wallet
-//    ): Synchronizer {
-//        return SdkSynchronizer(processor, repository, manager, wallet, DEFAULT_STALE_TOLERANCE)
-//    }
-
-    @JvmStatic
-    @Provides
-    @Singleton
     fun provideBroom(
         sender: TransactionSender,
         wallet: Wallet,
@@ -203,14 +182,6 @@ internal object SynchronizerModule {
             wallet
         )
     }
-
-//    @JvmStatic
-//    @Provides
-//    @Singleton
-//    fun provideChipBucket(): ChipBucket {
-//        return InMemoryChipBucket()
-//    }
-
 
     @JvmStatic
     @Provides
@@ -233,20 +204,20 @@ internal object SynchronizerModule {
     @JvmStatic
     @Provides
     @Singleton
-    fun provideTransactionEncoder(wallet: Wallet, repository: TransactionRepository): RawTransactionEncoder {
+    fun provideTransactionEncoder(wallet: Wallet, repository: TransactionRepository): TransactionEncoder {
         return WalletTransactionEncoder(wallet, repository)
     }
 
     @JvmStatic
     @Provides
     @Singleton
-    fun provideDataSynchronizer(
+    fun provideSynchronizer(
         wallet: Wallet,
         ledger: PollingTransactionRepository,
         sender: TransactionSender,
         processor: CompactBlockProcessor,
-        encoder: RawTransactionEncoder
-    ): DataSynchronizer {
+        encoder: TransactionEncoder
+    ): Synchronizer {
         return StableSynchronizer(wallet, ledger, sender, processor, encoder)
     }
 }
